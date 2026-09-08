@@ -1,0 +1,37 @@
+services:
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "${API_PORT:-8000}:8000"
+    environment:
+      # Host do banco e o nome do servico ("db"), nao "localhost":
+      # dentro do container, localhost seria o proprio container da API.
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-app}@db:5432/${POSTGRES_DB:-app}
+    depends_on:
+      # Espera o healthcheck do banco passar, e nao apenas o container iniciar
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-app}
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app}
+    ports:
+      # Porta publicada para inspecionar o banco do host (pgAdmin, DBeaver, psql)
+      - "${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-app} -d ${POSTGRES_DB:-app}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      # Volume nomeado: os dados sobrevivem a remocao do container
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
