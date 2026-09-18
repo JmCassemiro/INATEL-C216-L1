@@ -6,7 +6,12 @@ Laboratório da disciplina C216 — Sistemas Distribuídos.
 
 ```text
 INATEL-C216-L1/
+├── .github/
+│   └── workflows/
+│       └── ci-backend.yml
 ├── backend/
+│   ├── tests/
+│   │   └── test_main.py
 │   ├── .dockerignore
 │   ├── Dockerfile
 │   ├── main.py
@@ -62,12 +67,59 @@ make run
 |---|---|
 | `make install` | Instala as dependências |
 | `make test` | Executa os testes |
+| `make test-verbose` | Executa os testes com saída detalhada |
 | `make lint` | Executa o linter |
 | `make format` | Formata o código |
 | `make clean` | Remove artefatos de build e cache |
 | `make setup-hooks` | Ativa os git hooks do projeto |
 
 Rode `make help` para ver todos os comandos disponíveis.
+
+## Testes
+
+Os testes ficam em `backend/tests/` e são executados com Pytest.
+
+```bash
+make install   # apenas na primeira vez
+make test
+```
+
+Para uma saída detalhada, com o nome de cada teste:
+
+```bash
+make test-verbose
+```
+
+Também é possível rodar o Pytest diretamente:
+
+```bash
+cd backend
+poetry run pytest
+```
+
+A configuração do Pytest fica em `backend/pyproject.toml`, na seção
+`[tool.pytest.ini_options]`.
+
+### O que é testado
+
+| Tipo | Verificação |
+|---|---|
+| Unitário | A função `home()` chamada diretamente, sem subir o servidor |
+| Integração | A rota `/` pela camada HTTP, usando o `TestClient` do FastAPI |
+| Erro | Rotas inexistentes retornam `404` e método não permitido retorna `405` |
+
+## Integração contínua (CI)
+
+O workflow `.github/workflows/ci-backend.yml` roda no GitHub Actions a cada
+`push` e a cada `pull_request`, em dois jobs:
+
+| Job | O que executa |
+|---|---|
+| `Ruff (Lint & Format)` | `ruff format --check .` e `ruff check .` |
+| `Pytest` | `poetry run pytest` |
+
+São as mesmas verificações disponíveis localmente (`make format`, `make lint` e
+`make test`), então é possível reproduzir o resultado do CI antes de abrir a PR.
 
 ## Serviços
 

@@ -1,4 +1,4 @@
-.PHONY: help install test lint format run clean setup-hooks \
+.PHONY: help install test test-verbose lint format run clean setup-hooks \
         up down build rebuild logs ps shell db-shell docker-clean
 
 BACKEND := backend
@@ -14,6 +14,7 @@ help:
 	@echo " Ambiente local (Poetry):"
 	@echo "  install - Instalar dependencias"
 	@echo "  test - Executar testes"
+	@echo "  test-verbose - Executar testes com saida detalhada"
 	@echo "  lint - Executar linter"
 	@echo "  format - Formatar codigo"
 	@echo "  run - Executar servidor"
@@ -36,6 +37,9 @@ install:
 
 test:
 	cd $(BACKEND) && $(PYTEST)
+
+test-verbose:
+	cd $(BACKEND) && $(PYTEST) -v
 
 lint:
 	cd $(BACKEND) && $(RUFF) check .
