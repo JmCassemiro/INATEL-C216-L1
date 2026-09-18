@@ -15,11 +15,39 @@ dependencies = [
 [dependency-groups]
 dev = [
     "pytest (>=9.1.1,<10.0.0)",
-    "httpx (>=0.28.1,<0.29.0)",
-    "ruff (>=0.16.3,<0.17.0)"
+    "ruff (>=0.16.3,<0.17.0)",
+    "httpx2 (>=2.12.0,<3.0.0)"
 ]
+
+[tool.poetry]
+# O backend e uma aplicacao, nao uma biblioteca publicavel: o Poetry so gerencia
+# as dependencias e nao tenta instalar o proprio projeto como pacote.
+package-mode = false
 
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+# pythonpath: permite "from main import app" com o pytest rodando a partir de backend/
+pythonpath = ["."]
+# testpaths: o pytest so procura testes em backend/tests
+testpaths = ["tests"]
+# import-mode=importlib: importa os testes sem exigir __init__.py em tests/
+addopts = "--import-mode=importlib"
+
+[tool.ruff]
+line-length = 88
+target-version = "py314"
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes (erros de sintaxe e imports não usados)
+    "I",    # isort (ordenação automática e padronizada de imports)
+    "UP",   # pyupgrade (garante sintaxe moderna de Python 3.14+)
+    "B",    # flake8-bugbear (pega bugs comuns)
+]
+ignore = []
