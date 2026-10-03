@@ -48,7 +48,7 @@ format:
 	cd $(BACKEND) && $(RUFF) format .
 
 run:
-	cd $(BACKEND) && $(UVICORN) main:app --reload
+	cd $(BACKEND) && $(UVICORN) app.main:app --reload
 
 clean:
 	rm -rf $(BACKEND)/__pycache__ $(BACKEND)/.pytest_cache $(BACKEND)/.ruff_cache
