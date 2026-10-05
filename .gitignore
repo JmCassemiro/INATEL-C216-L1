@@ -201,3 +201,11 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/python,windows
+### Spec Kit (SDD) — fora do versionamento por enquanto ###
+.claude/skills/speckit-roadmap-*/
+.specify/extensions/
+.specify/extensions.yml
+.specify/memory/roadmap.md
+specs/
+docs/
+CLAUDE.md

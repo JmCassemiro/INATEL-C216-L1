@@ -10,11 +10,18 @@ INATEL-C216-L1/
 │   └── workflows/
 │       └── ci-backend.yml
 ├── backend/
+│   ├── app/
+│   │   ├── api/
+│   │   │   ├── routes/          # endpoints (home e produtos)
+│   │   │   └── dependencies.py  # injecao do service nas rotas
+│   │   ├── schemas/             # modelos Pydantic
+│   │   ├── services/            # regras do cadastro de produtos (em memoria)
+│   │   └── main.py              # apenas inicializa a aplicacao
 │   ├── tests/
-│   │   └── test_main.py
+│   │   ├── unit/                # service e funcoes chamados diretamente
+│   │   └── integration/         # endpoints via TestClient
 │   ├── .dockerignore
 │   ├── Dockerfile
-│   ├── main.py
 │   ├── poetry.lock
 │   └── pyproject.toml
 ├── .env.example
@@ -104,9 +111,23 @@ A configuração do Pytest fica em `backend/pyproject.toml`, na seção
 
 | Tipo | Verificação |
 |---|---|
-| Unitário | A função `home()` chamada diretamente, sem subir o servidor |
-| Integração | A rota `/` pela camada HTTP, usando o `TestClient` do FastAPI |
-| Erro | Rotas inexistentes retornam `404` e método não permitido retorna `405` |
+| Unitário (`tests/unit`) | `home()` e o `ProdutoService` chamados diretamente, sem subir o servidor |
+| Integração (`tests/integration`) | Todos os endpoints (`/` e `/produtos`) pela camada HTTP, com o `TestClient` |
+| Erro | `404` para rota ou produto inexistente, `405` para método não permitido, `422` para dados inválidos |
+
+## Endpoints de produtos
+
+Os dados ficam em memória (são perdidos ao reiniciar a API). Documentação interativa em
+<http://localhost:8000/docs>.
+
+| Método | Rota | Descrição |
+|---|---|---|
+| `GET` | `/produtos?limit=10` | Lista produtos (query parameter `limit`, de 1 a 100) |
+| `GET` | `/produtos/{produto_id}` | Consulta um produto |
+| `POST` | `/produtos` | Cadastra um produto |
+| `PUT` | `/produtos/{produto_id}` | Substitui todos os dados do produto |
+| `PATCH` | `/produtos/{produto_id}` | Altera só os campos enviados |
+| `DELETE` | `/produtos/{produto_id}` | Remove o produto |
 
 ## Integração contínua (CI)
 
