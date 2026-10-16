@@ -1,15 +1,15 @@
 from app.api.routes.home import home
 
-MENSAGEM_ESPERADA = {"message": "Olá, Sistemas Distribuídos!"}
+EXPECTED_MESSAGE = {"message": "Olá, Sistemas Distribuídos!"}
 
 
-def test_home_retorna_a_mensagem_esperada():
-    assert home() == MENSAGEM_ESPERADA
+def test_home_returns_the_expected_message():
+    assert home() == EXPECTED_MESSAGE
 
 
-def test_home_retorna_um_dicionario():
+def test_home_returns_a_dict():
     assert isinstance(home(), dict)
 
 
-def test_home_expoe_apenas_a_chave_message():
+def test_home_exposes_only_the_message_key():
     assert list(home().keys()) == ["message"]

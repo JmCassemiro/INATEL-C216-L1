@@ -10,15 +10,14 @@ INATEL-C216-L1/
 │   └── workflows/
 │       └── ci-backend.yml
 ├── backend/
-│   ├── app/
-│   │   ├── api/
-│   │   │   ├── routes/          # endpoints (home e produtos)
-│   │   │   └── dependencies.py  # injecao do service nas rotas
-│   │   ├── schemas/             # modelos Pydantic
-│   │   ├── services/            # regras do cadastro de produtos (em memoria)
-│   │   └── main.py              # apenas inicializa a aplicacao
+│   ├── app/                     # Clean Architecture: dependências apontam para dentro
+│   │   ├── domain/              # entidade Product, value objects Barcode e Price, erros
+│   │   ├── application/         # ProductService (casos de uso), porta do repositório, comandos
+│   │   ├── infrastructure/      # repositório em memória
+│   │   ├── api/                 # rotas, schemas Pydantic, tratamento de erros, dependências
+│   │   └── main.py              # create_app(): apenas compõe e inicializa a aplicação
 │   ├── tests/
-│   │   ├── unit/                # service e funcoes chamados diretamente
+│   │   ├── unit/                # domínio, aplicação, repositório e regra de dependência
 │   │   └── integration/         # endpoints via TestClient
 │   ├── .dockerignore
 │   ├── Dockerfile
@@ -111,23 +110,59 @@ A configuração do Pytest fica em `backend/pyproject.toml`, na seção
 
 | Tipo | Verificação |
 |---|---|
-| Unitário (`tests/unit`) | `home()` e o `ProdutoService` chamados diretamente, sem subir o servidor |
-| Integração (`tests/integration`) | Todos os endpoints (`/` e `/produtos`) pela camada HTTP, com o `TestClient` |
-| Erro | `404` para rota ou produto inexistente, `405` para método não permitido, `422` para dados inválidos |
+| Unitário (`tests/unit`) | Domínio, `ProductService`, repositório em memória (inclusive concorrência) e a regra de dependência entre camadas, sem subir o servidor |
+| Integração (`tests/integration`) | Todos os endpoints (`/` e `/products`) pela camada HTTP, com o `TestClient` |
+| Erro | `404` para rota ou produto inexistente, `405` para método não permitido, `409` para código de barras repetido, `422` para dados inválidos |
 
 ## Endpoints de produtos
 
 Os dados ficam em memória (são perdidos ao reiniciar a API). Documentação interativa em
 <http://localhost:8000/docs>.
 
-| Método | Rota | Descrição |
+| Método | Rota | Sucesso | Descrição |
+|---|---|---|---|
+| `POST` | `/products` | 201 | Cadastra um produto (cabeçalho `Location` com o id) |
+| `GET` | `/products?page=1&size=20&name=calca` | 200 | Lista com paginação e busca por nome |
+| `GET` | `/products/{product_id}` | 200 | Consulta pelo id (UUID) |
+| `GET` | `/products/barcode/{barcode}` | 200 | Consulta pelo código de barras |
+| `PUT` | `/products/{product_id}` | 200 | Substitui o cadastro completo |
+| `PATCH` | `/products/{product_id}` | 200 | Altera só os campos enviados |
+| `DELETE` | `/products/{product_id}` | 204 | Remove (inativa) o produto |
+
+Corpo de `POST` e `PUT`:
+
+```json
+{
+  "name": "Camiseta Básica Branca M",
+  "description": "Algodão",
+  "barcode": "7891000315507",
+  "price": "49.90"
+}
+```
+
+- `name`: obrigatório, de 1 a 120 caracteres (espaços nas pontas são removidos).
+- `description`: opcional, até 500 caracteres; vazia vira `null`.
+- `barcode`: string com um GTIN-8, 12, 13 ou 14 e dígito verificador válido. É único entre
+  todos os produtos, inclusive os removidos, e `7891000315507` e `07891000315507` são o mesmo
+  código.
+- `price`: número ou string, maior que zero, até 2 casas decimais e até 999999.99. Na resposta,
+  sai sempre como string com duas casas (`"49.90"`).
+
+No `PATCH`, todos os campos são opcionais, mas ao menos um precisa ser enviado. `null` só é aceito
+em `description` (remove a descrição).
+
+Parâmetros da listagem: `page` (≥ 1, padrão 1), `size` (de 1 a 100, padrão 20) e `name` (parte do
+nome, sem diferenciar maiúsculas e acentos). A resposta é `{"items": [...], "total": 25, "page": 1,
+"size": 20}`.
+
+| Status | Quando | Corpo |
 |---|---|---|
-| `GET` | `/produtos?limit=10` | Lista produtos (query parameter `limit`, de 1 a 100) |
-| `GET` | `/produtos/{produto_id}` | Consulta um produto |
-| `POST` | `/produtos` | Cadastra um produto |
-| `PUT` | `/produtos/{produto_id}` | Substitui todos os dados do produto |
-| `PATCH` | `/produtos/{produto_id}` | Altera só os campos enviados |
-| `DELETE` | `/produtos/{produto_id}` | Remove o produto |
+| `404` | Produto inexistente ou removido | `{"detail": "Produto não encontrado"}` |
+| `409` | Código de barras já pertence a outro produto | `{"detail": "Código de barras já cadastrado"}` |
+| `422` | Dado inválido no corpo, no caminho ou na consulta | `{"detail": [{"loc": [...], "msg": "...", "type": "..."}]}` |
+
+O `DELETE` não apaga o registro: o produto some das consultas e da listagem, mas o código de
+barras continua reservado. Nenhuma operação recusada altera o catálogo.
 
 ## Integração contínua (CI)
 

@@ -1,8 +1,18 @@
-from app.services.produto import ProdutoService
+"""Provedores de dependência: compõem os casos de uso na borda (D12)."""
 
-# Unica instancia enquanto a aplicacao estiver no ar (os dados ficam em memoria).
-_produto_service = ProdutoService()
+from typing import Annotated
+
+from fastapi import Depends, Request
+
+from app.application.ports.product_repository import ProductRepository
+from app.application.services.product_service import ProductService
 
 
-def get_produto_service() -> ProdutoService:
-    return _produto_service
+def get_product_repository(request: Request) -> ProductRepository:
+    return request.app.state.product_repository
+
+
+def get_product_service(
+    repository: Annotated[ProductRepository, Depends(get_product_repository)],
+) -> ProductService:
+    return ProductService(repository)

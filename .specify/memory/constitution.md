@@ -1,7 +1,21 @@
+<!--
+Sync Impact Report
+- Versão: 1.0.0 → 2.0.0 (MAJOR: o Princípio IV foi redefinido de forma incompatível)
+- Princípios modificados:
+  - IV. Simplicidade → IV. Boas Práticas e Complexidade Justificada (redefinido)
+- Princípios adicionados:
+  - V. Clean Architecture (NÃO NEGOCIÁVEL)
+- Seções modificadas:
+  - Qualidade e Verificação: conformidade com I–V, mapa de camadas no plan.md e código formatado
+- Seções removidas: nenhuma
+- TODOs: stack de front-end ainda a definir (Princípio III)
+-->
+
 # INATEL C216 L1 Constitution
 
 Projeto acadêmico full-stack da disciplina C216 (Sistemas Distribuídos), desenvolvido de forma
-incremental: cada Prática acrescenta funcionalidades a um mesmo sistema.
+incremental: cada Prática acrescenta funcionalidades a um mesmo sistema (o NexoPDV). O projeto
+também é uma referência profissional, então cada decisão de design deve ser explicável.
 
 ## Core Principles
 
@@ -46,24 +60,52 @@ sistema, mas não podem comprometer a entrega obrigatória.
 **Justificativa:** uma stack fixa mantém o projeto coerente entre as Práticas e evita trocas de
 ferramenta sem motivo.
 
-### IV. Simplicidade
+### IV. Boas Práticas e Complexidade Justificada
 
-- A solução adotada MUST ser a mais simples que atende aos requisitos atuais.
-- Camadas, abstrações e padrões (repository, service, factory, etc.) só entram quando houver uma
-  necessidade concreta no momento, e não por antecipação de Práticas futuras.
-- Qualquer complexidade adicional MUST ser justificada no `plan.md` (seção de verificação da
-  constituição / complexidade).
+- O código MUST aplicar SOLID, clean code e padrões de projeto sempre que eles tornarem o código
+  mais claro, mais testável ou mais fácil de evoluir.
+- O código MUST NOT ser mantido artificialmente simples quando uma solução mais estruturada for
+  melhor para o sistema; aumentar a complexidade é aceito quando ela se paga.
+- O código MUST NOT receber abstrações, camadas extras ou padrões sem propósito concreto (apenas
+  para "encher" a estrutura).
+- Toda abstração ou padrão relevante MUST ter justificativa registrada no `plan.md` (o que
+  resolve e qual alternativa foi descartada).
 
-**Justificativa:** o sistema cresce a cada Prática; abstrações criadas cedo demais tendem a
-servir mal os requisitos que realmente chegam. É mais barato refatorar com testes verdes quando
-a necessidade aparecer.
+**Justificativa:** o projeto é referência profissional e de estudo; ele precisa mostrar
+engenharia de qualidade, e cada escolha precisa poder ser defendida — inclusive a de não
+abstrair algo.
+
+### V. Clean Architecture (NÃO NEGOCIÁVEL)
+
+Vale para todo o código de back-end a partir da Prática 4.
+
+- O código MUST ser organizado nas camadas:
+  - **Domínio:** entidades e regras de negócio puras.
+  - **Aplicação:** casos de uso que orquestram o domínio.
+  - **Adaptadores de interface:** rotas FastAPI e schemas Pydantic (DTOs de entrada e saída).
+  - **Infraestrutura:** repositórios concretos, banco de dados e serviços externos.
+- **Regra de dependência:** as dependências MUST apontar sempre para dentro. Domínio e aplicação
+  MUST NOT importar FastAPI, Pydantic, SQLAlchemy ou qualquer módulo de infraestrutura.
+- Acesso a dados e a serviços externos MUST passar por interfaces (portas) definidas nas camadas
+  internas e implementadas na infraestrutura.
+- As dependências MUST ser injetadas: a composição acontece na borda (FastAPI `Depends`), e o
+  `main.py` MUST apenas inicializar a aplicação e montar essa composição.
+- Testes unitários MUST cobrir domínio e casos de uso sem infraestrutura real (usando
+  implementações em memória das portas); testes de integração MUST exercitar a API pela borda
+  (`TestClient`).
+
+**Justificativa:** separar regras de negócio de detalhes técnicos permite trocar o mecanismo de
+armazenamento (memória hoje, PostgreSQL nas próximas Práticas) e as integrações (API fiscal,
+sincronização offline) sem reescrever o núcleo, e torna as regras testáveis isoladamente.
 
 ## Qualidade e Verificação
 
-- `make test` e `make lint` MUST passar antes de uma feature ser considerada pronta.
+- `make test` e `make lint` MUST passar, e o código MUST estar formatado (`make format`), antes de
+  uma feature ser considerada pronta.
 - O workflow de CI do GitHub Actions MUST ficar verde para a branch da entrega.
-- O `plan.md` de cada feature MUST verificar conformidade com os Princípios I–IV antes da fase
-  de implementação.
+- O `plan.md` de cada feature MUST verificar conformidade com os Princípios I–V antes da fase de
+  implementação e MUST indicar em qual camada da Clean Architecture fica cada arquivo criado ou
+  alterado.
 
 ## Fora do Escopo desta Constituição
 
@@ -83,4 +125,4 @@ separadamente, após a implementação, pelo processo próprio do projeto.
   - **PATCH:** esclarecimentos e ajustes de redação.
 - `/speckit-plan` e `/speckit-analyze` MUST checar a conformidade com esta constituição.
 
-**Version**: 1.0.0 | **Ratified**: 2026-10-02 | **Last Amended**: 2026-10-02
+**Version**: 2.0.0 | **Ratified**: 2026-10-02 | **Last Amended**: 2026-10-03
