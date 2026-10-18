@@ -6,7 +6,20 @@ PYTHON := poetry run python
 PYTEST := poetry run pytest
 UVICORN := poetry run uvicorn
 RUFF := poetry run ruff
+ALEMBIC := poetry run alembic
 COMPOSE := docker compose
+
+# Variaveis do .env (se existir), as mesmas que o Compose usa para criar o banco.
+-include .env
+POSTGRES_USER ?= app
+POSTGRES_PASSWORD ?= app
+POSTGRES_DB ?= app
+POSTGRES_PORT ?= 5432
+
+# Fora do Docker, a API e o Alembic acessam o banco do Compose pela porta publicada no
+# host (localhost). Dentro do Compose, o host e "db" (veja compose.yaml).
+DATABASE_URL ?= postgresql+psycopg://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@localhost:$(POSTGRES_PORT)/$(POSTGRES_DB)
+export DATABASE_URL
 
 help:
 	@echo "Comandos disponiveis:"
@@ -17,7 +30,7 @@ help:
 	@echo "  test-verbose - Executar testes com saida detalhada"
 	@echo "  lint - Executar linter"
 	@echo "  format - Formatar codigo"
-	@echo "  run - Executar servidor"
+	@echo "  run - Executar servidor (usa o banco do Compose: rode make up antes)"
 	@echo "  clean - Limpar artefatos"
 	@echo "  setup-hooks - Ativar git hooks do projeto (valida mensagens de commit)"
 	@echo ""
@@ -25,12 +38,20 @@ help:
 	@echo "  up - Subir os containers em background"
 	@echo "  down - Parar e remover os containers"
 	@echo "  build - Construir as imagens"
-	@echo "  rebuild - Reconstruir as imagens e subir os containers"
+	@echo "  rebuild / up-build - Reconstruir as imagens e subir os containers"
 	@echo "  logs - Acompanhar os logs de todos os servicos"
+	@echo "  logs-api - Acompanhar os logs da API"
 	@echo "  ps - Listar o status dos containers"
 	@echo "  shell - Abrir um terminal dentro do container da API"
 	@echo "  db-shell - Abrir o psql dentro do container do banco"
 	@echo "  docker-clean - Remover containers e volumes (APAGA os dados do banco)"
+	@echo ""
+	@echo " Migrations (Alembic, no banco do Compose):"
+	@echo "  db-upgrade - Aplicar as migrations pendentes"
+	@echo "  db-downgrade - Desfazer a ultima migration"
+	@echo "  db-migration msg=\"...\" - Gerar uma migration a partir dos modelos"
+	@echo "  db-current - Mostrar a versao atual do banco"
+	@echo "  db-history - Listar o historico de migrations"
 
 install:
 	cd $(BACKEND) && poetry install --no-root
@@ -48,7 +69,7 @@ format:
 	cd $(BACKEND) && $(RUFF) format .
 
 run:
-	cd $(BACKEND) && $(UVICORN) app.main:app --reload
+	cd $(BACKEND) && $(UVICORN) app.main:create_app --factory --reload
 
 clean:
 	rm -rf $(BACKEND)/__pycache__ $(BACKEND)/.pytest_cache $(BACKEND)/.ruff_cache
@@ -66,11 +87,14 @@ down:
 build:
 	$(COMPOSE) build
 
-rebuild:
+rebuild up-build:
 	$(COMPOSE) up -d --build
 
 logs:
 	$(COMPOSE) logs -f
+
+logs-api:
+	$(COMPOSE) logs -f api
 
 ps:
 	$(COMPOSE) ps
@@ -83,3 +107,18 @@ db-shell:
 
 docker-clean:
 	$(COMPOSE) down -v
+
+db-upgrade:
+	cd $(BACKEND) && $(ALEMBIC) upgrade head
+
+db-downgrade:
+	cd $(BACKEND) && $(ALEMBIC) downgrade -1
+
+db-migration:
+	cd $(BACKEND) && $(ALEMBIC) revision --autogenerate -m "$(msg)"
+
+db-current:
+	cd $(BACKEND) && $(ALEMBIC) current
+
+db-history:
+	cd $(BACKEND) && $(ALEMBIC) history

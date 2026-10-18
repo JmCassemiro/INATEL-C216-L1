@@ -18,9 +18,9 @@ def raise_error(error: Exception):
 
 
 @pytest.fixture
-def client_with_failing_routes():
+def client_with_failing_routes(engine):
     """Aplicação real com rotas de teste que levantam erros de domínio."""
-    app = create_app()
+    app = create_app(engine)
     app.add_api_route("/test/not-found", raise_error(ProductNotFoundError()))
     app.add_api_route("/test/conflict", raise_error(DuplicateBarcodeError()))
     app.add_api_route(
@@ -35,17 +35,17 @@ def client_with_failing_routes():
         yield client
 
 
-def test_create_app_returns_a_new_fastapi_instance_each_call():
+def test_create_app_returns_a_new_fastapi_instance_each_call(engine):
     """D12: cada chamada cria uma aplicação própria."""
-    first, second = create_app(), create_app()
+    first, second = create_app(engine), create_app(engine)
 
     assert isinstance(first, FastAPI)
     assert first is not second
 
 
-def test_created_app_serves_home():
+def test_created_app_serves_home(engine):
     """RP-008: a rota GET / continua respondendo."""
-    with TestClient(create_app()) as client:
+    with TestClient(create_app(engine)) as client:
         response = client.get("/")
 
     assert response.status_code == 200
