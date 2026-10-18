@@ -13,13 +13,20 @@ INATEL-C216-L1/
 │   ├── app/                     # Clean Architecture: dependências apontam para dentro
 │   │   ├── domain/              # entidade Product, value objects Barcode e Price, erros
 │   │   ├── application/         # ProductService (casos de uso), porta do repositório, comandos
-│   │   ├── infrastructure/      # repositório em memória
+│   │   ├── infrastructure/
+│   │   │   ├── database/        # Base ORM, engine e sessões (URL via DATABASE_URL)
+│   │   │   ├── models/          # modelos SQLAlchemy (tabela products)
+│   │   │   └── repositories/    # repositório SQLAlchemy e repositório em memória
 │   │   ├── api/                 # rotas, schemas Pydantic, tratamento de erros, dependências
 │   │   └── main.py              # create_app(): apenas compõe e inicializa a aplicação
+│   ├── alembic/
+│   │   ├── versions/            # migrations versionadas do banco
+│   │   └── env.py               # integra o Alembic aos modelos e ao DATABASE_URL
 │   ├── tests/
 │   │   ├── unit/                # domínio, aplicação, repositório e regra de dependência
-│   │   └── integration/         # endpoints via TestClient
+│   │   └── integration/         # endpoints, repositório no banco e migrations
 │   ├── .dockerignore
+│   ├── alembic.ini
 │   ├── Dockerfile
 │   ├── poetry.lock
 │   └── pyproject.toml
@@ -40,7 +47,8 @@ cp .env.example .env
 make up
 ```
 
-A API fica disponível em <http://localhost:8000>.
+A API fica disponível em <http://localhost:8000>. Ao subir, o container da API aplica as
+migrations pendentes (`alembic upgrade head`) antes de iniciar o servidor.
 
 Sem o `.env`, o ambiente sobe com os valores padrão definidos no `compose.yaml`.
 
@@ -51,21 +59,29 @@ Sem o `.env`, o ambiente sobe com os valores padrão definidos no `compose.yaml`
 | `make up` | Sobe os containers em background |
 | `make down` | Para e remove os containers |
 | `make build` | Constrói as imagens |
-| `make rebuild` | Reconstrói as imagens e sobe os containers |
+| `make rebuild` / `make up-build` | Reconstrói as imagens e sobe os containers |
 | `make logs` | Acompanha os logs de todos os serviços |
+| `make logs-api` | Acompanha os logs da API |
 | `make ps` | Lista o status dos containers |
 | `make shell` | Abre um terminal dentro do container da API |
 | `make db-shell` | Abre o `psql` dentro do container do banco |
 | `make docker-clean` | Remove containers e volumes (**apaga os dados do banco**) |
 
-## Executando localmente (sem Docker)
+## Executando localmente (API fora do Docker)
 
-Pré-requisitos: Python 3.14+ e Poetry.
+Pré-requisitos: Python 3.14+ e Poetry. O banco continua sendo o PostgreSQL do Compose,
+acessado pela porta publicada no host.
 
 ```bash
 make install
+make up          # sobe o PostgreSQL (e a API do container, que pode ser parada)
+make db-upgrade  # aplica as migrations
 make run
 ```
+
+O `Makefile` monta o `DATABASE_URL` com as variáveis do `.env` (ou os padrões do
+`compose.yaml`) apontando para `localhost`. Para usar outro banco, defina `DATABASE_URL`
+no ambiente.
 
 ### Comandos locais
 
@@ -78,6 +94,21 @@ make run
 | `make format` | Formata o código |
 | `make clean` | Remove artefatos de build e cache |
 | `make setup-hooks` | Ativa os git hooks do projeto |
+
+### Banco de dados e migrations
+
+A conexão vem da variável de ambiente `DATABASE_URL`
+(`postgresql+psycopg://usuario:senha@host:5432/banco`). Dentro do Compose o host é `db`, o
+nome do serviço; fora dele, `localhost`. A estrutura do banco é versionada com Alembic, em
+`backend/alembic/versions/`.
+
+| Comando | Descrição |
+|---|---|
+| `make db-upgrade` | Aplica as migrations pendentes |
+| `make db-downgrade` | Desfaz a última migration |
+| `make db-migration msg="..."` | Gera uma migration comparando os modelos com o banco (revise o arquivo antes de aplicar) |
+| `make db-current` | Mostra a versão atual do banco |
+| `make db-history` | Lista o histórico de migrations |
 
 Rode `make help` para ver todos os comandos disponíveis.
 
@@ -106,17 +137,22 @@ poetry run pytest
 A configuração do Pytest fica em `backend/pyproject.toml`, na seção
 `[tool.pytest.ini_options]`.
 
+Os testes de integração usam um banco próprio, criado pelas migrations: por padrão um
+SQLite temporário, para rodar sem Docker. Com `TEST_DATABASE_URL` definida, rodam nesse
+banco; o CI usa um PostgreSQL.
+
 ### O que é testado
 
 | Tipo | Verificação |
 |---|---|
-| Unitário (`tests/unit`) | Domínio, `ProductService`, repositório em memória (inclusive concorrência) e a regra de dependência entre camadas, sem subir o servidor |
-| Integração (`tests/integration`) | Todos os endpoints (`/` e `/products`) pela camada HTTP, com o `TestClient` |
+| Unitário (`tests/unit`) | Domínio, `ProductService`, leitura do `DATABASE_URL` e a regra de dependência entre camadas, sem banco e sem servidor |
+| Integração (`tests/integration`) | Todos os endpoints (`/` e `/products`) pelo `TestClient`; o contrato do repositório (inclusive concorrência) nas implementações SQLAlchemy e em memória; migrations (`upgrade`/`downgrade` e conferência com os modelos); persistência após reiniciar a aplicação |
 | Erro | `404` para rota ou produto inexistente, `405` para método não permitido, `409` para código de barras repetido, `422` para dados inválidos |
 
 ## Endpoints de produtos
 
-Os dados ficam em memória (são perdidos ao reiniciar a API). Documentação interativa em
+Os dados ficam no PostgreSQL (tabela `products`) e continuam lá depois de reiniciar a API.
+Documentação interativa em
 <http://localhost:8000/docs>.
 
 | Método | Rota | Sucesso | Descrição |
@@ -172,7 +208,7 @@ O workflow `.github/workflows/ci-backend.yml` roda no GitHub Actions a cada
 | Job | O que executa |
 |---|---|
 | `Ruff (Lint & Format)` | `ruff format --check .` e `ruff check .` |
-| `Pytest` | `poetry run pytest` |
+| `Pytest` | `poetry run pytest`, contra um PostgreSQL 17 (service container) |
 
 São as mesmas verificações disponíveis localmente (`make format`, `make lint` e
 `make test`), então é possível reproduzir o resultado do CI antes de abrir a PR.
