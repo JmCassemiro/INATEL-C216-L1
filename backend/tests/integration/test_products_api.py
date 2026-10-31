@@ -179,12 +179,16 @@ def test_get_by_unknown_barcode_returns_404(client):
 # --- composição ---------------------------------------------------------------
 
 
-def test_apps_do_not_share_the_catalog():
-    """D12: cada aplicação criada tem o próprio catálogo."""
-    with TestClient(create_app()) as first, TestClient(create_app()) as second:
-        created = create_product(first)
+def test_catalog_survives_an_application_restart(engine, session_factory):
+    """Prática 5: o catálogo fica no banco e continua lá depois de reiniciar a API."""
+    with TestClient(create_app(engine)) as before_restart:
+        created = create_product(before_restart)
 
-        assert second.get(f"/products/{created['id']}").status_code == 404
+    with TestClient(create_app(engine)) as after_restart:
+        response = after_restart.get(f"/products/{created['id']}")
+
+    assert response.status_code == 200
+    assert response.json() == created
 
 
 # --- US2: listar e buscar ------------------------------------------------------
