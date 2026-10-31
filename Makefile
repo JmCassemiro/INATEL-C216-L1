@@ -1,7 +1,11 @@
 .PHONY: help install test test-verbose lint format run clean setup-hooks \
-        up down build rebuild logs ps shell db-shell docker-clean
+        up down build rebuild logs ps shell db-shell docker-clean \
+        frontend-install frontend-dev frontend-lint frontend-format frontend-check \
+        frontend-test frontend-test-e2e frontend-build check-all
 
 BACKEND := backend
+FRONTEND := frontend
+NPM := npm --prefix $(FRONTEND)
 PYTHON := poetry run python
 PYTEST := poetry run pytest
 UVICORN := poetry run uvicorn
@@ -52,6 +56,18 @@ help:
 	@echo "  db-migration msg=\"...\" - Gerar uma migration a partir dos modelos"
 	@echo "  db-current - Mostrar a versao atual do banco"
 	@echo "  db-history - Listar o historico de migrations"
+	@echo ""
+	@echo " Frontend (npm):"
+	@echo "  frontend-install - Instalar dependencias (npm ci)"
+	@echo "  frontend-dev - Servidor de desenvolvimento (Vite)"
+	@echo "  frontend-lint - Executar o lint (Biome)"
+	@echo "  frontend-format - Formatar codigo (Biome)"
+	@echo "  frontend-check - Lint + formatacao sem alterar arquivos"
+	@echo "  frontend-test - Testes unitarios e de integracao (Vitest)"
+	@echo "  frontend-test-e2e - Testes E2E (Playwright)"
+	@echo "  frontend-build - Build de producao"
+	@echo ""
+	@echo "  check-all - Backend (Ruff + Pytest) + frontend (Biome, Vitest, build, E2E)"
 
 install:
 	cd $(BACKEND) && poetry install --no-root
@@ -122,3 +138,32 @@ db-current:
 
 db-history:
 	cd $(BACKEND) && $(ALEMBIC) history
+
+frontend-install:
+	$(NPM) ci
+
+frontend-dev:
+	$(NPM) run dev
+
+frontend-lint:
+	$(NPM) run lint
+
+frontend-format:
+	$(NPM) run format
+
+frontend-check:
+	$(NPM) run lint
+	$(NPM) run format:check
+
+frontend-test:
+	$(NPM) run test
+
+frontend-test-e2e:
+	$(NPM) run test:e2e
+
+frontend-build:
+	$(NPM) run build
+
+check-all:
+	cd $(BACKEND) && $(RUFF) format --check . && $(RUFF) check . && $(PYTEST)
+	$(MAKE) frontend-check frontend-test frontend-build frontend-test-e2e

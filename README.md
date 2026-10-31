@@ -8,7 +8,8 @@ Laboratório da disciplina C216 — Sistemas Distribuídos.
 INATEL-C216-L1/
 ├── .github/
 │   └── workflows/
-│       └── ci-backend.yml
+│       ├── ci-backend.yml
+│       └── ci-frontend.yml
 ├── backend/
 │   ├── app/                     # Clean Architecture: dependências apontam para dentro
 │   │   ├── domain/              # entidade Product, value objects Barcode e Price, erros
@@ -30,6 +31,19 @@ INATEL-C216-L1/
 │   ├── Dockerfile
 │   ├── poetry.lock
 │   └── pyproject.toml
+├── frontend/                    # React + Vite + Tailwind, estado em memória (sem API ainda)
+│   ├── src/
+│   │   ├── components/          # ItemForm (formulário) e ItemList (listagem e estado vazio)
+│   │   ├── App.jsx              # guarda o estado dos itens
+│   │   └── validation.js        # regra de validação (função pura)
+│   ├── tests/
+│   │   ├── unit/                # Vitest: função de validação e componentes isolados
+│   │   ├── integration/         # Vitest: formulário + lista no App
+│   │   └── e2e/                 # Playwright
+│   ├── biome.json
+│   ├── package.json
+│   ├── playwright.config.js
+│   └── vite.config.js           # Vite + Tailwind + Vitest
 ├── .env.example
 ├── compose.yaml
 ├── Makefile
@@ -200,6 +214,34 @@ nome, sem diferenciar maiúsculas e acentos). A resposta é `{"items": [...], "t
 O `DELETE` não apaga o registro: o produto some das consultas e da listagem, mas o código de
 barras continua reservado. Nenhuma operação recusada altera o catálogo.
 
+## Frontend
+
+Gerenciador de itens (nome obrigatório com até 100 caracteres e descrição opcional) em
+React, Vite e Tailwind CSS. Nesta etapa os itens ficam só em memória: não há chamadas ao
+backend e eles somem ao recarregar a página.
+
+Pré-requisitos: Node.js 22+ e npm.
+
+```bash
+make frontend-install
+make frontend-dev   # http://localhost:5173
+```
+
+| Comando | Descrição |
+|---|---|
+| `make frontend-install` | Instala as dependências (`npm ci`) |
+| `make frontend-dev` | Sobe o servidor de desenvolvimento (Vite) |
+| `make frontend-lint` | Executa o lint (Biome) |
+| `make frontend-format` | Formata o código (Biome) |
+| `make frontend-check` | Lint + verificação da formatação, sem alterar arquivos |
+| `make frontend-test` | Testes unitários e de integração (Vitest + React Testing Library) |
+| `make frontend-test-e2e` | Testes E2E no navegador (Playwright) |
+| `make frontend-build` | Build de produção |
+| `make check-all` | Backend (Ruff + Pytest) e frontend (Biome, Vitest, build, E2E) |
+
+Antes do primeiro E2E, instale o navegador: `npx playwright install chromium` (dentro de
+`frontend/`). O Playwright sobe o Vite sozinho.
+
 ## Integração contínua (CI)
 
 O workflow `.github/workflows/ci-backend.yml` roda no GitHub Actions a cada
@@ -212,6 +254,10 @@ O workflow `.github/workflows/ci-backend.yml` roda no GitHub Actions a cada
 
 São as mesmas verificações disponíveis localmente (`make format`, `make lint` e
 `make test`), então é possível reproduzir o resultado do CI antes de abrir a PR.
+
+O workflow `.github/workflows/ci-frontend.yml` roda em pull requests (e em pushes na
+`main`) que alterem `frontend/`: `npm ci`, Biome (lint e formatação), Vitest, build e
+Playwright. Se o E2E falhar, o relatório do Playwright fica disponível como artefato.
 
 ## Serviços
 
