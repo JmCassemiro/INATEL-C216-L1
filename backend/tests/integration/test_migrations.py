@@ -24,9 +24,9 @@ def test_migrations_can_be_reverted_and_reapplied(engine):
     try:
         with engine.begin() as connection:
             command.downgrade(alembic_config(connection), "base")
-        assert "products" not in inspect(engine).get_table_names()
+        assert not {"products", "items"} & set(inspect(engine).get_table_names())
     finally:
         with engine.begin() as connection:
             command.upgrade(alembic_config(connection), "head")
 
-    assert "products" in inspect(engine).get_table_names()
+    assert {"products", "items"} <= set(inspect(engine).get_table_names())

@@ -9,7 +9,8 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import Connection, create_engine, pool
 
-import app.infrastructure.models.product  # noqa: F401 (registra a tabela no metadata)
+import app.infrastructure.models.item  # noqa: F401 (registra as tabelas no metadata)
+import app.infrastructure.models.product  # noqa: F401
 from app.infrastructure.database.base import Base
 from app.infrastructure.database.session import database_url
 

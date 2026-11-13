@@ -1,15 +1,23 @@
 name: CI - Frontend
 
+# O E2E roda a stack completa (frontend + API + PostgreSQL), entao mudancas no backend,
+# no Compose ou no Makefile tambem disparam este workflow.
 on:
   pull_request:
     paths:
       - "frontend/**"
+      - "backend/**"
+      - "compose.yaml"
+      - "Makefile"
       - ".github/workflows/ci-frontend.yml"
   push:
     branches:
       - main
     paths:
       - "frontend/**"
+      - "backend/**"
+      - "compose.yaml"
+      - "Makefile"
       - ".github/workflows/ci-frontend.yml"
 
 jobs:
@@ -50,8 +58,11 @@ jobs:
       - name: Install Playwright Browser
         run: npx playwright install --with-deps chromium
 
-      - name: Run E2E Tests
-        run: npm run test:e2e
+      # Sobe db + api + frontend numa stack isolada (Docker Compose), roda o
+      # Playwright contra ela e derruba tudo no final.
+      - name: Run Full-stack E2E Tests
+        working-directory: .
+        run: make e2e
 
       - name: Upload Playwright Report
         if: failure()

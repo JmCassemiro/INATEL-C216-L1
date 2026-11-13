@@ -36,3 +36,8 @@ class ProductNotFoundError(NotFoundError):
 class DuplicateBarcodeError(ConflictError):
     def __init__(self) -> None:
         super().__init__("Código de barras já cadastrado")
+
+
+class DuplicateItemNameError(ConflictError):
+    def __init__(self) -> None:
+        super().__init__("Já existe um item com esse nome")

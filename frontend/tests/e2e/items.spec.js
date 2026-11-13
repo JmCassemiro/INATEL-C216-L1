@@ -1,24 +1,59 @@
 import { expect, test } from "@playwright/test";
 
-test("carrega a interface com a lista vazia", async ({ page }) => {
+// Sem mocks: navegador → React → FastAPI → PostgreSQL. Nomes únicos por execução,
+// para o teste não depender dos dados que já estão no banco.
+function uniqueName(prefix) {
+  return `${prefix} ${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+}
+
+test("carrega a interface e a lista vinda da API", async ({ page }) => {
   await page.goto("/");
 
   await expect(
     page.getByRole("heading", { name: "Gerenciador de Itens" }),
   ).toBeVisible();
-  await expect(page.getByText("Nenhum item cadastrado.")).toBeVisible();
+  await expect(page.getByText("Carregando itens...")).toBeHidden();
+  await expect(page.getByRole("alert")).toHaveCount(0);
 });
 
-test("cadastra um item e o exibe na listagem", async ({ page }) => {
+test("cadastra um item e ele persiste após recarregar a página", async ({
+  page,
+}) => {
+  const name = uniqueName("Notebook");
   await page.goto("/");
 
-  await page.getByLabel("Nome").fill("Notebook");
+  await page.getByLabel("Nome").fill(name);
   await page.getByLabel("Descrição").fill("14 polegadas");
   await page.getByRole("button", { name: "Adicionar" }).click();
 
-  await expect(page.getByRole("listitem")).toContainText("Notebook");
-  await expect(page.getByRole("listitem")).toContainText("14 polegadas");
-  await expect(page.getByText("Nenhum item cadastrado.")).toBeHidden();
+  const item = page.getByRole("listitem").filter({ hasText: name });
+  await expect(item).toBeVisible();
+  await expect(item).toContainText("14 polegadas");
+
+  await page.reload();
+  await expect(item).toBeVisible(); // veio do PostgreSQL
+});
+
+test("mostra a mensagem da API ao repetir um nome", async ({ page }) => {
+  const name = uniqueName("Mouse");
+  await page.goto("/");
+
+  await page.getByLabel("Nome").fill(name);
+  await page.getByRole("button", { name: "Adicionar" }).click();
+  await expect(
+    page.getByRole("listitem").filter({ hasText: name }),
+  ).toBeVisible();
+
+  await page.getByLabel("Nome").fill(name);
+  await page.getByRole("button", { name: "Adicionar" }).click();
+
+  await expect(page.getByRole("alert")).toHaveText(
+    "Já existe um item com esse nome",
+  );
+  await expect(page.getByLabel("Nome")).toHaveValue(name);
+  await expect(
+    page.getByRole("listitem").filter({ hasText: name }),
+  ).toHaveCount(1);
 });
 
 test("mostra erro ao enviar nome vazio", async ({ page }) => {
@@ -27,5 +62,4 @@ test("mostra erro ao enviar nome vazio", async ({ page }) => {
   await page.getByRole("button", { name: "Adicionar" }).click();
 
   await expect(page.getByRole("alert")).toHaveText("O nome é obrigatório.");
-  await expect(page.getByRole("listitem")).toHaveCount(0);
 });

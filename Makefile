@@ -1,17 +1,24 @@
 .PHONY: help install test test-verbose lint format run clean setup-hooks \
         up down build rebuild logs ps shell db-shell docker-clean \
         frontend-install frontend-dev frontend-lint frontend-format frontend-check \
-        frontend-test frontend-test-e2e frontend-build check-all
+        frontend-test frontend-test-e2e frontend-build e2e check-all
 
 BACKEND := backend
 FRONTEND := frontend
+# No Windows, o script "npm" chama "bash", que pode ser o do WSL; o npm.cmd nao depende dele.
+ifeq ($(OS),Windows_NT)
+NPM := npm.cmd --prefix $(FRONTEND)
+else
 NPM := npm --prefix $(FRONTEND)
+endif
 PYTHON := poetry run python
 PYTEST := poetry run pytest
 UVICORN := poetry run uvicorn
 RUFF := poetry run ruff
 ALEMBIC := poetry run alembic
 COMPOSE := docker compose
+# Stack do E2E: outro projeto do Compose, isolado do ambiente de desenvolvimento
+E2E_COMPOSE := $(COMPOSE) -p lab-e2e
 
 # Variaveis do .env (se existir), as mesmas que o Compose usa para criar o banco.
 -include .env
@@ -39,7 +46,7 @@ help:
 	@echo "  setup-hooks - Ativar git hooks do projeto (valida mensagens de commit)"
 	@echo ""
 	@echo " Ambiente Docker:"
-	@echo "  up - Subir os containers em background"
+	@echo "  up - Subir os containers (db, api e frontend) em background"
 	@echo "  down - Parar e remover os containers"
 	@echo "  build - Construir as imagens"
 	@echo "  rebuild / up-build - Reconstruir as imagens e subir os containers"
@@ -64,10 +71,12 @@ help:
 	@echo "  frontend-format - Formatar codigo (Biome)"
 	@echo "  frontend-check - Lint + formatacao sem alterar arquivos"
 	@echo "  frontend-test - Testes unitarios e de integracao (Vitest)"
-	@echo "  frontend-test-e2e - Testes E2E (Playwright)"
+	@echo "  frontend-test-e2e - Testes E2E (Playwright) contra uma stack ja no ar (E2E_BASE_URL)"
 	@echo "  frontend-build - Build de producao"
 	@echo ""
-	@echo "  check-all - Backend (Ruff + Pytest) + frontend (Biome, Vitest, build, E2E)"
+	@echo " Full-stack (exige Docker):"
+	@echo "  e2e - E2E em stack isolada (lab-e2e): sobe, testa e apaga tudo"
+	@echo "  check-all - Backend (Ruff + Pytest) + frontend (Biome, Vitest, build) + e2e"
 
 install:
 	cd $(BACKEND) && poetry install --no-root
@@ -164,6 +173,20 @@ frontend-test-e2e:
 frontend-build:
 	$(NPM) run build
 
+# E2E full-stack numa stack separada da de desenvolvimento: projeto "lab-e2e", outras
+# portas e um volume proprio do banco. A API aplica as migrations ao subir. No final,
+# "down -v" apaga tudo, inclusive o banco de teste, mesmo se os testes falharem.
+e2e: export API_PORT := 8001
+e2e: export FRONTEND_PORT := 5174
+e2e: export POSTGRES_PORT := 5434
+e2e: export CORS_ORIGINS := http://localhost:5174,http://127.0.0.1:5174
+e2e: export VITE_API_URL := http://localhost:8001
+e2e: export E2E_BASE_URL := http://localhost:5174
+e2e:
+	$(E2E_COMPOSE) up -d --build --wait || ($(E2E_COMPOSE) down -v && exit 1)
+	$(NPM) run test:e2e || ($(E2E_COMPOSE) down -v && exit 1)
+	$(E2E_COMPOSE) down -v
+
 check-all:
 	cd $(BACKEND) && $(RUFF) format --check . && $(RUFF) check . && $(PYTEST)
-	$(MAKE) frontend-check frontend-test frontend-build frontend-test-e2e
+	$(MAKE) frontend-check frontend-test frontend-build e2e
