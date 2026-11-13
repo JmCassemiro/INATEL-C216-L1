@@ -17,6 +17,8 @@ Rodar a partir da raiz do repositório:
 - `make lint` — verifica o código (`ruff check`)
 - `make format` — formata o código (`ruff format`); o CI falha se o código não estiver formatado
 - `make up` / `make down` — sobe/derruba a API e o PostgreSQL (Docker Compose)
+- `make db-upgrade` / `make db-migration msg="..."` — aplica/gera migrations do Alembic
+  (`DATABASE_URL` montado pelo `Makefile`, apontando para o banco do Compose)
 
 Uma mudança só está pronta com `make test` e `make lint` passando e o código formatado.
 
@@ -47,7 +49,7 @@ Uma mudança só está pronta com `make test` e `make lint` passando e o código
 
 - `backend/app/` — API em Clean Architecture, com dependências apontando para dentro:
   `domain/` (entidades, value objects, erros), `application/` (casos de uso, portas, comandos),
-  `infrastructure/` (repositórios) e `api/` (rotas, schemas, tratamento de erros, dependências).
+  `infrastructure/` (banco, modelos ORM e repositórios) e `api/` (rotas, schemas, tratamento de erros, dependências).
   `main.py` só tem `create_app()`, que compõe a aplicação.
 - `backend/tests/` — `unit/` (por camada, mais a regra de dependência) e `integration/`
   (`TestClient`)

@@ -1,11 +1,11 @@
 import builtins
 import threading
-import unicodedata
 from uuid import UUID
 
 from app.domain.barcode import Barcode
 from app.domain.errors import DuplicateBarcodeError, ProductNotFoundError
 from app.domain.product import Product
+from app.infrastructure.repositories.search import searchable
 
 
 class InMemoryProductRepository:
@@ -54,23 +54,15 @@ class InMemoryProductRepository:
     def list(
         self, offset: int, limit: int, name: str | None
     ) -> tuple[builtins.list[Product], int]:
-        search = _searchable(name or "")
+        search = searchable(name or "")
         with self._lock:
             matches = [
                 product
                 for product in self._products.values()
-                if product.is_active and search in _searchable(product.name)
+                if product.is_active and search in searchable(product.name)
             ]
         return matches[offset : offset + limit], len(matches)
 
     @staticmethod
     def _active(product: Product | None) -> Product | None:
         return product if product is not None and product.is_active else None
-
-
-def _searchable(text: str) -> str:
-    """Forma de comparação da busca: sem acentos e sem diferenciar maiúsculas (D11)."""
-    decomposed = unicodedata.normalize("NFKD", text)
-    return "".join(
-        char for char in decomposed if not unicodedata.combining(char)
-    ).casefold()

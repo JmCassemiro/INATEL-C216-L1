@@ -4,6 +4,7 @@ from app.domain.errors import (
     ConflictError,
     DomainError,
     DuplicateBarcodeError,
+    DuplicateItemNameError,
     InvalidDataError,
     NotFoundError,
     ProductNotFoundError,
@@ -50,6 +51,14 @@ def test_duplicate_barcode_error_is_conflict_with_message():
     assert isinstance(error, ConflictError)
     assert isinstance(error, DomainError)
     assert str(error) == "Código de barras já cadastrado"
+
+
+def test_duplicate_item_name_error_is_conflict_with_message():
+    """Nome de item repetido é da categoria "conflito" (vira 409)."""
+    error = DuplicateItemNameError()
+
+    assert isinstance(error, ConflictError)
+    assert str(error) == "Já existe um item com esse nome"
 
 
 @pytest.mark.parametrize(
