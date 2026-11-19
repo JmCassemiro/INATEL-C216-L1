@@ -165,12 +165,21 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* "R$" da etiqueta: pequeno, na largura normal, alinhado ao topo do numeral. */
+@utility type-price-currency {
+  font-size: 0.5em;
+  font-weight: 700;
+  font-stretch: 100%;
+  line-height: 1;
+  margin-top: 0.18em;
+  margin-right: 0.18em;
+}
+
 /* Centavos da etiqueta: menores e elevados, como na etiqueta de gôndola. */
 @utility type-price-cents {
   font-size: 0.6em;
   line-height: 1;
-  position: relative;
-  top: -0.55em;
+  margin-top: 0.05em;
 }
 
 /* Linha que acabou de mudar: lavagem amarela que some (o único movimento do painel). */
