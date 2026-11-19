@@ -185,6 +185,13 @@ Decisões técnicas da spec 007. Cada uma traz o que foi escolhido, por quê e o
 - **Na implementação:** a versão atual é a 3 (não a 2): a API de `http`, `HttpResponse` e
   `setupServer` é a mesma, mas a opção de requisição sem rota passou a se chamar
   `onUnhandledFrame` (`server.listen({ onUnhandledFrame: "error" })`).
+- **Testes instáveis (2026-11-19):** com a máquina carregada (Docker no ar e 13 arquivos em
+  paralelo), alguns testes de tela passavam de 5 s, e uma vez a mesma toast apareceu duas vezes
+  (o sonner guarda as toasts numa variável global e as entrega por `setTimeout`). Correções:
+  `testTimeout` de 15 s, `asyncUtilTimeout` de 3 s nos `findBy`, `user-event` sem pausa entre as
+  teclas e, no próprio painel, um `id` fixo por tipo de aviso (`product-created`,
+  `product-updated`, `product-removed`, `product-not-found`), que faz o sonner substituir a toast
+  em vez de empilhar repetidas. Cinco execuções seguidas verdes com o Docker no ar.
 
 ### D13 — E2E do fluxo completo com persistência
 

@@ -76,6 +76,7 @@ export function ProductsPage() {
     setSearch("");
   }
 
+  // Cada aviso tem um id fixo: o mesmo aviso de novo substitui o anterior em vez de empilhar.
   // Formulário (cadastro ou edição) e linha destacada depois de salvar (research D14).
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
@@ -101,10 +102,10 @@ export function ProductsPage() {
     setFormOpen(false);
     setHighlightedId(product.id);
     if (editing) {
-      toast.success("Alterações salvas");
+      toast.success("Alterações salvas", { id: "product-updated" });
       return;
     }
-    toast.success("Produto cadastrado");
+    toast.success("Produto cadastrado", { id: "product-created" });
     // O produto novo fica no topo da primeira página, sem busca (FR-005).
     if (search || page !== 1) clearSearch();
   }
@@ -113,7 +114,9 @@ export function ProductsPage() {
   function handleNotFound() {
     setFormOpen(false);
     setRemoveOpen(false);
-    toast.warning("Este produto não existe mais. A lista foi atualizada.");
+    toast.warning("Este produto não existe mais. A lista foi atualizada.", {
+      id: "product-not-found",
+    });
   }
 
   // Remoção com confirmação (FR-013).
@@ -127,7 +130,7 @@ export function ProductsPage() {
 
   function handleRemoved() {
     setRemoveOpen(false);
-    toast.success("Produto removido");
+    toast.success("Produto removido", { id: "product-removed" });
     // Era o último da página: mostra a anterior em vez de uma página vazia (FR-014).
     if (data?.items.length === 1 && page > 1) setPage(page - 1);
   }

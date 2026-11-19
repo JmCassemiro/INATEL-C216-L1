@@ -12,6 +12,8 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     setupFiles: ["./tests/setup.ts"],
+    // Testes de tela no jsdom são lentos com a máquina carregada (ex.: Docker no ar).
+    testTimeout: 15_000,
     include: [
       "tests/unit/**/*.test.{ts,tsx}",
       "tests/integration/**/*.test.{ts,tsx}",

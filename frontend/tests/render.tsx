@@ -15,7 +15,8 @@ export function renderApp(route = "/products") {
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
   const router = createMemoryRouter(routes, { initialEntries: [route] });
-  const user = userEvent.setup();
+  // Sem pausa entre as teclas: o comportamento é o mesmo, e os testes ficam mais rápidos.
+  const user = userEvent.setup({ delay: null });
   const view = render(
     <AppProviders queryClient={queryClient}>
       <RouterProvider router={router} />
