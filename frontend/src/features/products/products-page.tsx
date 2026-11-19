@@ -4,6 +4,7 @@
  */
 import { PlusIcon, SearchIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   InputGroup,
@@ -11,6 +12,7 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { useDebouncedValue } from "@/lib/use-debounced-value";
+import { ProductFormSheet } from "./product-form-sheet";
 import {
   ProductsEmpty,
   ProductsList,
@@ -20,6 +22,7 @@ import {
 } from "./products-list";
 import { ProductsPagination } from "./products-pagination";
 import { PAGE_SIZE, useProductsPage } from "./queries";
+import type { Product } from "./types";
 import { useProductListParams } from "./use-product-list-params";
 
 function countLabel(total: number, searching: boolean): string {
@@ -72,8 +75,26 @@ export function ProductsPage() {
     setSearch("");
   }
 
+  // Formulário de cadastro e linha destacada depois de salvar (research D14).
+  const [formOpen, setFormOpen] = useState(false);
+  const [highlightedId, setHighlightedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!highlightedId) return;
+    const timer = setTimeout(() => setHighlightedId(null), 2000);
+    return () => clearTimeout(timer);
+  }, [highlightedId]);
+
   function openCreate() {
-    // O formulário de cadastro entra na US2.
+    setFormOpen(true);
+  }
+
+  function handleCreated(product: Product) {
+    setFormOpen(false);
+    toast.success("Produto cadastrado");
+    setHighlightedId(product.id);
+    // O produto novo fica no topo da primeira página, sem busca (FR-005).
+    if (search || page !== 1) clearSearch();
   }
 
   let content: React.ReactNode;
@@ -90,7 +111,7 @@ export function ProductsPage() {
   } else {
     content = (
       <>
-        <ProductsList products={data.items} />
+        <ProductsList products={data.items} highlightedId={highlightedId} />
         <ProductsPagination
           page={page}
           pageSize={PAGE_SIZE}
@@ -141,6 +162,12 @@ export function ProductsPage() {
           {content}
         </section>
       )}
+
+      <ProductFormSheet
+        open={formOpen}
+        onOpenChange={setFormOpen}
+        onSaved={handleCreated}
+      />
     </div>
   );
 }

@@ -31,6 +31,7 @@ sendo a autoridade.
 |---|---|---|
 | `name` | obrigatório; 1 a 120 caracteres sem os espaços das pontas | "Informe o nome do produto." / "Use no máximo 120 caracteres." |
 | `description` | opcional; até 500 caracteres; vazia vira `null` | "Use no máximo 500 caracteres." |
+| `barcode` | obrigatório | "Informe o código de barras." |
 | `barcode` | só dígitos; 8, 12, 13 ou 14 dígitos | "Use só números: 8, 12, 13 ou 14 dígitos." |
 | `barcode` | dígito verificador GTIN válido | "Confira os dígitos: o código de barras não é válido." |
 | `price` | obrigatório; número com vírgula ou ponto | "Informe o preço de venda." / "Use só números, com vírgula para os centavos." |

@@ -1,6 +1,6 @@
 /** Operações da API de produtos usadas pelo painel (contracts/products-api-changes.md). */
 import { apiRequest } from "@/lib/api-client";
-import type { ProductPage } from "./types";
+import type { Product, ProductInput, ProductPage } from "./types";
 
 export function listProducts(params: {
   search: string;
@@ -13,4 +13,8 @@ export function listProducts(params: {
   });
   if (params.search) query.set("name", params.search);
   return apiRequest<ProductPage>(`/products?${query}`);
+}
+
+export function createProduct(input: ProductInput): Promise<Product> {
+  return apiRequest<Product>("/products", { method: "POST", body: input });
 }

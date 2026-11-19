@@ -3,8 +3,13 @@
  * chave de cache própria, então a tela só mostra a resposta da visão atual, mesmo
  * que uma resposta antiga chegue depois.
  */
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { listProducts } from "./api";
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { createProduct, listProducts } from "./api";
 
 export const PAGE_SIZE = 10;
 
@@ -17,5 +22,14 @@ export function useProductsPage(search: string, page: number) {
     queryFn: () => listProducts({ search, page, size: PAGE_SIZE }),
     // Ao trocar de página, a lista anterior fica na tela até a nova chegar.
     placeholderData: keepPreviousData,
+  });
+}
+
+/** Cadastro (FR-007): sem repetição automática; a lista é recarregada no sucesso (FR-017). */
+export function useCreateProduct() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: createProduct,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: PRODUCTS_KEY }),
   });
 }
