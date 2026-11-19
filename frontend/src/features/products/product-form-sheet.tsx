@@ -34,6 +34,7 @@ import { ApiError } from "@/lib/api-client";
 import { priceForInput } from "@/lib/money";
 import { useReturnFocus } from "@/lib/use-return-focus";
 import { useCreateProduct, useUpdateProduct } from "./queries";
+import { ShelfLabel } from "./shelf-label";
 import type { Product, ProductField, ProductInput } from "./types";
 import {
   type ProductFormErrors,
@@ -191,7 +192,12 @@ function ProductForm({
 
   return (
     <form noValidate onSubmit={submit} className="flex min-h-0 flex-1 flex-col">
-      <div className="flex-1 overflow-y-auto px-6 py-5">
+      <div className="flex flex-1 flex-col gap-6 overflow-y-auto px-6 py-5">
+        <ShelfLabel
+          name={values.name.trim()}
+          price={values.price}
+          barcode={values.barcode.trim()}
+        />
         <FieldGroup>
           <FormField id="product-name" label="Nome" error={errors.name}>
             <Input
@@ -266,7 +272,7 @@ function ProductForm({
         </FieldGroup>
 
         {generalError && (
-          <Alert variant="destructive" className="mt-5">
+          <Alert variant="destructive">
             <TriangleAlertIcon />
             <AlertTitle>{generalError}</AlertTitle>
             <AlertDescription>

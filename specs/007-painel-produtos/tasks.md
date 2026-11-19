@@ -216,13 +216,13 @@ trocar por um código inválido e ver só os dígitos.
 
 ### Tests ⚠️
 
-- [ ] T049 [P] [US2] Escrever `frontend/tests/unit/ean.test.ts` (RED) para `encodeEan(digits)`: EAN-13 `5901234123457` igual ao padrão de referência de 95 módulos (gerado de forma independente, por exemplo com um script Python à parte, e colado no teste como texto `"101…"`); começa e termina com `101` e tem `01010` no meio; UPC-A `036000291452` codifica igual ao EAN-13 `0036000291452`; EAN-8 `96385074` tem 67 módulos e confere com o padrão de referência; GTIN-14 `17891000315504`, código inválido e texto com letras devolvem `null` (research D10)
-- [ ] T050 [P] [US2] Escrever `frontend/tests/integration/shelf-label.test.tsx` (RED): no `dialog` "Novo produto", a `figure` "Prévia da etiqueta" mostra o nome digitado e o preço com nome acessível "R$ 49,90"; com código válido aparece o `img` "Código de barras 7891000315507"; com `7891000315508` o `img` some e os dígitos continuam; no modo edição a prévia abre preenchida (FR-022)
+- [X] T049 [P] [US2] Escrever `frontend/tests/unit/ean.test.ts` (RED) para `encodeEan(digits)`: EAN-13 `5901234123457` igual ao padrão de referência de 95 módulos (gerado de forma independente, por exemplo com um script Python à parte, e colado no teste como texto `"101…"`); começa e termina com `101` e tem `01010` no meio; UPC-A `036000291452` codifica igual ao EAN-13 `0036000291452`; EAN-8 `96385074` tem 67 módulos e confere com o padrão de referência; GTIN-14 `17891000315504`, código inválido e texto com letras devolvem `null` (research D10)
+- [X] T050 [P] [US2] Escrever `frontend/tests/integration/shelf-label.test.tsx` (RED): no `dialog` "Novo produto", a `figure` "Prévia da etiqueta" mostra o nome digitado e o preço com nome acessível "R$ 49,90"; com código válido aparece o `img` "Código de barras 7891000315507"; com `7891000315508` o `img` some e os dígitos continuam; no modo edição a prévia abre preenchida (FR-022)
 
 ### Implementation
 
-- [ ] T051 [P] [US2] Implementar `frontend/src/features/products/ean.ts` (tabelas L, G e R, paridade do primeiro dígito, guardas `101`/`01010`/`101`; UPC-A como EAN-13 com zero à esquerda); T049 verde
-- [ ] T052 [US2] Implementar `frontend/src/features/products/barcode.tsx` (SVG com um `rect` por barra, `role="img"`, `aria-label` "Código de barras {dígitos}", dígitos embaixo com `tabular-nums`) e `frontend/src/features/products/shelf-label.tsx` (`figure` com `figcaption` acessível "Prévia da etiqueta", nome, `PriceTag` tamanho `label`, `Barcode` ou só os dígitos) e colocar a prévia no topo de `product-form-sheet.tsx`; T050 verde
+- [X] T051 [P] [US2] Implementar `frontend/src/features/products/ean.ts` (tabelas L, G e R, paridade do primeiro dígito, guardas `101`/`01010`/`101`; UPC-A como EAN-13 com zero à esquerda); T049 verde
+- [X] T052 [US2] Implementar `frontend/src/features/products/barcode.tsx` (SVG com um `rect` por barra, `role="img"`, `aria-label` "Código de barras {dígitos}", dígitos embaixo com `tabular-nums`) e `frontend/src/features/products/shelf-label.tsx` (`figure` com `figcaption` acessível "Prévia da etiqueta", nome, `PriceTag` tamanho `label`, `Barcode` ou só os dígitos) e colocar a prévia no topo de `product-form-sheet.tsx`; T050 verde
 
 **Checkpoint**: commit `feat(painel): mostra a prévia da etiqueta de gôndola no formulário`.
 
