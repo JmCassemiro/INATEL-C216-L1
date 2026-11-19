@@ -18,7 +18,7 @@ RUFF := poetry run ruff
 ALEMBIC := poetry run alembic
 COMPOSE := docker compose
 # Stack do E2E: outro projeto do Compose, isolado do ambiente de desenvolvimento
-E2E_COMPOSE := $(COMPOSE) -p lab-e2e
+E2E_COMPOSE := $(COMPOSE) -p nexopdv-e2e
 
 # Variaveis do .env (se existir), as mesmas que o Compose usa para criar o banco.
 -include .env
@@ -75,7 +75,7 @@ help:
 	@echo "  frontend-build - Build de producao"
 	@echo ""
 	@echo " Full-stack (exige Docker):"
-	@echo "  e2e - E2E em stack isolada (lab-e2e): sobe, testa e apaga tudo"
+	@echo "  e2e - E2E em stack isolada (nexopdv-e2e): sobe, testa e apaga tudo"
 	@echo "  check-all - Backend (Ruff + Pytest) + frontend (Biome, Vitest, build) + e2e"
 
 install:
@@ -173,7 +173,7 @@ frontend-test-e2e:
 frontend-build:
 	$(NPM) run build
 
-# E2E full-stack numa stack separada da de desenvolvimento: projeto "lab-e2e", outras
+# E2E full-stack numa stack separada da de desenvolvimento: projeto "nexopdv-e2e", outras
 # portas e um volume proprio do banco. A API aplica as migrations ao subir. No final,
 # "down -v" apaga tudo, inclusive o banco de teste, mesmo se os testes falharem.
 e2e: export API_PORT := 8001

@@ -37,6 +37,7 @@ O título da aba é "Produtos | NexoPDV".
 | Preço | texto com nome acessível "R$ 49,90" (as partes visuais ficam ocultas) |
 | Editar | `button` "Editar {nome do produto}" |
 | Remover | `button` "Remover {nome do produto}" |
+| Ações no celular (< 640 px) | `button` "Ações de {nome do produto}", que abre um `menu` com os `menuitem` "Editar" e "Remover" |
 | Paginação | `navigation` "Paginação", com `button` "Página anterior" e "Próxima página" e o texto "Página {p} de {n}" |
 
 ## Estados da lista

@@ -1,6 +1,7 @@
 # INATEL-C216-L1
 
-Laboratório da disciplina C216 — Sistemas Distribuídos.
+NexoPDV: frente de caixa e gestão para lojas de varejo físico. Projeto da disciplina C216 —
+Sistemas Distribuídos.
 
 ## Estrutura
 
@@ -12,11 +13,11 @@ INATEL-C216-L1/
 │       └── ci-frontend.yml
 ├── backend/
 │   ├── app/                     # Clean Architecture: dependências apontam para dentro
-│   │   ├── domain/              # entidades Product e Item, value objects Barcode e Price, erros
-│   │   ├── application/         # ProductService e ItemService (casos de uso), portas, comandos
+│   │   ├── domain/              # entidade Product, value objects Barcode e Price, erros
+│   │   ├── application/         # ProductService (casos de uso), portas, comandos
 │   │   ├── infrastructure/
 │   │   │   ├── database/        # Base ORM, engine e sessões (URL via DATABASE_URL)
-│   │   │   ├── models/          # modelos SQLAlchemy (tabelas products e items)
+│   │   │   ├── models/          # modelo SQLAlchemy (tabela products)
 │   │   │   └── repositories/    # repositórios SQLAlchemy e em memória
 │   │   ├── api/                 # rotas, schemas Pydantic, CORS, tratamento de erros, dependências
 │   │   └── main.py              # create_app(): apenas compõe e inicializa a aplicação
@@ -31,21 +32,26 @@ INATEL-C216-L1/
 │   ├── Dockerfile
 │   ├── poetry.lock
 │   └── pyproject.toml
-├── frontend/                    # React + Vite + Tailwind, consumindo a API de itens
+├── frontend/                    # painel do NexoPDV: React + TypeScript + Vite + shadcn/ui
 │   ├── src/
-│   │   ├── components/          # ItemForm (formulário) e ItemList (listagem e estado vazio)
-│   │   ├── services/items.js    # cliente HTTP (fetch): listItems e createItem
-│   │   ├── App.jsx              # carrega os itens da API e guarda o estado da interface
-│   │   └── validation.js        # regra de validação (função pura)
+│   │   ├── app/                 # composição: providers, rotas e layout (barra superior)
+│   │   ├── components/          # ui/ (shadcn), marca e tema claro/escuro
+│   │   ├── features/products/   # seção de produtos: telas, API, consultas e regras do formulário
+│   │   ├── lib/                 # cliente HTTP, preço como texto e hooks utilitários
+│   │   └── index.css            # tokens do tema (cores, fonte, raios) do DESIGN.md
 │   ├── tests/
-│   │   ├── unit/                # Vitest: validação, cliente HTTP e componentes isolados
-│   │   ├── integration/         # Vitest: formulário + lista no App, com fetch mockado
+│   │   ├── unit/                # Vitest: regras puras (GTIN, EAN, preço, validação, URL)
+│   │   ├── integration/         # Vitest + Testing Library: telas com a API simulada (MSW)
+│   │   ├── msw/                 # catálogo falso que segue o contrato de /products
 │   │   └── e2e/                 # Playwright contra a stack completa
+│   ├── DESIGN.md                # identidade visual do painel
 │   ├── Dockerfile               # servidor de desenvolvimento do Vite
 │   ├── biome.json
+│   ├── components.json          # configuração do shadcn/ui
 │   ├── package.json
-│   ├── playwright.config.js
-│   └── vite.config.js           # Vite + Tailwind + Vitest
+│   ├── playwright.config.ts
+│   ├── tsconfig.json            # TypeScript estrito (app e configs)
+│   └── vite.config.ts           # Vite + Tailwind + Vitest
 ├── .env.example
 ├── compose.yaml
 ├── Makefile
@@ -166,30 +172,15 @@ banco; o CI usa um PostgreSQL.
 | Tipo | Verificação |
 |---|---|
 | Unitário (`tests/unit`) | Domínio, `ProductService`, leitura do `DATABASE_URL` e a regra de dependência entre camadas, sem banco e sem servidor |
-| Integração (`tests/integration`) | Todos os endpoints (`/`, `/products` e `/items/`) pelo `TestClient`; CORS (origem permitida e desconhecida); o contrato dos repositórios nas implementações SQLAlchemy e em memória; migrations (`upgrade`/`downgrade` e conferência com os modelos); persistência após reiniciar a aplicação |
-| Erro | `404` para rota ou produto inexistente, `405` para método não permitido, `409` para código de barras ou nome de item repetido, `422` para dados inválidos |
+| Integração (`tests/integration`) | Todos os endpoints (`/` e `/products`) pelo `TestClient`; CORS (origem desconhecida e métodos liberados); o contrato dos repositórios nas implementações SQLAlchemy e em memória; migrations (`upgrade`/`downgrade` e conferência com os modelos); persistência após reiniciar a aplicação |
+| Erro | `404` para rota ou produto inexistente, `405` para método não permitido, `409` para código de barras repetido, `422` para dados inválidos |
 
-## Endpoints de itens
-
-Usados pelo frontend. Os itens ficam no PostgreSQL (tabela `items`).
-
-| Método | Rota | Sucesso | Erros |
-|---|---|---|---|
-| `GET` | `/items/` | `200` com a lista de itens, em ordem de cadastro | — |
-| `POST` | `/items/` | `201` com o item criado (`id`, `name`, `description`) | `409` nome repetido, `422` corpo inválido |
-
-- `name`: obrigatório, de 1 a 100 caracteres (espaços nas pontas são removidos) e único:
-  repetir um nome devolve `409` com `{"detail": "Já existe um item com esse nome"}`.
-- `description`: opcional, até 500 caracteres; vazia vira `null`.
-- As rotas terminam em `/`: `/items` sem a barra responde `307` (redirecionamento), que o
-  navegador trata mal em requisições com CORS.
-
-### CORS
+## CORS
 
 O frontend (`localhost:5173`) e a API (`localhost:8000`) são origens diferentes, então a API
 autoriza explicitamente as origens da variável `CORS_ORIGINS` (lista separada por vírgulas;
-padrão `http://localhost:5173,http://127.0.0.1:5173`), só com `GET`, `POST` e o cabeçalho
-`Content-Type`. Nada de `"*"`. O CORS é uma regra do navegador: não substitui autenticação.
+padrão `http://localhost:5173,http://127.0.0.1:5173`), só com os métodos que o painel usa
+(`GET`, `POST`, `PUT` e `DELETE`) e o cabeçalho `Content-Type`. Nada de `"*"`. O CORS é uma regra do navegador: não substitui autenticação.
 
 ## Endpoints de produtos
 
@@ -230,7 +221,7 @@ No `PATCH`, todos os campos são opcionais, mas ao menos um precisa ser enviado.
 em `description` (remove a descrição).
 
 Parâmetros da listagem: `page` (≥ 1, padrão 1), `size` (de 1 a 100, padrão 20) e `name` (parte do
-nome, sem diferenciar maiúsculas e acentos). A resposta é `{"items": [...], "total": 25, "page": 1,
+nome, sem diferenciar maiúsculas e acentos), do mais recente para o mais antigo. A resposta é `{"items": [...], "total": 25, "page": 1,
 "size": 20}`.
 
 | Status | Quando | Corpo |
@@ -244,11 +235,11 @@ barras continua reservado. Nenhuma operação recusada altera o catálogo.
 
 ## Frontend
 
-Gerenciador de itens (nome obrigatório com até 100 caracteres e descrição opcional) em
-React, Vite e Tailwind CSS, consumindo a API com `fetch`. Ao abrir, a página carrega os
-itens com `GET /items/`; o cadastro faz `POST /items/`. Os itens ficam no PostgreSQL, então
-continuam lá depois de recarregar a página. Erros da API (ex.: nome repetido) aparecem no
-formulário, sem apagar o que foi digitado.
+Painel do NexoPDV em React, TypeScript (estrito), Vite, Tailwind CSS e shadcn/ui, com tema
+claro e escuro. A seção de produtos faz o CRUD completo do catálogo: lista paginada com busca
+por nome (busca e página ficam na URL), cadastro e edição num painel lateral com prévia da
+etiqueta de gôndola, e remoção com confirmação. Cada ação mostra carregando, sucesso e erro.
+Os dados vêm da API pelo TanStack Query; a identidade visual está em `frontend/DESIGN.md`.
 
 A URL da API vem de `VITE_API_URL` (padrão `http://localhost:8000`). Como o React roda no
 navegador, ela usa a porta publicada no host, e não o nome do serviço do Compose.
@@ -270,7 +261,7 @@ make frontend-dev   # http://localhost:5173
 | `make frontend-check` | Lint + verificação da formatação, sem alterar arquivos |
 | `make frontend-test` | Testes unitários e de integração (Vitest + React Testing Library) |
 | `make frontend-test-e2e` | Playwright contra uma stack já no ar (`E2E_BASE_URL`, padrão `http://localhost:5173`) |
-| `make frontend-build` | Build de produção |
+| `make frontend-build` | Verificação de tipos (TypeScript) e build de produção |
 | `make e2e` | E2E full-stack numa stack isolada (exige Docker) |
 | `make check-all` | Backend (Ruff + Pytest), frontend (Biome, Vitest, build) e `make e2e` |
 
@@ -278,11 +269,11 @@ make frontend-dev   # http://localhost:5173
 
 | Tipo | Ferramenta | O que verifica |
 |---|---|---|
-| Unitário | Vitest | `validation.js`, `services/items.js` e os componentes isolados, com `fetch` mockado |
-| Integração | Vitest + Testing Library | `App` + `ItemForm` + `ItemList` com `fetch` mockado: carregando, lista vazia, itens da API, erro de conexão, erro `409` e envio do `POST` |
-| E2E | Playwright | navegador real → React → FastAPI → PostgreSQL, sem mocks: cadastro, persistência após recarregar a página, nome repetido e validação |
+| Unitário | Vitest | Regras puras: GTIN, código de barras EAN, preço como texto, validação do formulário, parâmetros da URL e o cliente HTTP |
+| Integração | Vitest + Testing Library + MSW | As telas com a API simulada na rede: lista, busca e paginação, cadastro, edição e remoção, com os estados de carregando, vazio, erro, `404`, `409` e `422`, tema e teclado |
+| E2E | Playwright | navegador real → React → FastAPI → PostgreSQL, sem mocks: cadastrar, buscar, editar e remover, recarregando a página para provar a persistência |
 
-`make e2e` sobe uma stack **separada** da de desenvolvimento (projeto Compose `lab-e2e`,
+`make e2e` sobe uma stack **separada** da de desenvolvimento (projeto Compose `nexopdv-e2e`,
 frontend em `5174`, API em `8001`, banco em `5434` e volume próprio), roda o Playwright e
 derruba tudo com `down -v`, mesmo se os testes falharem. O banco de desenvolvimento nunca
 é tocado. Antes do primeiro E2E, instale o navegador: `npx playwright install chromium`
@@ -303,14 +294,14 @@ São as mesmas verificações disponíveis localmente (`make format`, `make lint
 
 O workflow `.github/workflows/ci-frontend.yml` roda em pull requests (e em pushes na
 `main`) que alterem `frontend/`, `backend/`, o `compose.yaml` ou o `Makefile`: `npm ci`,
-Biome (lint e formatação), Vitest, build e `make e2e` (stack completa no Docker Compose).
+Biome (lint e formatação), Vitest, build (com verificação de tipos) e `make e2e` (stack completa no Docker Compose).
 Se o E2E falhar, o relatório do Playwright fica disponível como artefato.
 
 ## Serviços
 
 | Serviço | Porta (host) | Descrição |
 |---|---|---|
-| `frontend` | 5173 | React servido pelo Vite (desenvolvimento) |
+| `frontend` | 5173 | Painel (React) servido pelo Vite (desenvolvimento) |
 | `api` | 8000 | Backend FastAPI |
 | `db` | 5432 | PostgreSQL 17 |
 
