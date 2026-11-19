@@ -2,7 +2,7 @@
  * Confirmação de remoção (FR-013). A remoção é inativação no back-end: o código de
  * barras continua reservado, e o lojista é avisado disso antes de confirmar.
  */
-import { TriangleAlertIcon } from "lucide-react";
+import { Trash2Icon, TriangleAlertIcon } from "lucide-react";
 import { useState } from "react";
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import {
@@ -12,6 +12,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
+  AlertDialogMedia,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
@@ -40,7 +41,10 @@ export function DeleteProductDialog({
   const focus = useReturnFocus();
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent {...focus}>
+      <AlertDialogContent
+        {...focus}
+        className="rounded-2xl p-6 shadow-lg data-[size=default]:sm:max-w-md"
+      >
         {product && (
           <ConfirmRemoval
             product={product}
@@ -88,7 +92,12 @@ function ConfirmRemoval({
   return (
     <>
       <AlertDialogHeader>
-        <AlertDialogTitle>Remover {product.name}?</AlertDialogTitle>
+        <AlertDialogMedia className="size-12 rounded-xl bg-destructive/10 text-destructive">
+          <Trash2Icon />
+        </AlertDialogMedia>
+        <AlertDialogTitle className="text-lg font-bold">
+          Remover {product.name}?
+        </AlertDialogTitle>
         <AlertDialogDescription>
           O produto sai do catálogo. O código de barras {product.barcode}{" "}
           continua reservado e não poderá ser usado em outro produto.
@@ -100,11 +109,14 @@ function ConfirmRemoval({
           <AlertTitle>{error}</AlertTitle>
         </Alert>
       )}
-      <AlertDialogFooter>
-        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+      <AlertDialogFooter className="-mx-6 -mb-6 rounded-b-2xl px-6">
+        <AlertDialogCancel className="h-10 rounded-full px-5">
+          Cancelar
+        </AlertDialogCancel>
         {/* Botão comum, não AlertDialogAction: o diálogo só fecha quando a remoção termina. */}
         <Button
           variant="destructive"
+          className="h-10 rounded-full px-5 font-semibold"
           disabled={remove.isPending}
           onClick={confirm}
         >

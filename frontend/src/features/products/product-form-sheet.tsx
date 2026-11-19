@@ -3,7 +3,7 @@
  * erros do servidor no campo certo (FR-011), preserva o que foi digitado e não
  * envia em dobro (FR-012).
  */
-import { TriangleAlertIcon } from "lucide-react";
+import { PackagePlusIcon, PencilIcon, TriangleAlertIcon } from "lucide-react";
 import { type FormEvent, useRef, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -64,15 +64,24 @@ export function ProductFormSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         {...focus}
-        className="gap-0 p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-md"
+        className="gap-0 border-0 p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-md [&>[data-slot=sheet-close]]:top-5 [&>[data-slot=sheet-close]]:right-5 [&>[data-slot=sheet-close]]:text-night-muted [&>[data-slot=sheet-close]]:hover:bg-white/10 [&>[data-slot=sheet-close]]:hover:text-night-foreground"
       >
-        <SheetHeader className="border-b px-6 py-4">
-          <SheetTitle className="type-page-title text-xl">
-            {product ? "Editar produto" : "Novo produto"}
-          </SheetTitle>
-          <SheetDescription>
-            Os dados aparecem assim na lista e na etiqueta.
-          </SheetDescription>
+        <SheetHeader className="relative isolate flex-row items-center gap-3 overflow-hidden bg-night-glow px-6 py-5">
+          <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-white/10 text-price-tag ring-1 ring-white/15">
+            {product ? (
+              <PencilIcon className="size-5" aria-hidden="true" />
+            ) : (
+              <PackagePlusIcon className="size-5" aria-hidden="true" />
+            )}
+          </span>
+          <div className="flex flex-col gap-0.5">
+            <SheetTitle className="text-xl font-extrabold tracking-tight text-night-foreground">
+              {product ? "Editar produto" : "Novo produto"}
+            </SheetTitle>
+            <SheetDescription className="text-night-muted">
+              Os dados aparecem assim na lista e na etiqueta.
+            </SheetDescription>
+          </div>
         </SheetHeader>
         {/* Montado só com o painel aberto: cada abertura começa com o formulário limpo. */}
         <ProductForm
@@ -282,11 +291,20 @@ function ProductForm({
         )}
       </div>
 
-      <SheetFooter className="flex-row justify-end gap-2 border-t px-6 py-4">
-        <Button type="button" variant="outline" onClick={onCancel}>
+      <SheetFooter className="flex-row justify-end gap-2 border-t bg-muted/40 px-6 py-4">
+        <Button
+          type="button"
+          variant="outline"
+          className="h-10 rounded-full px-5"
+          onClick={onCancel}
+        >
           Cancelar
         </Button>
-        <Button type="submit" disabled={isSaving}>
+        <Button
+          type="submit"
+          disabled={isSaving}
+          className="h-10 rounded-full px-5 font-semibold shadow-glow-brand"
+        >
           {isSaving && <Spinner data-icon="inline-start" />}
           {product ? "Salvar alterações" : "Cadastrar produto"}
         </Button>
