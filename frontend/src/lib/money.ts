@@ -58,6 +58,36 @@ export function parsePriceInput(text: string): PriceInputResult {
   return { ok: true, value: `${integer}.${cents}` };
 }
 
+/** "49.90" → 4990. Centavos inteiros: somar e comparar sem erro de arredondamento. */
+function toCents(price: string): number {
+  const { integer, cents } = splitPrice(price);
+  return Number(integer.replaceAll(".", "")) * 100 + Number(cents);
+}
+
+/** 4990 → "49.90". */
+function fromCents(cents: number): string {
+  return `${Math.floor(cents / 100)}.${String(cents % 100).padStart(2, "0")}`;
+}
+
+/** Média dos preços, arredondando meio centavo para cima; `null` sem preços. */
+export function averagePrice(prices: string[]): string | null {
+  if (prices.length === 0) return null;
+  const total = prices.reduce((sum, price) => sum + toCents(price), 0);
+  return fromCents(Math.round(total / prices.length));
+}
+
+/** Menor e maior preço; `null` sem preços. */
+export function priceRange(
+  prices: string[],
+): { min: string; max: string } | null {
+  if (prices.length === 0) return null;
+  const cents = prices.map(toCents);
+  return {
+    min: fromCents(Math.min(...cents)),
+    max: fromCents(Math.max(...cents)),
+  };
+}
+
 /** Preço da API no campo do formulário de edição: "49.90" → "49,90". */
 export function priceForInput(price: string): string {
   return price.replace(".", ",");
