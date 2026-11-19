@@ -31,6 +31,14 @@ export function useProductsPage(search: string, page: number) {
   });
 }
 
+/**
+ * Total do catálogo, sem busca: é a mesma consulta da primeira página da lista, então
+ * o menu e os indicadores reaproveitam o cache em vez de pedir de novo.
+ */
+export function useCatalogFirstPage() {
+  return useProductsPage("", 1);
+}
+
 /** Cadastro (FR-007): sem repetição automática; a lista é recarregada no sucesso (FR-017). */
 export function useCreateProduct() {
   const queryClient = useQueryClient();

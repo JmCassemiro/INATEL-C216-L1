@@ -9,7 +9,11 @@ export const routes: RouteObject[] = [
     element: <AppLayout />,
     children: [
       { index: true, element: <Navigate to="/products" replace /> },
-      { path: "products", element: <ProductsPage /> },
+      {
+        path: "products",
+        element: <ProductsPage />,
+        handle: { title: "Produtos" },
+      },
       { path: "*", element: <Navigate to="/products" replace /> },
     ],
   },
