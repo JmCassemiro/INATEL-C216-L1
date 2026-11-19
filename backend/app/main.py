@@ -6,7 +6,7 @@ from sqlalchemy import Engine
 
 from app.api.cors import add_cors
 from app.api.error_handlers import register_error_handlers
-from app.api.routes import home, items, products
+from app.api.routes import home, products
 from app.infrastructure.database.session import (
     create_database_engine,
     create_session_factory,
@@ -32,7 +32,6 @@ def create_app(engine: Engine | None = None) -> FastAPI:
     app.state.session_factory = create_session_factory(engine)
     app.include_router(home.router)
     app.include_router(products.router)
-    app.include_router(items.router)
     add_cors(app)
     register_error_handlers(app)
     return app

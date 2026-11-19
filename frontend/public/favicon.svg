@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <title>NexoPDV</title>
+  <rect width="32" height="32" rx="7" fill="#2B39A8"/>
+  <g fill="#FFFFFF">
+    <rect x="8" y="8" width="1.33" height="16"/>
+    <rect x="10.67" y="8" width="2.67" height="16"/>
+    <rect x="14.67" y="8" width="1.33" height="16"/>
+    <rect x="17.33" y="8" width="4" height="16"/>
+    <rect x="22.67" y="8" width="1.33" height="16"/>
+  </g>
+</svg>

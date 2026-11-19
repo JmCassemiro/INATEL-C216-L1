@@ -1,4 +1,5 @@
-"""CORS: só as origens configuradas podem chamar a API pelo navegador."""
+"""CORS: só as origens configuradas podem chamar a API pelo navegador, e só com os
+métodos que o painel usa (spec 007, RP-003)."""
 
 import pytest
 from fastapi.testclient import TestClient
@@ -7,15 +8,16 @@ from app.api.cors import cors_origins
 from app.main import create_app
 
 FRONTEND = "http://localhost:5173"
+PRODUCT_PATH = "/products/0190f2a4-0000-7000-8000-000000000000"
 
 
-def preflight(client, origin: str):
-    """Requisição OPTIONS que o navegador envia antes de um POST com JSON."""
+def preflight(client, origin: str, method: str = "POST", path: str = "/products"):
+    """Requisição OPTIONS que o navegador envia antes de um pedido com JSON."""
     return client.options(
-        "/items/",
+        path,
         headers={
             "Origin": origin,
-            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Method": method,
             "Access-Control-Request-Headers": "Content-Type",
         },
     )
@@ -42,8 +44,25 @@ def test_preflight_from_allowed_origin_is_authorized(client):
     assert "POST" in response.headers["access-control-allow-methods"]
 
 
+@pytest.mark.parametrize("method", ["PUT", "DELETE"])
+def test_preflight_for_edit_and_remove_is_authorized(client, method):
+    """RP-003 (spec 007): o painel edita com PUT e remove com DELETE."""
+    response = preflight(client, FRONTEND, method=method, path=PRODUCT_PATH)
+
+    assert response.status_code == 200
+    assert method in response.headers["access-control-allow-methods"]
+
+
+def test_preflight_for_patch_is_refused(client):
+    """RP-003 (spec 007): PATCH existe na API, mas o painel não usa; o navegador
+    não é autorizado a chamá-lo."""
+    response = preflight(client, FRONTEND, method="PATCH", path=PRODUCT_PATH)
+
+    assert response.status_code == 400
+
+
 def test_response_to_allowed_origin_carries_the_cors_header(client):
-    response = client.get("/items/", headers={"Origin": FRONTEND})
+    response = client.get("/products", headers={"Origin": FRONTEND})
 
     assert response.status_code == 200
     assert response.headers["access-control-allow-origin"] == FRONTEND
@@ -53,7 +72,7 @@ def test_response_to_allowed_origin_carries_the_cors_header(client):
 def test_unknown_origin_is_not_authorized(client, origin):
     """Origem desconhecida: o preflight é recusado e a resposta não libera a leitura."""
     assert preflight(client, origin).status_code == 400
-    response = client.get("/items/", headers={"Origin": origin})
+    response = client.get("/products", headers={"Origin": origin})
     assert "access-control-allow-origin" not in response.headers
 
 

@@ -137,18 +137,18 @@ def catalog(service) -> list[Product]:
 
 
 def test_list_returns_page_with_items_and_metadata(service, catalog):
-    """FR-009: a página traz itens, total, número e tamanho."""
+    """FR-009: a página traz itens (mais recentes primeiro), total, número e tamanho."""
     page = service.list(page=1, size=10, name=None)
 
-    assert page == Page(items=catalog[:10], total=25, page=1, size=10)
+    assert page == Page(items=catalog[::-1][:10], total=25, page=1, size=10)
 
 
 def test_walking_all_pages_returns_each_product_once_in_order(service, catalog):
-    """SC-005: percorrer as páginas devolve cada produto uma vez, em ordem."""
+    """SC-005: percorrer as páginas devolve cada produto uma vez, do mais recente."""
     pages = [service.list(page=number, size=10, name=None) for number in (1, 2, 3)]
 
     assert [len(page.items) for page in pages] == [10, 10, 5]
-    assert [item for page in pages for item in page.items] == catalog
+    assert [item for page in pages for item in page.items] == catalog[::-1]
 
 
 def test_page_past_the_last_is_empty_with_total(service, catalog):
@@ -164,8 +164,8 @@ def test_list_filters_by_name(service, catalog):
     page = service.list(page=1, size=10, name="produto 2")
 
     assert [item.name for item in page.items] == [
+        *(f"Produto {number}" for number in range(24, 19, -1)),
         "Produto 2",
-        *(f"Produto {number}" for number in range(20, 25)),
     ]
     assert page.total == 6
 

@@ -56,9 +56,11 @@ class InMemoryProductRepository:
     ) -> tuple[builtins.list[Product], int]:
         search = searchable(name or "")
         with self._lock:
+            # O dicionário guarda a ordem de inserção (e a atualização mantém a
+            # posição); invertido, o produto cadastrado por último vem primeiro.
             matches = [
                 product
-                for product in self._products.values()
+                for product in reversed(self._products.values())
                 if product.is_active and search in searchable(product.name)
             ]
         return matches[offset : offset + limit], len(matches)

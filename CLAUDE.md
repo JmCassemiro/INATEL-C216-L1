@@ -16,11 +16,18 @@ Rodar a partir da raiz do repositório:
 - `make test` — roda os testes (pytest)
 - `make lint` — verifica o código (`ruff check`)
 - `make format` — formata o código (`ruff format`); o CI falha se o código não estiver formatado
-- `make up` / `make down` — sobe/derruba a API e o PostgreSQL (Docker Compose)
+- `make up` / `make down` — sobe/derruba a stack (painel, API e PostgreSQL) no Docker Compose
 - `make db-upgrade` / `make db-migration msg="..."` — aplica/gera migrations do Alembic
   (`DATABASE_URL` montado pelo `Makefile`, apontando para o banco do Compose)
+- `make frontend-install` / `make frontend-dev` — instala / sobe o painel fora do Docker (Vite)
+- `make frontend-check` — Biome (lint e formatação, sem alterar arquivos); `make frontend-format` formata
+- `make frontend-test` — Vitest + Testing Library (API simulada com MSW)
+- `make frontend-build` — verificação de tipos (`tsc -b`) e build
+- `make e2e` — Playwright contra uma stack isolada do Compose (`nexopdv-e2e`); exige Docker
+- `make check-all` — tudo acima, back-end e front-end
 
-Uma mudança só está pronta com `make test` e `make lint` passando e o código formatado.
+Uma mudança só está pronta com `make test` e `make lint` passando e o código formatado; no
+front-end, com `make frontend-check`, `make frontend-test` e `make frontend-build` verdes.
 
 ## Regras
 
@@ -53,6 +60,12 @@ Uma mudança só está pronta com `make test` e `make lint` passando e o código
   `main.py` só tem `create_app()`, que compõe a aplicação.
 - `backend/tests/` — `unit/` (por camada, mais a regra de dependência) e `integration/`
   (`TestClient`)
+- `frontend/` — painel em React + TypeScript estrito + Vite + Tailwind + shadcn/ui.
+  `src/app/` (providers, rotas, layout), `src/components/` (`ui/` gerado pelo shadcn, marca,
+  tema), `src/lib/` (cliente HTTP, preço como texto, hooks) e `src/features/<seção>/` (telas,
+  API, consultas do TanStack Query e regras de cada seção). Testes em `tests/unit`,
+  `tests/integration` (MSW em `tests/msw`) e `tests/e2e`. Identidade visual em
+  `frontend/DESIGN.md`: estilos só por tokens do `src/index.css`.
 - `docs/product/visao.md` — documento de visão do NexoPDV
 - `specs/` — spec, plano e tarefas de cada feature
 - `.specify/` — constituição, roadmap, templates e scripts do Spec Kit

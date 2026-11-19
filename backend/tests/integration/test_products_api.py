@@ -203,12 +203,12 @@ def catalog(client) -> list[dict]:
 
 
 def test_list_uses_default_page_and_size(client, catalog):
-    """FR-009, RP-002: sem parâmetros, page=1 e size=20."""
+    """FR-009, RP-002: sem parâmetros, page=1 e size=20, do mais recente primeiro."""
     response = client.get("/products")
 
     assert response.status_code == 200
     assert response.json() == {
-        "items": catalog[:20],
+        "items": catalog[::-1][:20],
         "total": 25,
         "page": 1,
         "size": 20,
@@ -233,7 +233,7 @@ def test_walking_all_pages_returns_each_product_once(client, catalog):
         ]
     ]
 
-    assert items == catalog
+    assert items == catalog[::-1]
 
 
 def test_list_filters_by_name_without_accents(client):
@@ -244,7 +244,7 @@ def test_list_filters_by_name_without_accents(client):
 
     body = client.get("/products", params={"name": "calca"}).json()
 
-    assert body["items"] == [jeans, sweatpants]
+    assert body["items"] == [sweatpants, jeans]
     assert body["total"] == 2
 
 
