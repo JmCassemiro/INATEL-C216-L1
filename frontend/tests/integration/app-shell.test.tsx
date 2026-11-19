@@ -10,22 +10,22 @@ describe("Layout do painel (FR-018)", () => {
     window.dispatchEvent(new Event("online"));
   });
 
-  it("redireciona / para /products", async () => {
-    const { router } = renderApp("/");
-
-    expect(
-      await screen.findByRole("heading", { level: 1, name: "Produtos" }),
-    ).toBeVisible();
-    expect(currentUrl(router)).toBe("/products");
-  });
-
-  it("redireciona uma rota desconhecida para /products", async () => {
+  it("redireciona uma rota desconhecida para a página de entrada", async () => {
     const { router } = renderApp("/nao-existe");
 
     expect(
-      await screen.findByRole("heading", { level: 1, name: "Produtos" }),
-    ).toBeVisible();
-    expect(currentUrl(router)).toBe("/products");
+      await screen.findAllByRole("link", { name: "Abrir o painel" }),
+    ).not.toHaveLength(0);
+    expect(currentUrl(router)).toBe("/");
+  });
+
+  it("a barra superior tem o link de volta para o site", async () => {
+    renderApp();
+
+    const banner = await screen.findByRole("banner");
+    expect(
+      within(banner).getByRole("link", { name: "Ver o site" }),
+    ).toHaveAttribute("href", "/");
   });
 
   it("mostra o menu lateral com a marca e as seções", async () => {

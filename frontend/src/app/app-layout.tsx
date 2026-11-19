@@ -1,6 +1,6 @@
-import { MenuIcon } from "lucide-react";
+import { GlobeIcon, MenuIcon } from "lucide-react";
 import { useState } from "react";
-import { Outlet, useMatches } from "react-router";
+import { Link, Outlet, useMatches } from "react-router";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
 import {
@@ -70,6 +70,12 @@ export function AppLayout() {
             )}
           </p>
           <div className="ml-auto flex items-center gap-1">
+            <Button variant="ghost" asChild className="text-muted-foreground">
+              <Link to="/">
+                <GlobeIcon data-icon="inline-start" />
+                Ver o site
+              </Link>
+            </Button>
             <ThemeToggle />
           </div>
         </header>

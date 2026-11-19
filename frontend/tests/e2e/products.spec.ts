@@ -31,8 +31,12 @@ test("RP-001, RP-005, SC-008: cadastrar, buscar, editar e remover pela interface
   const barcode = uniqueGtin13();
   const name = `Camiseta E2E ${barcode.slice(-6)}`;
 
-  // Abrir o painel: / leva a /products.
+  // Abrir o painel pela página de entrada.
   await page.goto("/");
+  await page
+    .getByRole("navigation", { name: "Site" })
+    .getByRole("link", { name: "Abrir o painel" })
+    .click();
   await expect(page).toHaveURL(/\/products$/);
   await expect(
     page.getByRole("heading", { level: 1, name: "Produtos" }),
