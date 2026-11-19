@@ -20,6 +20,8 @@ eggs/
 .eggs/
 lib/
 lib64/
+# ...mas a pasta de utilitários do frontend é código do projeto
+!frontend/src/lib/
 parts/
 sdist/
 var/
