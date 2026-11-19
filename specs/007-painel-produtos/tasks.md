@@ -48,7 +48,7 @@ comentários e documentação em **português**. Arquivos do front-end em kebab-
 
 **Purpose**: confirmar o ponto de partida.
 
-- [ ] T001 Confirmar a linha de base na branch `007-painel-produtos`: `make test`, `make lint`, `make frontend-check` e `make frontend-test` verdes antes de qualquer mudança; anotar o número de testes do back-end e do front-end
+- [X] T001 Confirmar a linha de base na branch `007-painel-produtos`: `make test`, `make lint`, `make frontend-check` e `make frontend-test` verdes antes de qualquer mudança; anotar o número de testes do back-end e do front-end
 
 ---
 
@@ -61,9 +61,9 @@ comentários e documentação em **português**. Arquivos do front-end em kebab-
 
 ### Back-end: listagem do mais recente para o mais antigo (FR-005, research D15)
 
-- [ ] T002 [P] Inverter as expectativas de ordem nos testes do back-end (RED): em `backend/tests/integration/test_product_repository_contract.py`, `test_list_returns_products_in_insertion_order_with_total` vira `test_list_returns_newest_products_first_with_total` (espera `list(reversed(clothes))`), e ajustar `test_list_slices_with_offset_and_limit`, `test_list_filters_by_name_ignoring_case_and_accents`, `test_list_filters_and_paginates_together`, `test_list_without_name_does_not_filter` e `test_update_replaces_product_and_keeps_its_position` para a ordem decrescente; em `backend/tests/integration/test_products_api.py`, as listagens (`test_list_uses_default_page_and_size`, `test_walking_all_pages_returns_each_product_once`, `test_list_filters_by_name_without_accents` com `[sweatpants, jeans]`); em `backend/tests/unit/application/test_product_service.py`, `test_walking_all_pages_returns_each_product_once_in_order` passa a esperar do mais novo para o mais antigo. Docstrings citam "FR-005 (spec 007)"
-- [ ] T003 Implementar a ordem decrescente (GREEN): `order_by(ProductModel.id.desc())` em `backend/app/infrastructure/repositories/sqlalchemy_product_repository.py`, atualizando o comentário (UUID v7 crescente → mais novo primeiro); `matches` invertido em `backend/app/infrastructure/repositories/in_memory_product_repository.py` (a atualização mantém a posição do dicionário); `make test` verde
-- [ ] T004 [P] Acrescentar nota sem apagar o texto: no FR-009 de `specs/002-produtos/spec.md` e na seção de listagem de `specs/002-produtos/contracts/products-api.md`, "Alterado pela spec 007 (2026-11-19): do mais recente para o mais antigo"
+- [X] T002 [P] Inverter as expectativas de ordem nos testes do back-end (RED): em `backend/tests/integration/test_product_repository_contract.py`, `test_list_returns_products_in_insertion_order_with_total` vira `test_list_returns_newest_products_first_with_total` (espera `list(reversed(clothes))`), e ajustar `test_list_slices_with_offset_and_limit`, `test_list_filters_by_name_ignoring_case_and_accents`, `test_list_filters_and_paginates_together`, `test_list_without_name_does_not_filter` e `test_update_replaces_product_and_keeps_its_position` para a ordem decrescente; em `backend/tests/integration/test_products_api.py`, as listagens (`test_list_uses_default_page_and_size`, `test_walking_all_pages_returns_each_product_once`, `test_list_filters_by_name_without_accents` com `[sweatpants, jeans]`); em `backend/tests/unit/application/test_product_service.py`, `test_walking_all_pages_returns_each_product_once_in_order` passa a esperar do mais novo para o mais antigo. Docstrings citam "FR-005 (spec 007)"
+- [X] T003 Implementar a ordem decrescente (GREEN): `order_by(ProductModel.id.desc())` em `backend/app/infrastructure/repositories/sqlalchemy_product_repository.py`, atualizando o comentário (UUID v7 crescente → mais novo primeiro); `matches` invertido em `backend/app/infrastructure/repositories/in_memory_product_repository.py` (a atualização mantém a posição do dicionário); `make test` verde
+- [X] T004 [P] Acrescentar nota sem apagar o texto: no FR-009 de `specs/002-produtos/spec.md` e na seção de listagem de `specs/002-produtos/contracts/products-api.md`, "Alterado pela spec 007 (2026-11-19): do mais recente para o mais antigo"
 
 ### Back-end: CORS com os métodos do painel (RP-003, research D9 e D17)
 

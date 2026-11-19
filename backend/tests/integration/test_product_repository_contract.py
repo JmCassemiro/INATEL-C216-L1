@@ -126,6 +126,11 @@ def test_concurrent_adds_with_same_barcode_store_only_one(repository_factory):
 # --- US2: listar ---------------------------------------------------------------
 
 
+def newest_first(products: list[Product]) -> list[Product]:
+    """Ordem da listagem (FR-005 da spec 007): o último cadastrado vem primeiro."""
+    return list(reversed(products))
+
+
 @pytest.fixture
 def clothes(repository) -> list[Product]:
     products = [
@@ -138,9 +143,9 @@ def clothes(repository) -> list[Product]:
     return products
 
 
-def test_list_returns_products_in_insertion_order_with_total(repository, clothes):
-    """FR-009: lista em ordem de cadastro, com o total."""
-    assert repository.list(0, 10, None) == (clothes, 3)
+def test_list_returns_newest_products_first_with_total(repository, clothes):
+    """FR-009 (002), FR-005 (007): do mais recente para o mais antigo, com o total."""
+    assert repository.list(0, 10, None) == (newest_first(clothes), 3)
 
 
 def test_list_slices_with_offset_and_limit(repository, clothes):
@@ -156,18 +161,18 @@ def test_list_offset_past_the_end_returns_empty_with_total(repository, clothes):
 @pytest.mark.parametrize("name", ["calca", "CALÇA", "Calç"])
 def test_list_filters_by_name_ignoring_case_and_accents(repository, clothes, name):
     """FR-010: busca por parte do nome, sem diferenciar maiúsculas e acentos."""
-    assert repository.list(0, 10, name) == ([clothes[0], clothes[2]], 2)
+    assert repository.list(0, 10, name) == ([clothes[2], clothes[0]], 2)
 
 
 def test_list_filters_and_paginates_together(repository, clothes):
     """FR-009, FR-010: o total é o da busca, e a página recorta o resultado."""
-    assert repository.list(1, 1, "calca") == ([clothes[2]], 2)
+    assert repository.list(1, 1, "calca") == ([clothes[0]], 2)
 
 
 @pytest.mark.parametrize("name", [None, ""])
 def test_list_without_name_does_not_filter(repository, clothes, name):
     """FR-010: sem nome, a listagem não é filtrada."""
-    assert repository.list(0, 10, name) == (clothes, 3)
+    assert repository.list(0, 10, name) == (newest_first(clothes), 3)
 
 
 # --- US3: atualizar --------------------------------------------------------------
@@ -184,13 +189,13 @@ def changed(product: Product, **overrides) -> Product:
 
 
 def test_update_replaces_product_and_keeps_its_position(repository, clothes):
-    """FR-012: a atualização substitui o registro e mantém a ordem de cadastro."""
+    """FR-012: a atualização substitui o registro e mantém a posição na lista."""
     new_version = changed(clothes[1], name="Camiseta Preta")
 
     repository.update(new_version)
 
     assert repository.get_by_id(new_version.id) == new_version
-    assert repository.list(0, 10, None) == ([clothes[0], new_version, clothes[2]], 3)
+    assert repository.list(0, 10, None) == ([clothes[2], new_version, clothes[0]], 3)
 
 
 def test_update_keeping_own_barcode_is_allowed(repository, clothes):
@@ -238,7 +243,7 @@ def test_removed_product_is_not_found(repository, clothes, removed):
     """FR-016: o produto removido some das consultas e da listagem."""
     assert repository.get_by_id(removed.id) is None
     assert repository.get_by_barcode(removed.barcode) is None
-    assert repository.list(0, 10, None) == ([clothes[1], clothes[2]], 2)
+    assert repository.list(0, 10, None) == ([clothes[2], clothes[1]], 2)
 
 
 def test_removed_products_barcode_stays_reserved(repository, removed):

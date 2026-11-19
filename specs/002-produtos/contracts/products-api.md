@@ -77,6 +77,9 @@ Toda resposta de erro deixa o catálogo inalterado (FR-017).
 | `size` | inteiro | 20 | `1 ≤ size ≤ 100` |
 | `name` | string | — | parte do nome, sem diferenciar maiúsculas e acentos *(extra)*; vazio = sem filtro |
 
+_Alterado pela spec 007 (2026-11-19): a listagem vem do mais recente para o mais antigo
+([mudanças da 007](../../007-painel-produtos/contracts/products-api-changes.md))._
+
 ### Observações
 
 - `GET /products/barcode/{barcode}` compara pela forma GTIN-14: buscar

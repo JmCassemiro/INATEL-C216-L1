@@ -64,11 +64,12 @@ class SqlAlchemyProductRepository:
         total = self._session.scalar(
             select(func.count()).select_from(ProductModel).where(*conditions)
         )
-        # O id é UUID v7, que cresce com o tempo: ordenar por ele é a ordem de cadastro.
+        # O id é UUID v7, que cresce com o tempo: em ordem decrescente, o produto
+        # cadastrado por último vem primeiro (spec 007, FR-005).
         models = self._session.scalars(
             select(ProductModel)
             .where(*conditions)
-            .order_by(ProductModel.id)
+            .order_by(ProductModel.id.desc())
             .offset(offset)
             .limit(limit)
         )

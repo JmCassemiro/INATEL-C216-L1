@@ -186,6 +186,8 @@ reservado.
 
 - **FR-009**: O sistema MUST listar os produtos em páginas, em ordem de cadastro, com tamanho de
   página padrão de 20 e máximo de 100 itens, informando o total de produtos que atendem ao filtro.
+  _Alterado pela spec 007 (2026-11-19): a ordem passou a ser do mais recente para o mais antigo
+  (`specs/007-painel-produtos/`, FR-005)._
 - **FR-010**: O sistema MUST permitir filtrar a listagem por parte do nome, sem diferenciar
   maiúsculas, minúsculas e acentos. *(Extra — fora do PDF.)*
 - **FR-011**: O sistema MUST recusar parâmetros de paginação inválidos (página ou tamanho menores
