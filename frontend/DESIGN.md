@@ -194,8 +194,11 @@ Os textos de vazio, busca sem resultado, erro e confirmação de remoção segue
   dados reais nos indicadores; "em breve" para o que ainda não existe; rótulo visível em todo
   campo; foco visível em tudo.
 - **Não faça:** número inventado no painel; link para tela que não existe; cor solta
-  (`bg-blue-500`) fora da lista de gradientes de `ProductAvatar`; `dark:` manual onde um token
-  resolve; fonte monoespaçada para dados.
+  (`bg-blue-500`) fora dos gradientes de `ProductAvatar` e dos cartões de recurso do site;
+  `dark:` manual onde um token resolve; fonte monoespaçada para dados.
+- **Exceção:** a ilustração do caixa no hero do site é um "print" do produto, sempre clara, e
+  usa a paleta fixa do Tailwind. Os números dela são de exemplo, e ela é uma imagem (`role="img"`
+  com descrição) para leitores de tela.
 
 ## Responsivo
 

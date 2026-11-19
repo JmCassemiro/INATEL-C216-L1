@@ -14,13 +14,15 @@ os elementos **pelo papel e pelo nome acessível** listados aqui, nunca por clas
 
 | Endereço | Conteúdo |
 |---|---|
-| `/` | redireciona para `/products` |
+| `/` | página de entrada do site (manchete `heading` nível 1, `navigation` "Site" e os links "Abrir o painel") |
 | `/products` | seção de produtos, primeira página, sem busca |
 | `/products?search=camis` | busca "camis", primeira página |
 | `/products?search=camis&page=2` | busca "camis", página 2 |
-| qualquer outra | redireciona para `/products` |
+| qualquer outra | redireciona para `/` |
 
-O título da aba é "Produtos | NexoPDV".
+O título da aba é "Produtos | NexoPDV" no painel.
+
+> Atualizado na reforma visual (depois da spec 007): página de entrada em `/` e menu lateral.
 
 ## Estrutura da página
 
@@ -38,7 +40,7 @@ O título da aba é "Produtos | NexoPDV".
 | Editar | `button` "Editar {nome do produto}" |
 | Remover | `button` "Remover {nome do produto}" |
 | Ações no celular (< 640 px) | `button` "Ações de {nome do produto}", que abre um `menu` com os `menuitem` "Editar" e "Remover" |
-| Paginação | `navigation` "Paginação", com `button` "Página anterior" e "Próxima página" e o texto "Página {p} de {n}" |
+| Paginação | `navigation` "Paginação", com `button` "Página anterior", "Próxima página" e "Página {k}" (a atual com `aria-current="page"`) e o texto "Página {p} de {n}" |
 
 ## Estados da lista
 
