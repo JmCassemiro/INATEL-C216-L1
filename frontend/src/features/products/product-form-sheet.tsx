@@ -1,5 +1,5 @@
 /**
- * Painel lateral de cadastro (FR-007). Valida antes de enviar (FR-009), mostra os
+ * Painel lateral de cadastro (FR-007) e edição (FR-008). Valida antes de enviar (FR-009), mostra os
  * erros do servidor no campo certo (FR-011), preserva o que foi digitado e não
  * envia em dobro (FR-012).
  */
@@ -31,9 +31,10 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { ApiError } from "@/lib/api-client";
+import { priceForInput } from "@/lib/money";
 import { useReturnFocus } from "@/lib/use-return-focus";
-import { useCreateProduct } from "./queries";
-import type { Product, ProductField } from "./types";
+import { useCreateProduct, useUpdateProduct } from "./queries";
+import type { Product, ProductField, ProductInput } from "./types";
 import {
   type ProductFormErrors,
   type ProductFormValues,
@@ -43,13 +44,19 @@ import {
 type ProductFormSheetProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** Produto em edição; `null` para cadastrar um novo. */
+  product: Product | null;
   onSaved: (product: Product) => void;
+  /** O produto editado não existe mais (removido em outra aba, FR-016). */
+  onNotFound: () => void;
 };
 
 export function ProductFormSheet({
   open,
   onOpenChange,
+  product,
   onSaved,
+  onNotFound,
 }: ProductFormSheetProps) {
   const focus = useReturnFocus();
   return (
@@ -60,14 +67,19 @@ export function ProductFormSheet({
       >
         <SheetHeader className="border-b px-6 py-4">
           <SheetTitle className="type-page-title text-xl">
-            Novo produto
+            {product ? "Editar produto" : "Novo produto"}
           </SheetTitle>
           <SheetDescription>
             Os dados aparecem assim na lista e na etiqueta.
           </SheetDescription>
         </SheetHeader>
         {/* Montado só com o painel aberto: cada abertura começa com o formulário limpo. */}
-        <ProductForm onSaved={onSaved} onCancel={() => onOpenChange(false)} />
+        <ProductForm
+          product={product}
+          onSaved={onSaved}
+          onNotFound={onNotFound}
+          onCancel={() => onOpenChange(false)}
+        />
       </SheetContent>
     </Sheet>
   );
@@ -81,24 +93,42 @@ const EMPTY: ProductFormValues = {
 };
 const FIELDS: ProductField[] = ["name", "description", "barcode", "price"];
 
+function valuesOf(product: Product | null): ProductFormValues {
+  if (!product) return EMPTY;
+  return {
+    name: product.name,
+    description: product.description ?? "",
+    barcode: product.barcode,
+    price: priceForInput(product.price),
+  };
+}
+
 const SAVE_ERRORS = {
   network: "Não foi possível salvar: sem conexão com o servidor.",
   unexpected: "Não foi possível salvar. Tente de novo.",
 };
 
 function ProductForm({
+  product,
   onSaved,
+  onNotFound,
   onCancel,
 }: {
+  product: Product | null;
   onSaved: (product: Product) => void;
+  onNotFound: () => void;
   onCancel: () => void;
 }) {
-  const [values, setValues] = useState<ProductFormValues>(EMPTY);
+  const [values, setValues] = useState<ProductFormValues>(() =>
+    valuesOf(product),
+  );
   const [errors, setErrors] = useState<ProductFormErrors>({});
   const [generalError, setGeneralError] = useState<string | null>(null);
   const submitted = useRef(false);
   const saving = useRef(false);
   const create = useCreateProduct();
+  const update = useUpdateProduct();
+  const isSaving = create.isPending || update.isPending;
 
   function change(field: ProductField, value: string) {
     const next = { ...values, [field]: value };
@@ -114,7 +144,9 @@ function ProductForm({
   }
 
   function showServerError(error: unknown) {
-    if (error instanceof ApiError && error.kind === "conflict") {
+    if (error instanceof ApiError && error.kind === "not-found") {
+      onNotFound();
+    } else if (error instanceof ApiError && error.kind === "conflict") {
       setErrors({ barcode: error.message });
     } else if (error instanceof ApiError && error.kind === "validation") {
       const fieldErrors = Object.fromEntries(
@@ -145,13 +177,16 @@ function ProductForm({
     }
     setErrors({});
     saving.current = true;
-    create.mutate(result.input, {
+    const callbacks = {
       onSuccess: onSaved,
       onError: showServerError,
       onSettled: () => {
         saving.current = false;
       },
-    });
+    };
+    const input: ProductInput = result.input;
+    if (product) update.mutate({ id: product.id, input }, callbacks);
+    else create.mutate(input, callbacks);
   }
 
   return (
@@ -245,9 +280,9 @@ function ProductForm({
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancelar
         </Button>
-        <Button type="submit" disabled={create.isPending}>
-          {create.isPending && <Spinner data-icon="inline-start" />}
-          Cadastrar produto
+        <Button type="submit" disabled={isSaving}>
+          {isSaving && <Spinner data-icon="inline-start" />}
+          {product ? "Salvar alterações" : "Cadastrar produto"}
         </Button>
       </SheetFooter>
     </form>

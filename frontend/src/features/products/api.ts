@@ -18,3 +18,10 @@ export function listProducts(params: {
 export function createProduct(input: ProductInput): Promise<Product> {
   return apiRequest<Product>("/products", { method: "POST", body: input });
 }
+
+export function updateProduct(
+  id: string,
+  input: ProductInput,
+): Promise<Product> {
+  return apiRequest<Product>(`/products/${id}`, { method: "PUT", body: input });
+}

@@ -17,7 +17,7 @@ function seedClothes() {
       barcode: "7891000315507",
       price: "49.90",
     },
-    { name: "Calça Jeans Azul 42", barcode: "7896543210985", price: "159.90" },
+    { name: "Calça Jeans Azul 42", barcode: "7896543210982", price: "159.90" },
     { name: "Meia Cano Curto", barcode: "7894900011517", price: "12.50" },
   );
 }
@@ -187,7 +187,7 @@ describe("Lista de produtos (US1)", () => {
   it("Edge Cases: a resposta atrasada de um termo antigo não substitui a do termo atual", async () => {
     catalog.seed(
       { name: "Camiseta Polo", barcode: "7891000315507" },
-      { name: "Calça Social", barcode: "7896543210985" },
+      { name: "Calça Social", barcode: "7896543210982" },
     );
     server.use(
       http.get(PRODUCTS_URL, async ({ request }) => {

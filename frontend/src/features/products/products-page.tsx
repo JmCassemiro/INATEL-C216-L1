@@ -75,8 +75,9 @@ export function ProductsPage() {
     setSearch("");
   }
 
-  // Formulário de cadastro e linha destacada depois de salvar (research D14).
+  // Formulário (cadastro ou edição) e linha destacada depois de salvar (research D14).
   const [formOpen, setFormOpen] = useState(false);
+  const [editing, setEditing] = useState<Product | null>(null);
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -86,15 +87,31 @@ export function ProductsPage() {
   }, [highlightedId]);
 
   function openCreate() {
+    setEditing(null);
     setFormOpen(true);
   }
 
-  function handleCreated(product: Product) {
+  function openEdit(product: Product) {
+    setEditing(product);
+    setFormOpen(true);
+  }
+
+  function handleSaved(product: Product) {
     setFormOpen(false);
-    toast.success("Produto cadastrado");
     setHighlightedId(product.id);
+    if (editing) {
+      toast.success("Alterações salvas");
+      return;
+    }
+    toast.success("Produto cadastrado");
     // O produto novo fica no topo da primeira página, sem busca (FR-005).
     if (search || page !== 1) clearSearch();
+  }
+
+  /** O produto sumiu (removido em outra aba): avisa; a lista já foi recarregada (FR-016). */
+  function handleNotFound() {
+    setFormOpen(false);
+    toast.warning("Este produto não existe mais. A lista foi atualizada.");
   }
 
   let content: React.ReactNode;
@@ -111,7 +128,11 @@ export function ProductsPage() {
   } else {
     content = (
       <>
-        <ProductsList products={data.items} highlightedId={highlightedId} />
+        <ProductsList
+          products={data.items}
+          highlightedId={highlightedId}
+          onEdit={openEdit}
+        />
         <ProductsPagination
           page={page}
           pageSize={PAGE_SIZE}
@@ -166,7 +187,9 @@ export function ProductsPage() {
       <ProductFormSheet
         open={formOpen}
         onOpenChange={setFormOpen}
-        onSaved={handleCreated}
+        product={editing}
+        onSaved={handleSaved}
+        onNotFound={handleNotFound}
       />
     </div>
   );

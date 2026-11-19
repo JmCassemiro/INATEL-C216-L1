@@ -176,12 +176,12 @@ recarregar.
 
 ### Tests for User Story 3 ⚠️
 
-- [ ] T043 [US3] Escrever `frontend/tests/integration/product-edit.test.tsx` (RED): "Editar Camiseta Básica Branca M" abre o `dialog` "Editar produto" com os campos preenchidos (preço como "49,90") (US3-1); mudar o preço para "54,90" e "Salvar alterações" envia `PUT /products/{id}` com o cadastro completo, mostra o toast "Alterações salvas", fecha e a linha mostra "R$ 54,90" com `data-highlighted`, na mesma posição (US3-2, FR-005, FR-017); apagar a descrição envia `description: null` (US3-3); código de outro produto (409) mostra o erro no campo (US3-4); 404 fecha o painel, mostra o toast "Este produto não existe mais. A lista foi atualizada." e a lista é recarregada sem ele (US3-5, FR-016); "Cancelar" e `Esc` não fazem requisição (US3-6)
+- [X] T043 [US3] Escrever `frontend/tests/integration/product-edit.test.tsx` (RED): "Editar Camiseta Básica Branca M" abre o `dialog` "Editar produto" com os campos preenchidos (preço como "49,90") (US3-1); mudar o preço para "54,90" e "Salvar alterações" envia `PUT /products/{id}` com o cadastro completo, mostra o toast "Alterações salvas", fecha e a linha mostra "R$ 54,90" com `data-highlighted`, na mesma posição (US3-2, FR-005, FR-017); apagar a descrição envia `description: null` (US3-3); código de outro produto (409) mostra o erro no campo (US3-4); 404 fecha o painel, mostra o toast "Este produto não existe mais. A lista foi atualizada." e a lista é recarregada sem ele (US3-5, FR-016); "Cancelar" e `Esc` não fazem requisição (US3-6)
 
 ### Implementation for User Story 3
 
-- [ ] T044 [US3] Implementar `updateProduct(id, input)` em `frontend/src/features/products/api.ts` e `useUpdateProduct` em `frontend/src/features/products/queries.ts` (sem retry; invalida `["products"]` no sucesso e no 404)
-- [ ] T045 [US3] Estender `frontend/src/features/products/product-form-sheet.tsx` com o modo edição (`product` opcional: título "Editar produto", valores iniciais a partir do `Product`, com `price` "49.90" exibido como "49,90", botão "Salvar alterações") e ligar em `products-page.tsx`/`products-list.tsx` o "Editar {nome}" de cada linha, o toast "Alterações salvas", o destaque da linha e o tratamento do `not-found` (FR-016); T043 verde
+- [X] T044 [US3] Implementar `updateProduct(id, input)` em `frontend/src/features/products/api.ts` e `useUpdateProduct` em `frontend/src/features/products/queries.ts` (sem retry; invalida `["products"]` no sucesso e no 404)
+- [X] T045 [US3] Estender `frontend/src/features/products/product-form-sheet.tsx` com o modo edição (`product` opcional: título "Editar produto", valores iniciais a partir do `Product`, com `price` "49.90" exibido como "49,90", botão "Salvar alterações") e ligar em `products-page.tsx`/`products-list.tsx` o "Editar {nome}" de cada linha, o toast "Alterações salvas", o destaque da linha e o tratamento do `not-found` (FR-016); T043 verde
 
 **Checkpoint**: US1–US3 funcionam; commit `feat(painel): edita produtos pelo painel`.
 

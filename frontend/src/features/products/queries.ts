@@ -9,7 +9,8 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { createProduct, listProducts } from "./api";
+import { createProduct, listProducts, updateProduct } from "./api";
+import type { ProductInput } from "./types";
 
 export const PAGE_SIZE = 10;
 
@@ -31,5 +32,18 @@ export function useCreateProduct() {
   return useMutation({
     mutationFn: createProduct,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: PRODUCTS_KEY }),
+  });
+}
+
+/**
+ * Edição (FR-008) com PUT do cadastro completo (research D9). A lista é recarregada
+ * no fim, com sucesso ou não: se o produto sumiu (404), ela já sai sem ele (FR-016).
+ */
+export function useUpdateProduct() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, input }: { id: string; input: ProductInput }) =>
+      updateProduct(id, input),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: PRODUCTS_KEY }),
   });
 }

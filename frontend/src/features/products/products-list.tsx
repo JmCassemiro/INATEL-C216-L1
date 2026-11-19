@@ -3,7 +3,13 @@
  * com a coluna de etiquetas de preço à direita (a "borda da prateleira"); abaixo
  * de 640 px vira uma lista empilhada (FR-020).
  */
-import { PackageOpenIcon, SearchXIcon, TriangleAlertIcon } from "lucide-react";
+import {
+  EllipsisVerticalIcon,
+  PackageOpenIcon,
+  PencilIcon,
+  SearchXIcon,
+  TriangleAlertIcon,
+} from "lucide-react";
 import {
   Alert,
   AlertAction,
@@ -11,6 +17,13 @@ import {
   AlertTitle,
 } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Empty,
   EmptyContent,
@@ -28,6 +41,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useIsMobile } from "@/lib/use-is-mobile";
 import { PriceTag } from "./price-tag";
 import type { Product } from "./types";
@@ -36,29 +54,29 @@ type ProductsListProps = {
   products: Product[];
   /** Produto que acabou de mudar: a linha recebe o destaque amarelo (research D14). */
   highlightedId?: string | null;
+  onEdit: (product: Product) => void;
 };
 
 function highlight(product: Product, highlightedId?: string | null) {
   return product.id === highlightedId ? "true" : undefined;
 }
 
-export function ProductsList({ products, highlightedId }: ProductsListProps) {
+export function ProductsList(props: ProductsListProps) {
   const isMobile = useIsMobile();
-  return isMobile ? (
-    <ProductsStack products={products} highlightedId={highlightedId} />
-  ) : (
-    <ProductsTable products={products} highlightedId={highlightedId} />
-  );
+  return isMobile ? <ProductsStack {...props} /> : <ProductsTable {...props} />;
 }
 
-function ProductsTable({ products, highlightedId }: ProductsListProps) {
+function ProductsTable({ products, highlightedId, onEdit }: ProductsListProps) {
   return (
     <Table aria-label="Produtos" className="table-fixed">
       <TableHeader>
         <TableRow className="hover:bg-transparent">
           <TableHead className="pl-4">Produto</TableHead>
           <TableHead className="w-40">Código de barras</TableHead>
-          <TableHead className="w-36 pr-4 text-right">Preço</TableHead>
+          <TableHead className="w-36 text-right">Preço</TableHead>
+          <TableHead className="w-24 pr-4">
+            <span className="sr-only">Ações</span>
+          </TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -85,8 +103,19 @@ function ProductsTable({ products, highlightedId }: ProductsListProps) {
             <TableCell className="tabular-nums tracking-[0.02em]">
               {product.barcode}
             </TableCell>
-            <TableCell className="pr-4 text-right">
+            <TableCell className="text-right">
               <PriceTag price={product.price} />
+            </TableCell>
+            <TableCell className="pr-4">
+              <div className="flex justify-end gap-1">
+                <IconAction
+                  label={`Editar ${product.name}`}
+                  tooltip="Editar"
+                  onClick={() => onEdit(product)}
+                >
+                  <PencilIcon />
+                </IconAction>
+              </div>
             </TableCell>
           </TableRow>
         ))}
@@ -95,7 +124,35 @@ function ProductsTable({ products, highlightedId }: ProductsListProps) {
   );
 }
 
-function ProductsStack({ products, highlightedId }: ProductsListProps) {
+function IconAction({
+  label,
+  tooltip,
+  onClick,
+  children,
+}: {
+  label: string;
+  tooltip: string;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label={label}
+          onClick={onClick}
+        >
+          {children}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>{tooltip}</TooltipContent>
+    </Tooltip>
+  );
+}
+
+function ProductsStack({ products, highlightedId, onEdit }: ProductsListProps) {
   return (
     <ul aria-label="Produtos" className="divide-y">
       {products.map((product) => (
@@ -104,13 +161,35 @@ function ProductsStack({ products, highlightedId }: ProductsListProps) {
           data-highlighted={highlight(product, highlightedId)}
           className="flex flex-col gap-2 px-4 py-3"
         >
-          <div className="flex min-w-0 flex-col gap-0.5">
-            <span className="font-medium">{product.name}</span>
-            {product.description && (
-              <span className="type-meta truncate text-muted-foreground">
-                {product.description}
-              </span>
-            )}
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex min-w-0 flex-col gap-0.5">
+              <span className="font-medium">{product.name}</span>
+              {product.description && (
+                <span className="type-meta truncate text-muted-foreground">
+                  {product.description}
+                </span>
+              )}
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="-mt-1 -mr-2 shrink-0"
+                  aria-label={`Ações de ${product.name}`}
+                >
+                  <EllipsisVerticalIcon />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuGroup>
+                  <DropdownMenuItem onSelect={() => onEdit(product)}>
+                    <PencilIcon />
+                    Editar
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
           <div className="flex items-center justify-between gap-3">
             <span className="type-meta tabular-nums tracking-[0.02em] text-muted-foreground">
