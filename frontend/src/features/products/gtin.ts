@@ -24,6 +24,18 @@ export function gtinCheckDigit(body: string): number {
   return (10 - (sum % 10)) % 10;
 }
 
+const KINDS: Record<number, string> = {
+  8: "EAN-8",
+  12: "UPC-A",
+  13: "EAN-13",
+  14: "GTIN-14",
+};
+
+/** Nome do padrão pelo número de dígitos ("EAN-13"); o código já veio validado da API. */
+export function gtinKind(code: string): string {
+  return KINDS[code.length] ?? "GTIN";
+}
+
 export function isValidGtin(code: string): boolean {
   return gtinError(code) === null;
 }

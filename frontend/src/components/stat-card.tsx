@@ -38,7 +38,7 @@ export function StatCard({
       role="group"
       aria-label={label}
       className={cn(
-        "flex flex-col gap-3 rounded-2xl bg-card p-5 shadow-sm ring-1 ring-border transition-transform duration-200 hover:-translate-y-0.5",
+        "flex flex-col gap-3 rounded-2xl bg-card p-4 shadow-sm sm:p-5 ring-1 ring-border transition-transform duration-200 hover:-translate-y-0.5",
         className,
       )}
     >

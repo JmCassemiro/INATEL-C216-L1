@@ -35,7 +35,7 @@ export function CatalogOverview() {
   return (
     <section
       aria-label="Indicadores do catálogo"
-      className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+      className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4"
     >
       <StatCard
         label="Produtos no catálogo"
