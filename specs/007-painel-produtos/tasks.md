@@ -67,8 +67,8 @@ comentários e documentação em **português**. Arquivos do front-end em kebab-
 
 ### Back-end: CORS com os métodos do painel (RP-003, research D9 e D17)
 
-- [ ] T005 Reescrever `backend/tests/integration/test_cors.py` sobre `/products` (RED): o `preflight` recebe o método e o caminho; preflight `PUT` e `DELETE` em `/products/{um uuid qualquer}` vindos de `http://localhost:5173` respondem 200 com o método em `access-control-allow-methods`; preflight `PATCH` responde 400; `GET /products` com origem permitida traz `access-control-allow-origin`; origem desconhecida continua recusada; os testes de `cors_origins()` continuam iguais
-- [ ] T006 Implementar `allow_methods=["GET", "POST", "PUT", "DELETE"]` em `backend/app/api/cors.py`, com o docstring explicando que são exatamente os métodos usados pelo painel (PATCH fica fora); `make test` verde
+- [X] T005 Reescrever `backend/tests/integration/test_cors.py` sobre `/products` (RED): o `preflight` recebe o método e o caminho; preflight `PUT` e `DELETE` em `/products/{um uuid qualquer}` vindos de `http://localhost:5173` respondem 200 com o método em `access-control-allow-methods`; preflight `PATCH` responde 400; `GET /products` com origem permitida traz `access-control-allow-origin`; origem desconhecida continua recusada; os testes de `cors_origins()` continuam iguais
+- [X] T006 Implementar `allow_methods=["GET", "POST", "PUT", "DELETE"]` em `backend/app/api/cors.py`, com o docstring explicando que são exatamente os métodos usados pelo painel (PATCH fica fora); `make test` verde
 
 ### Back-end: remoção do laboratório de itens (FR-023, FR-024, RP-008, research D16)
 
