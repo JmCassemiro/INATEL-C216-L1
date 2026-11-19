@@ -37,11 +37,3 @@ class ProductChanges:
 
     def is_empty(self) -> bool:
         return all(getattr(self, field.name) is UNSET for field in fields(self))
-
-
-@dataclass(frozen=True, slots=True)
-class ItemData:
-    """Cadastro de um item."""
-
-    name: str
-    description: str | None

@@ -51,6 +51,15 @@ def test_created_app_serves_home(engine):
     assert response.status_code == 200
 
 
+@pytest.mark.parametrize("method", ["GET", "POST"])
+def test_lab_items_routes_no_longer_exist(engine, method):
+    """FR-023, RP-008 (spec 007): o recurso de itens do laboratório saiu da API."""
+    with TestClient(create_app(engine)) as client:
+        response = client.request(method, "/items/", json={"name": "caneta"})
+
+    assert response.status_code == 404
+
+
 def test_not_found_error_becomes_404(client_with_failing_routes):
     """D8, FR-017: "não encontrado" vira 404 com a mensagem do domínio."""
     response = client_with_failing_routes.get("/test/not-found")
