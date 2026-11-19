@@ -1,25 +1,32 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version change: 1.0.0 → 1.1.0
-Bump rationale: MINOR — nova decisão (C-11, Clean Architecture) e mudança material de escopo da
-spec 002 (recorte da Prática 4); inclui também a transição 002 planned → specced.
+Version change: 1.1.0 → 1.2.0
+Bump rationale: MINOR — nova decisão (C-12, recorte e ordem do Projeto Final) e mudança material
+de escopo da spec 007 (recorte do painel de produtos); inclui também transições de status e a
+confirmação da C-03.
 
 Changes this revision:
-  - Decision recorded: C-11 — Clean Architecture obrigatória no back-end (constituição v2.0.0,
-    Princípios IV e V)
-  - Status: 002 planned → specced (specs/002-produtos/)
-  - Scope changed on 002: Prática 4 cobre só o CRUD de produtos (em memória); estoque, alertas,
-    restrição de preço por papel e persistência ficam pendentes dentro da 002
-  - Decisões da spec 002 registradas: código de barras GTIN com dígito verificador; remoção por
-    inativação com código reservado
-  - Open question Q6 parcialmente resolvida: Prática 4 → spec 002 (recorte CRUD)
+  - Decision confirmed: C-03 — stack de front-end confirmada e registrada na constituição v2.1.0
+    (Princípio III)
+  - Decision recorded: C-12 — Projeto Final (prazo 2026-11-28): 007 painel de produtos →
+    estoque → venda mínima (esta só se o estoque terminar até 2026-11-24)
+  - Status: 002 specced → in-progress (CRUD implementado e persistido em PostgreSQL; estoque e
+    preço por papel pendentes)
+  - Status: 007 planned → specced (specs/007-painel-produtos/)
+  - Scope changed on 007: o Projeto Final cobre só o painel de produtos, que substitui o
+    laboratório de itens (Práticas 6 e 7); as demais telas ficam pendentes dentro da 007
+  - Decisão da spec 007 registrada: a listagem da API passa a ser do mais recente para o mais
+    antigo (altera o FR-009 da 002)
+  - Notes on 004: recorte possível de venda mínima no Projeto Final (C-12)
+  - Open question Q6 resolvida: Práticas encerradas na 7; Projeto Final → C-12
 
-Specs affected: 002
-Open questions added/resolved: Q6 parcialmente resolvida
+Specs affected: 002, 004, 007
+Open questions added/resolved: Q6 resolvida
 
-Notes: emenda feita logo após a constituição 2.0.0 e o /speckit-specify da 002. Histórico da
-1.0.0 (2026-10-02): criação inicial — visão, C-01 a C-10, specs 001–010, Q1–Q6.
+Notes: emenda feita logo após a constituição 2.1.0 e o /speckit-specify da 007. Histórico:
+1.0.0 (2026-10-02) criação inicial — visão, C-01 a C-10, specs 001–010, Q1–Q6; 1.1.0
+(2026-10-03) C-11, 002 specced com o recorte da Prática 4, Q6 parcialmente resolvida.
 -->
 
 # NexoPDV — Spec Roadmap
@@ -59,9 +66,13 @@ O NexoPDV é um sistema híbrido de automação comercial (frente de caixa) e ge
 - **C-02 — Infraestrutura da nuvem:** API administrativa em FastAPI e banco central PostgreSQL,
   em containers Docker. _Governed by: constituição, Princípio III._
 - **C-03 — Front-end:** React + TypeScript, Tailwind CSS + shadcn/ui, com tema claro e escuro.
-  Ainda não consta na constituição (Princípio III diz "a definir"): confirmar contra o PDF da
+  ~~Ainda não consta na constituição (Princípio III diz "a definir"): confirmar contra o PDF da
   Prática de front-end e, então, emendar a constituição (MINOR). Se o PDF exigir outra
-  tecnologia, o PDF prevalece (Princípio II). _Fonte: visão §6._
+  tecnologia, o PDF prevalece (Princípio II).~~ **Confirmado em 2026-11-19:** os PDFs da
+  Prática 6 e do Projeto Final exigem React, Vite e Biome e permitem TypeScript; a stack completa
+  (React 19 + TypeScript + Vite, Tailwind CSS + shadcn/ui, Biome, Vitest + Testing Library,
+  Playwright) consta na constituição v2.1.0. _Fonte: visão §6. Governed by: constituição v2.1.0,
+  Princípio III._
 - **C-04 — Offline-first:** o caixa precisa operar sem internet e sincronizar depois. Ordem
   adotada: construir primeiro o sistema online (API e painel) e o caixa offline por último,
   quando a API já estiver estável. _Fonte: visão §1 e §5._
@@ -88,6 +99,18 @@ O NexoPDV é um sistema híbrido de automação comercial (frente de caixa) e ge
   padrões de projeto quando se pagarem, sem abstração sem propósito; cada escolha justificada no
   `plan.md`. Escolhido para que o projeto sirva de referência profissional e de estudo. _Governed
   by: constituição v2.0.0, Princípios IV e V._
+- **C-12 — Recorte do Projeto Final (prazo 2026-11-28):** o PDF do Projeto Final exige CRUD
+  completo de um recurso principal pela interface, além do fluxo interface → API → banco em
+  containers. Ordem decidida em 2026-11-19:
+  1. **007 — painel de produtos** (recorte da 007), que substitui o laboratório de itens;
+  2. **estoque** (parte pendente da 002), numa spec própria com número a definir;
+  3. **venda mínima** (recorte da 004, sem vínculo com operador e turno), **só se** o estoque
+     estiver concluído até 2026-11-24; caso contrário, o tempo restante vai para o fechamento
+     (README, vídeo e PR `projeto-final` → `main`).
+
+  O código vai para a branch `projeto-final`; cada spec sai dela e volta para ela por PR. O que
+  não couber no prazo continua no roadmap para depois da entrega. _Fonte: PDF do Projeto Final
+  (não versionado); Governed by: constituição v2.1.0, Princípio II._
 
 ## Planned Specs
 
@@ -109,7 +132,7 @@ O NexoPDV é um sistema híbrido de automação comercial (frente de caixa) e ge
 - **Notes:** proposta a confirmar na spec: "demitir" = **desativar** o funcionário, nunca
   excluir, para que vendas e turnos antigos continuem apontando para ele (auditoria).
 
-### 002 — Produtos e estoque  [status: specced]
+### 002 — Produtos e estoque  [status: in-progress]
 
 - **Description:** cadastro de produtos com código de barras e preço, e controle de estoque com
   quantidade mínima e alerta de reposição.
@@ -133,6 +156,11 @@ O NexoPDV é um sistema híbrido de automação comercial (frente de caixa) e ge
   dígitos) com dígito verificador validado — regra de domínio; remoção é inativação (registro
   mantido, código de barras continua reservado), coerente com a nota de auditoria. Reativação de
   produto removido fica para uma spec futura.
+  **Andamento (2026-11-19):** o recorte da Prática 4 foi implementado (PR #7) e a persistência em
+  PostgreSQL entrou na Prática 5. Continuam pendentes: estoque, estoque mínimo e alertas, que
+  viram uma spec própria no Projeto Final (C-12, número a definir), e a alteração de preço só
+  por Admin (depende da 001). A spec 007 inverte a ordem padrão da listagem (FR-009 daqui):
+  mais recentes primeiro.
 
 ### 003 — Turno de caixa  [status: planned]
 
@@ -164,6 +192,10 @@ O NexoPDV é um sistema híbrido de automação comercial (frente de caixa) e ge
 - **Notes:** propostas a confirmar na spec: uma venda nunca é excluída, só cancelada, com motivo
   e responsável registrados; cada venda tem um identificador UUID para permitir a sincronização
   idempotente da spec 009. O limite de desconto que exige aprovação é a pergunta Q4.
+  **Recorte possível no Projeto Final (C-12):** venda mínima, com carrinho por código de barras,
+  um ou mais meios de pagamento, troco, baixa de estoque na mesma transação e histórico de
+  vendas. Fica de fora do recorte: vínculo com operador e turno (dependem da 001 e da 003),
+  desconto com aprovação e cancelamento. Só entra se o estoque estiver concluído até 2026-11-24.
 
 ### 005 — Clientes e crediário  [status: planned]
 
@@ -190,7 +222,7 @@ O NexoPDV é um sistema híbrido de automação comercial (frente de caixa) e ge
 
 ### Front-end
 
-### 007 — Painel web administrativo  [status: planned]
+### 007 — Painel web administrativo  [status: specced]
 
 - **Description:** interface web do Admin (e do Gerente, no que couber) em cima das specs
   001–006.
@@ -198,10 +230,25 @@ O NexoPDV é um sistema híbrido de automação comercial (frente de caixa) e ge
   clientes, e vê o dashboard com gráficos.
 - **Scope (in):** login, telas de funcionários, produtos/estoque, clientes/crediário e dashboard
   com gráficos; tema claro e escuro.
+  - **Recorte do Projeto Final (especificado em `specs/007-painel-produtos/`):** a seção de
+    produtos do painel, com listagem paginada e busca por nome, cadastro, edição e remoção com
+    confirmação, e estados de carregamento, sucesso e erro; identidade visual do NexoPDV, tema
+    claro e escuro e estrutura de navegação pronta para as próximas seções. Substitui o
+    laboratório de itens das Práticas 6 e 7 (API, tabela e telas) e libera no CORS os métodos que
+    o painel usa.
+  - **Pendente dentro da 007:** login (depende da 001), telas de estoque (depende da spec de
+    estoque), funcionários, clientes/crediário e dashboard (dependem das specs das APIs delas).
 - **Scope (out):** tela de venda do caixa (spec 008).
-- **Depends on:** 001–006 (cada tela depende da spec da sua API)
-- **Governed by:** C-03
+- **Depends on:** 001–006 (cada tela depende da spec da sua API). O recorte do painel de
+  produtos depende só da 002.
+- **Governed by:** C-03, C-12
 - **Addresses:** docs/product/visao.md §6, jornada 3
+- **Spec dir:** specs/007-painel-produtos/
+- **Notes:** decisões da spec (2026-11-19): sem login no recorte, pois a 001 ainda não existe
+  (qualquer pessoa com acesso ao endereço opera o catálogo); a listagem da API passa a ser do
+  mais recente para o mais antigo, para que o produto recém-cadastrado apareça no topo (altera
+  o FR-009 da 002); a remoção dos dados de itens é feita por uma migração nova, sem reescrever as
+  já registradas.
 
 ### 008 — App do caixa (desktop)  [status: needs-info]
 
@@ -259,6 +306,9 @@ O NexoPDV é um sistema híbrido de automação comercial (frente de caixa) e ge
 - **Q6 — Prática de cada spec:** a ordem e o encaixe nas Práticas são definidos conforme cada PDF
   chega; o PDF pode pedir uma combinação diferente de specs.
   _Parcialmente resolvida (2026-10-03): Prática 4 → spec 002, recorte CRUD de produtos._
+  _Resolvida (2026-11-19): as Práticas terminaram na 7. A Prática 5 trouxe a persistência da 002
+  em PostgreSQL; as Práticas 6 e 7 foram laboratórios (gerenciador de itens) fora das specs. O
+  Projeto Final segue a C-12: 007 (painel de produtos), estoque e venda mínima se houver tempo._
 
 ## Cross-Cutting Notes
 
@@ -273,4 +323,4 @@ O NexoPDV é um sistema híbrido de automação comercial (frente de caixa) e ge
 
 ---
 
-**Version**: 1.1.0 | **Ratified**: 2026-10-02 | **Last Amended**: 2026-10-03
+**Version**: 1.2.0 | **Ratified**: 2026-10-02 | **Last Amended**: 2026-11-19
