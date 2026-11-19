@@ -39,6 +39,13 @@ Decisões técnicas da spec 007. Cada uma traz o que foi escolhido, por quê e o
 - **Alternativas:** a base Base UI (padrão atual do shadcn) foi descartada só por risco de prazo.
   `add --all` mais a página de design system do fluxo `design-system.md` da skill foram
   descartados: dezenas de componentes sem uso e uma página que a spec não pede.
+- **Na implementação (2026-11-19):** o `init` precisou do alias `@/*` também no `tsconfig.json` da
+  raiz e da opção `--no-reinstall` (sem ela, para num prompt). Ele trouxe o pacote `cn` (oficial do
+  shadcn, `shadcn-ui/cn`, MIT), que substitui `clsx` + `tailwind-merge`, e o pacote `shadcn`, usado
+  só pelo `@import "shadcn/tailwind.css"`; este ficou em `devDependencies`. O `npm audit` acusa 4
+  vulnerabilidades moderadas no `ts-morph` da linha de comando do shadcn, só no ambiente de
+  desenvolvimento (`npm audit --omit=dev`: 0). A fonte Geist do preset foi removida (usamos a
+  Archivo).
 
 ### D3 — Tema por tokens a partir do DESIGN.md
 
@@ -154,10 +161,14 @@ Decisões técnicas da spec 007. Cada uma traz o que foi escolhido, por quê e o
 - **Por quê:** FR-019. O shadcn usa `@custom-variant dark (&:is(.dark *))`.
 - **Alternativas:** `next-themes` (feito para Next.js); só `prefers-color-scheme` (não deixa
   trocar à mão).
+- **Na implementação (2026-11-19):** o `sonner.tsx` gerado pelo shadcn importa o `next-themes`.
+  Ele foi reavaliado e descartado de novo: a versão 0.4.6 renderiza uma tag `<script>` no cliente,
+  e o React 19 acusa erro no console. O componente passou a usar o `useTheme` do nosso provider
+  (comentado no arquivo).
 
 ### D12 — Testes do front-end: Testing Library + MSW
 
-- **Decisão:** Vitest 5 + Testing Library + `user-event`, com **MSW 2** (`msw/node`,
+- **Decisão:** Vitest 5 + Testing Library + `user-event`, com **MSW 3** (`msw/node`,
   `setupServer`) simulando a API: um catálogo falso em memória responde `GET/POST/PUT/DELETE
   /products` como o contrato, e cada teste pode trocar uma rota para simular 404, 409, 422,
   servidor fora do ar ou demora. Funções puras (GTIN, EAN, dinheiro, validação, parâmetros da
@@ -171,6 +182,9 @@ Decisões técnicas da spec 007. Cada uma traz o que foi escolhido, por quê e o
   com várias chamadas.
 - **Alternativas:** `vi.stubGlobal('fetch')` com respostas em fila (frágil com várias consultas e
   invalidações); mockar os hooks de consulta (o teste deixaria de cobrir a integração com a API).
+- **Na implementação:** a versão atual é a 3 (não a 2): a API de `http`, `HttpResponse` e
+  `setupServer` é a mesma, mas a opção de requisição sem rota passou a se chamar
+  `onUnhandledFrame` (`server.listen({ onUnhandledFrame: "error" })`).
 
 ### D13 — E2E do fluxo completo com persistência
 
@@ -236,6 +250,13 @@ Decisões técnicas da spec 007. Cada uma traz o que foi escolhido, por quê e o
   `biome.json`, com o motivo num comentário.
 - **Por quê:** os componentes gerados viram código do projeto (o shadcn copia o fonte), então
   seguem o mesmo padrão.
+- **Na implementação (2026-11-19):**
+  - Markdown fica fora do Biome (`!**/*.md`): o formatador de Markdown do Biome 2.6 apagou a
+    indentação do frontmatter YAML do `DESIGN.md`. Documentação não é código para ele formatar.
+  - `css.parser.tailwindDirectives: true`, para o Biome entender `@theme`, `@utility` e `@apply`.
+  - Em `src/components/ui/**`, quatro regras desligadas por `overrides` (`useSemanticElements`,
+    `useKeyWithClickEvents`, `noDoubleEquals`, `noArrayIndexKey`): o código gerado fica igual ao
+    do shadcn, para poder ser atualizado pelo CLI. O resto do projeto segue todas as regras.
 
 ### D19 — Container do front-end e variáveis
 
@@ -254,8 +275,8 @@ Decisões técnicas da spec 007. Cada uma traz o que foi escolhido, por quê e o
 | `typescript`, `@types/react`, `@types/react-dom` | tipos | D1, constituição |
 | `react-router` | rotas e URL | D5 |
 | `@tanstack/react-query` | dados do servidor | D6 |
-| `radix-ui`, `class-variance-authority`, `clsx`, `tailwind-merge`, `tw-animate-css`, `lucide-react`, `sonner` | trazidos pelo shadcn | D2 |
+| `radix-ui`, `class-variance-authority`, `cn`, `tw-animate-css`, `lucide-react`, `sonner`; `shadcn` (dev) | trazidos pelo shadcn | D2 |
 | `@fontsource-variable/archivo` | fonte auto-hospedada | D4 |
-| `msw` (dev) | API simulada nos testes | D12 |
+| `msw` 3 (dev) | API simulada nos testes | D12 |
 
 Nenhuma substitui tecnologia exigida pelo PDF (React, Vite e Biome continuam).

@@ -1,1 +1,195 @@
+/*
+ * Tema do painel do NexoPDV. Os valores vêm do DESIGN.md (cores, fonte, raios e
+ * sombra) e entram nos componentes só por tokens: nada de cor solta nas telas.
+ */
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+/* Archivo com os eixos de peso (100–900) e de largura (62%–125%), sem CDN. */
+@import "@fontsource-variable/archivo/standard.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: "Archivo Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-sans);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Tokens próprios do NexoPDV, sem equivalente no shadcn. */
+  --color-price-tag: var(--price-tag);
+  --color-price-tag-border: var(--price-tag-border);
+  --color-price-tag-foreground: var(--price-tag-foreground);
+  --color-success: var(--success);
+
+  /* Raios por hierarquia (DESIGN.md): etiqueta 2px, controles 6px, superfícies 10px. */
+  --radius-sm: 2px;
+  --radius-md: 6px;
+  --radius-lg: 6px;
+  --radius-xl: 10px;
+  --radius-2xl: 10px;
+  --radius-3xl: 10px;
+  --radius-4xl: 10px;
+}
+
+@theme {
+  /* Plano por padrão; uma sombra só, para o que flutua (painel, diálogo, toast). */
+  --shadow-xs: 0 0 #0000;
+  --shadow-md: 0 16px 40px -12px rgb(18 21 40 / 0.28);
+  --shadow-lg: 0 16px 40px -12px rgb(18 21 40 / 0.28);
+}
+
+:root {
+  --radius: 6px;
+
+  --background: #eef1f3; /* Gôndola */
+  --foreground: #1b1e2e; /* Grafite */
+  --card: #ffffff; /* Papel */
+  --card-foreground: #1b1e2e;
+  --popover: #ffffff;
+  --popover-foreground: #1b1e2e;
+  --primary: #2b39a8; /* Tinta */
+  --primary-foreground: #ffffff;
+  --secondary: #e4e8ee;
+  --secondary-foreground: #1b1e2e;
+  --muted: #e4e8ee;
+  --muted-foreground: #5b6075; /* Grafite suave */
+  --accent: #e8ebf8;
+  --accent-foreground: #1b1e2e;
+  --destructive: #c21f32; /* Remarcação */
+  --border: #d9dde4; /* Linha */
+  --input: #8a90a5; /* Linha de campo (≥ 3:1 sobre o papel) */
+  --ring: #2b39a8;
+
+  /* Etiqueta de preço: igual nos dois temas, como um adesivo físico. */
+  --price-tag: #ffd43b;
+  --price-tag-border: #d9ae00;
+  --price-tag-foreground: #1b1e2e;
+  --success: #1f7a4d; /* Caixa livre */
+}
+
+.dark {
+  --background: #121528;
+  --foreground: #e8eaf4;
+  --card: #1a1e36;
+  --card-foreground: #e8eaf4;
+  --popover: #1a1e36;
+  --popover-foreground: #e8eaf4;
+  --primary: #8f9bff;
+  --primary-foreground: #121528;
+  --secondary: #252a47;
+  --secondary-foreground: #e8eaf4;
+  --muted: #252a47;
+  --muted-foreground: #a2a7c0;
+  --accent: #262b4a;
+  --accent-foreground: #e8eaf4;
+  --destructive: #ff7a7a;
+  --border: #2c3150;
+  --input: #6e7499;
+  --ring: #8f9bff;
+
+  --success: #5fd69a;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+/* Tipografia: uma família em três larguras (Letreiro, Leitura e Etiqueta). */
+@utility type-page-title {
+  font-size: clamp(24px, 1.6vw + 16px, 30px);
+  font-weight: 760;
+  font-stretch: 118%;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+
+@utility type-brand {
+  font-size: 18px;
+  font-weight: 800;
+  font-stretch: 125%;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+@utility type-meta {
+  font-size: 13px;
+  font-weight: 450;
+  line-height: 1.4;
+}
+
+@utility type-price-list {
+  font-size: 20px;
+  font-weight: 800;
+  font-stretch: 72%;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+@utility type-price-label {
+  font-size: 48px;
+  font-weight: 850;
+  font-stretch: 68%;
+  line-height: 0.95;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Centavos da etiqueta: menores e elevados, como na etiqueta de gôndola. */
+@utility type-price-cents {
+  font-size: 0.6em;
+  line-height: 1;
+  position: relative;
+  top: -0.55em;
+}
+
+/* Linha que acabou de mudar: lavagem amarela que some (o único movimento do painel). */
+@keyframes row-highlight {
+  from {
+    background-color: color-mix(in srgb, var(--price-tag) 45%, transparent);
+  }
+  to {
+    background-color: transparent;
+  }
+}
+
+[data-highlighted="true"] {
+  animation: row-highlight 1.2s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-highlighted="true"] {
+    animation: none;
+    background-color: color-mix(in srgb, var(--price-tag) 45%, transparent);
+  }
+}
