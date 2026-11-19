@@ -12,6 +12,7 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { useDebouncedValue } from "@/lib/use-debounced-value";
+import { DeleteProductDialog } from "./delete-product-dialog";
 import { ProductFormSheet } from "./product-form-sheet";
 import {
   ProductsEmpty,
@@ -111,7 +112,24 @@ export function ProductsPage() {
   /** O produto sumiu (removido em outra aba): avisa; a lista já foi recarregada (FR-016). */
   function handleNotFound() {
     setFormOpen(false);
+    setRemoveOpen(false);
     toast.warning("Este produto não existe mais. A lista foi atualizada.");
+  }
+
+  // Remoção com confirmação (FR-013).
+  const [removing, setRemoving] = useState<Product | null>(null);
+  const [removeOpen, setRemoveOpen] = useState(false);
+
+  function openRemove(product: Product) {
+    setRemoving(product);
+    setRemoveOpen(true);
+  }
+
+  function handleRemoved() {
+    setRemoveOpen(false);
+    toast.success("Produto removido");
+    // Era o último da página: mostra a anterior em vez de uma página vazia (FR-014).
+    if (data?.items.length === 1 && page > 1) setPage(page - 1);
   }
 
   let content: React.ReactNode;
@@ -132,6 +150,7 @@ export function ProductsPage() {
           products={data.items}
           highlightedId={highlightedId}
           onEdit={openEdit}
+          onRemove={openRemove}
         />
         <ProductsPagination
           page={page}
@@ -189,6 +208,13 @@ export function ProductsPage() {
         onOpenChange={setFormOpen}
         product={editing}
         onSaved={handleSaved}
+        onNotFound={handleNotFound}
+      />
+      <DeleteProductDialog
+        product={removing}
+        open={removeOpen}
+        onOpenChange={setRemoveOpen}
+        onRemoved={handleRemoved}
         onNotFound={handleNotFound}
       />
     </div>

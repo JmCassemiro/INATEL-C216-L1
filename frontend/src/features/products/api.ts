@@ -25,3 +25,7 @@ export function updateProduct(
 ): Promise<Product> {
   return apiRequest<Product>(`/products/${id}`, { method: "PUT", body: input });
 }
+
+export function removeProduct(id: string): Promise<void> {
+  return apiRequest<void>(`/products/${id}`, { method: "DELETE" });
+}

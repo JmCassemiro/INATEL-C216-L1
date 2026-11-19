@@ -9,7 +9,12 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { createProduct, listProducts, updateProduct } from "./api";
+import {
+  createProduct,
+  listProducts,
+  removeProduct,
+  updateProduct,
+} from "./api";
 import type { ProductInput } from "./types";
 
 export const PAGE_SIZE = 10;
@@ -44,6 +49,15 @@ export function useUpdateProduct() {
   return useMutation({
     mutationFn: ({ id, input }: { id: string; input: ProductInput }) =>
       updateProduct(id, input),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: PRODUCTS_KEY }),
+  });
+}
+
+/** Remoção (FR-016): recarrega a lista no fim, com sucesso ou com 404. */
+export function useRemoveProduct() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: removeProduct,
     onSettled: () => queryClient.invalidateQueries({ queryKey: PRODUCTS_KEY }),
   });
 }

@@ -8,6 +8,7 @@ import {
   PackageOpenIcon,
   PencilIcon,
   SearchXIcon,
+  Trash2Icon,
   TriangleAlertIcon,
 } from "lucide-react";
 import {
@@ -55,6 +56,7 @@ type ProductsListProps = {
   /** Produto que acabou de mudar: a linha recebe o destaque amarelo (research D14). */
   highlightedId?: string | null;
   onEdit: (product: Product) => void;
+  onRemove: (product: Product) => void;
 };
 
 function highlight(product: Product, highlightedId?: string | null) {
@@ -66,7 +68,12 @@ export function ProductsList(props: ProductsListProps) {
   return isMobile ? <ProductsStack {...props} /> : <ProductsTable {...props} />;
 }
 
-function ProductsTable({ products, highlightedId, onEdit }: ProductsListProps) {
+function ProductsTable({
+  products,
+  highlightedId,
+  onEdit,
+  onRemove,
+}: ProductsListProps) {
   return (
     <Table aria-label="Produtos" className="table-fixed">
       <TableHeader>
@@ -115,6 +122,13 @@ function ProductsTable({ products, highlightedId, onEdit }: ProductsListProps) {
                 >
                   <PencilIcon />
                 </IconAction>
+                <IconAction
+                  label={`Remover ${product.name}`}
+                  tooltip="Remover"
+                  onClick={() => onRemove(product)}
+                >
+                  <Trash2Icon />
+                </IconAction>
               </div>
             </TableCell>
           </TableRow>
@@ -152,7 +166,12 @@ function IconAction({
   );
 }
 
-function ProductsStack({ products, highlightedId, onEdit }: ProductsListProps) {
+function ProductsStack({
+  products,
+  highlightedId,
+  onEdit,
+  onRemove,
+}: ProductsListProps) {
   return (
     <ul aria-label="Produtos" className="divide-y">
       {products.map((product) => (
@@ -170,7 +189,8 @@ function ProductsStack({ products, highlightedId, onEdit }: ProductsListProps) {
                 </span>
               )}
             </div>
-            <DropdownMenu>
+            {/* Não modal: o diálogo que a ação abre recebe o foco sem disputar com o menu. */}
+            <DropdownMenu modal={false}>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
@@ -186,6 +206,13 @@ function ProductsStack({ products, highlightedId, onEdit }: ProductsListProps) {
                   <DropdownMenuItem onSelect={() => onEdit(product)}>
                     <PencilIcon />
                     Editar
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    variant="destructive"
+                    onSelect={() => onRemove(product)}
+                  >
+                    <Trash2Icon />
+                    Remover
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
               </DropdownMenuContent>
