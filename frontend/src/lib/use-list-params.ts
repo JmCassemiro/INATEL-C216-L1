@@ -8,10 +8,11 @@ function parsePage(raw: string | null): number {
 }
 
 /**
- * Busca e página da lista guardadas na URL (FR-004): recarregar, voltar ou abrir o
- * mesmo endereço mostra a mesma visão. A página 1 e a busca vazia não aparecem.
+ * Busca e página de uma lista guardadas na URL (spec 007, FR-004): recarregar, voltar
+ * ou abrir o mesmo endereço mostra a mesma visão. A página 1 e a busca vazia não
+ * aparecem. Usado pelas seções Produtos e Estoque.
  */
-export function useProductListParams() {
+export function useListParams() {
   const [params, setParams] = useSearchParams();
   const search = params.get("search") ?? "";
   const page = parsePage(params.get("page"));

@@ -9,6 +9,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Field,
+  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
@@ -100,8 +101,17 @@ const EMPTY: ProductFormValues = {
   description: "",
   barcode: "",
   price: "",
+  min_stock: "",
 };
-const FIELDS: ProductField[] = ["name", "description", "barcode", "price"];
+const FIELDS: ProductField[] = [
+  "name",
+  "description",
+  "barcode",
+  "price",
+  "min_stock",
+];
+const MIN_STOCK_HINT =
+  "Abaixo dessa quantidade, o produto entra na lista de reposição.";
 
 function valuesOf(product: Product | null): ProductFormValues {
   if (!product) return EMPTY;
@@ -110,6 +120,7 @@ function valuesOf(product: Product | null): ProductFormValues {
     description: product.description ?? "",
     barcode: product.barcode,
     price: priceForInput(product.price),
+    min_stock: String(product.min_stock),
   };
 }
 
@@ -278,6 +289,28 @@ function ProductForm({
               />
             </InputGroup>
           </FormField>
+
+          <FormField
+            id="product-min-stock"
+            label="Estoque mínimo (opcional)"
+            description={MIN_STOCK_HINT}
+            error={errors.min_stock}
+          >
+            <Input
+              id="product-min-stock"
+              inputMode="numeric"
+              autoComplete="off"
+              className="tabular-nums"
+              value={values.min_stock}
+              aria-invalid={errors.min_stock ? true : undefined}
+              aria-describedby={
+                errors.min_stock
+                  ? "product-min-stock-description product-min-stock-error"
+                  : "product-min-stock-description"
+              }
+              onChange={(event) => change("min_stock", event.target.value)}
+            />
+          </FormField>
         </FieldGroup>
 
         {generalError && (
@@ -316,11 +349,14 @@ function ProductForm({
 function FormField({
   id,
   label,
+  description,
   error,
   children,
 }: {
   id: string;
   label: string;
+  /** Ajuda fixa abaixo do campo, com o id `{id}-description`. */
+  description?: string;
   error?: string;
   children: React.ReactNode;
 }) {
@@ -328,6 +364,11 @@ function FormField({
     <Field data-invalid={error ? true : undefined}>
       <FieldLabel htmlFor={id}>{label}</FieldLabel>
       {children}
+      {description && (
+        <FieldDescription id={`${id}-description`}>
+          {description}
+        </FieldDescription>
+      )}
       {error && <FieldError id={`${id}-error`}>{error}</FieldError>}
     </Field>
   );

@@ -256,4 +256,35 @@ describe("Lista de produtos (US1)", () => {
     expect(within(list).getAllByRole("listitem")).toHaveLength(3);
     expect(screen.queryByRole("table")).not.toBeInTheDocument();
   });
+
+  it("FR-025 (011): mostra o saldo e destaca quem está sem estoque ou para repor", async () => {
+    catalog.seed(
+      {
+        name: "Camiseta Básica Branca M",
+        barcode: "7891000315507",
+        stock_quantity: 36,
+        min_stock: 10,
+      },
+      {
+        name: "Calça Jeans Azul 42",
+        barcode: "7896543210982",
+        stock_quantity: 4,
+        min_stock: 10,
+      },
+      { name: "Meia Cano Curto", barcode: "7894900011517" },
+    );
+    renderApp();
+
+    const table = await findTable();
+    expect(
+      within(table).getByRole("columnheader", { name: "Estoque" }),
+    ).toBeInTheDocument();
+    const [meia, calca, camiseta] = bodyRows(table).map((row) => within(row));
+    expect(camiseta?.getByText("36 un.")).toBeVisible();
+    expect(camiseta?.queryByText(/Repor|Sem estoque/)).not.toBeInTheDocument();
+    expect(calca?.getByText("4 un.")).toBeVisible();
+    expect(calca?.getByText("Repor")).toBeVisible();
+    expect(meia?.getByText("0 un.")).toBeVisible();
+    expect(meia?.getByText("Sem estoque")).toBeVisible();
+  });
 });

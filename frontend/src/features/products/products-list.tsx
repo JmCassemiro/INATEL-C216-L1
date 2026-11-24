@@ -47,6 +47,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { StockStatusPill } from "@/features/stock/stock-status";
+import { formatUnits } from "@/lib/quantity";
 import { useIsMobile } from "@/lib/use-is-mobile";
 import { gtinKind } from "./gtin";
 import { PriceTag } from "./price-tag";
@@ -85,6 +87,9 @@ function ProductsTable({
           </TableHead>
           <TableHead className="type-eyebrow h-11 w-44 text-muted-foreground">
             Código de barras
+          </TableHead>
+          <TableHead className="type-eyebrow h-11 w-32 text-muted-foreground">
+            Estoque
           </TableHead>
           <TableHead className="type-eyebrow h-11 w-36 text-right text-muted-foreground">
             Preço
@@ -127,6 +132,9 @@ function ProductsTable({
                 <BarcodeKind code={product.barcode} />
               </div>
             </TableCell>
+            <TableCell>
+              <StockCell product={product} />
+            </TableCell>
             <TableCell className="text-right">
               <PriceTag price={product.price} />
             </TableCell>
@@ -152,6 +160,20 @@ function ProductsTable({
         ))}
       </TableBody>
     </Table>
+  );
+}
+
+/** Saldo e, se não estiver em dia, a situação (spec 011, FR-025). */
+function StockCell({ product }: { product: Product }) {
+  return (
+    <div className="flex flex-col items-start gap-1">
+      <span className="font-semibold tabular-nums">
+        {formatUnits(product.stock_quantity)}
+      </span>
+      {product.stock_status !== "ok" && (
+        <StockStatusPill status={product.stock_status} />
+      )}
+    </div>
   );
 }
 
@@ -220,6 +242,14 @@ function ProductsStack({
                   {product.description}
                 </span>
               )}
+              <span className="mt-1 flex items-center gap-2">
+                <span className="type-meta font-semibold tabular-nums">
+                  {formatUnits(product.stock_quantity)}
+                </span>
+                {product.stock_status !== "ok" && (
+                  <StockStatusPill status={product.stock_status} />
+                )}
+              </span>
             </div>
             {/* Não modal: o diálogo que a ação abre recebe o foco sem disputar com o menu. */}
             <DropdownMenu modal={false}>

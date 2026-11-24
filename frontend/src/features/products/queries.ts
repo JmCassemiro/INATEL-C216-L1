@@ -9,6 +9,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import { PRODUCTS_KEY, STOCK_KEY } from "@/lib/query-keys";
 import {
   createProduct,
   listProducts,
@@ -19,8 +20,18 @@ import type { ProductInput } from "./types";
 
 export const PAGE_SIZE = 10;
 
-/** Prefixo de todas as consultas de produtos (invalidado depois de cada mudança). */
-export const PRODUCTS_KEY = ["products"] as const;
+export { PRODUCTS_KEY };
+
+/**
+ * Depois de mudar o catálogo, recarrega as listas e também o estoque: o mínimo, a
+ * remoção e o cadastro mudam a reposição e os indicadores (spec 011, D13).
+ */
+function invalidateCatalog(queryClient: ReturnType<typeof useQueryClient>) {
+  return Promise.all([
+    queryClient.invalidateQueries({ queryKey: PRODUCTS_KEY }),
+    queryClient.invalidateQueries({ queryKey: STOCK_KEY }),
+  ]);
+}
 
 export function useProductsPage(search: string, page: number) {
   return useQuery({
@@ -44,7 +55,7 @@ export function useCreateProduct() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: createProduct,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: PRODUCTS_KEY }),
+    onSuccess: () => invalidateCatalog(queryClient),
   });
 }
 
@@ -57,7 +68,7 @@ export function useUpdateProduct() {
   return useMutation({
     mutationFn: ({ id, input }: { id: string; input: ProductInput }) =>
       updateProduct(id, input),
-    onSettled: () => queryClient.invalidateQueries({ queryKey: PRODUCTS_KEY }),
+    onSettled: () => invalidateCatalog(queryClient),
   });
 }
 
@@ -66,6 +77,6 @@ export function useRemoveProduct() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: removeProduct,
-    onSettled: () => queryClient.invalidateQueries({ queryKey: PRODUCTS_KEY }),
+    onSettled: () => invalidateCatalog(queryClient),
   });
 }

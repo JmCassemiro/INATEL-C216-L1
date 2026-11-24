@@ -5,6 +5,7 @@
 import { PackageIcon, PlusIcon, SearchIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { ListPagination } from "@/components/list-pagination";
 import { Button } from "@/components/ui/button";
 import {
   InputGroup,
@@ -12,6 +13,7 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { useDebouncedValue } from "@/lib/use-debounced-value";
+import { useListParams } from "@/lib/use-list-params";
 import { CatalogOverview } from "./catalog-overview";
 import { DeleteProductDialog } from "./delete-product-dialog";
 import { PriceTag } from "./price-tag";
@@ -23,10 +25,8 @@ import {
   ProductsLoadError,
   ProductsNoResults,
 } from "./products-list";
-import { ProductsPagination } from "./products-pagination";
 import { PAGE_SIZE, useCatalogFirstPage, useProductsPage } from "./queries";
 import type { Product } from "./types";
-import { useProductListParams } from "./use-product-list-params";
 
 function countLabel(total: number, searching: boolean): string {
   if (searching)
@@ -92,7 +92,7 @@ function PageBand({
 }
 
 export function ProductsPage() {
-  const { search, page, setSearch, setPage } = useProductListParams();
+  const { search, page, setSearch, setPage } = useListParams();
   const query = useProductsPage(search, page);
   const data = query.data;
 
@@ -210,7 +210,7 @@ export function ProductsPage() {
           onEdit={openEdit}
           onRemove={openRemove}
         />
-        <ProductsPagination
+        <ListPagination
           page={page}
           pageSize={PAGE_SIZE}
           total={data.total}
