@@ -156,9 +156,9 @@ commit seguem a tabela "Ordem de implementação e commits" do plano.
 
 **Independent Test**: depois de uma entrada e um ajuste, o histórico mostra as duas com data, tipo, quantidade com sinal, saldo e texto.
 
-- [ ] T053 [P] [US4] Escrever `frontend/tests/unit/date.test.ts`: `formatDateTime` no formato "24/11/2026 14:35" (fuso fixo no teste)
-- [ ] T054 [P] [US4] Escrever `frontend/tests/integration/stock-movements.test.tsx`: "Ver histórico de {nome}" abre "Histórico de {nome}"; tabela "Movimentações" com Data, Tipo, "+24"/"−2", Saldo e Observação; paginação "Paginação do histórico"; vazio com "Registrar entrada" (abre o diálogo de entrada); erro com "Tentar de novo"; nenhuma ação de editar ou apagar
-- [ ] T055 [US4] Implementar `frontend/src/lib/date.ts` e `frontend/src/features/stock/movements-sheet.tsx`; ligar a ação "Ver histórico de {nome}" (e o menu "Ações de {nome}" no celular) em `stock-list.tsx` e `stock-page.tsx`
+- [X] T053 [P] [US4] Escrever `frontend/tests/unit/date.test.ts`: `formatDateTime` no formato "24/11/2026 14:35" (fuso fixo no teste)
+- [X] T054 [P] [US4] Escrever `frontend/tests/integration/stock-movements.test.tsx`: "Ver histórico de {nome}" abre "Histórico de {nome}"; tabela "Movimentações" com Data, Tipo, "+24"/"−2", Saldo e Observação; paginação "Paginação do histórico"; vazio com "Registrar entrada" (abre o diálogo de entrada); erro com "Tentar de novo"; nenhuma ação de editar ou apagar
+- [X] T055 [US4] Implementar `frontend/src/lib/date.ts` e `frontend/src/features/stock/movements-sheet.tsx`; ligar a ação "Ver histórico de {nome}" (e o menu "Ações de {nome}" no celular) em `stock-list.tsx` e `stock-page.tsx`
 
 **Checkpoint (commit 9)**: `feat(estoque): mostra o historico de movimentacoes`.
 

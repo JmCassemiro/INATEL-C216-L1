@@ -15,6 +15,7 @@ import { Toggle } from "@/components/ui/toggle";
 import type { Product } from "@/features/products/types";
 import { formatUnits } from "@/lib/quantity";
 import { useSearchTerm } from "@/lib/use-search-term";
+import { MovementsSheet } from "./movements-sheet";
 import { PAGE_SIZE, type StockView, useStockPage } from "./queries";
 import { StockAdjustmentDialog } from "./stock-adjustment-dialog";
 import { StockEntryDialog } from "./stock-entry-dialog";
@@ -132,6 +133,20 @@ export function StockPage() {
     setEntryOpen(true);
   }
 
+  const [historyOf, setHistoryOf] = useState<Product | null>(null);
+  const [historyOpen, setHistoryOpen] = useState(false);
+
+  function openHistory(product: Product) {
+    setHistoryOf(product);
+    setHistoryOpen(true);
+  }
+
+  /** Do histórico vazio direto para a primeira entrada. */
+  function enterFromHistory(product: Product) {
+    setHistoryOpen(false);
+    openEntry(product);
+  }
+
   const [adjusting, setAdjusting] = useState<Product | null>(null);
   const [adjustOpen, setAdjustOpen] = useState(false);
 
@@ -188,6 +203,7 @@ export function StockPage() {
           highlightedId={highlightedId}
           onEnter={openEntry}
           onAdjust={openAdjust}
+          onHistory={openHistory}
         />
         <ListPagination
           page={page}
@@ -247,6 +263,12 @@ export function StockPage() {
         onOpenChange={setAdjustOpen}
         onAdjusted={handleAdjusted}
         onNotFound={handleNotFound}
+      />
+      <MovementsSheet
+        product={historyOf}
+        open={historyOpen}
+        onOpenChange={setHistoryOpen}
+        onEnter={enterFromHistory}
       />
     </div>
   );
