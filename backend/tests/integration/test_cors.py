@@ -90,3 +90,11 @@ def test_preflight_for_stock_entry_is_authorized(client):
 
     assert response.status_code == 200
     assert "POST" in response.headers["access-control-allow-methods"]
+
+
+def test_preflight_for_registering_a_sale_is_authorized(client):
+    """RP-005 (spec 004): o painel registra a venda com POST, já liberado."""
+    response = preflight(client, FRONTEND, "POST", "/sales")
+
+    assert response.status_code == 200
+    assert "POST" in response.headers["access-control-allow-methods"]

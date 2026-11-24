@@ -7,11 +7,16 @@ from fastapi import Depends, Request
 from sqlalchemy.orm import Session
 
 from app.application.ports.product_repository import ProductRepository
+from app.application.ports.sale_repository import SaleRepository
 from app.application.ports.stock_repository import StockRepository
 from app.application.services.product_service import ProductService
+from app.application.services.sale_service import SaleService
 from app.application.services.stock_service import StockService
 from app.infrastructure.repositories.sqlalchemy_product_repository import (
     SqlAlchemyProductRepository,
+)
+from app.infrastructure.repositories.sqlalchemy_sale_repository import (
+    SqlAlchemySaleRepository,
 )
 from app.infrastructure.repositories.sqlalchemy_stock_repository import (
     SqlAlchemyStockRepository,
@@ -46,3 +51,15 @@ def get_stock_service(
     repository: Annotated[StockRepository, Depends(get_stock_repository)],
 ) -> StockService:
     return StockService(repository)
+
+
+def get_sale_repository(
+    session: Annotated[Session, Depends(get_session)],
+) -> SaleRepository:
+    return SqlAlchemySaleRepository(session)
+
+
+def get_sale_service(
+    repository: Annotated[SaleRepository, Depends(get_sale_repository)],
+) -> SaleService:
+    return SaleService(repository)
