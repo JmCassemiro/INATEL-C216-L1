@@ -5,7 +5,7 @@ from decimal import Decimal
 from uuid import UUID
 
 from app.domain.errors import ProductNotFoundError
-from app.domain.price import CENT
+from app.domain.money import CENT
 from app.domain.stock import StockChange, StockMovement, StockSummary
 from app.infrastructure.repositories.in_memory_store import InMemoryStore
 

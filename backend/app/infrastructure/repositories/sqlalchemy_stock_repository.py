@@ -7,7 +7,7 @@ from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session
 
 from app.domain.errors import ProductNotFoundError
-from app.domain.price import CENT
+from app.domain.money import CENT
 from app.domain.stock import StockChange, StockMovement, StockSummary
 from app.infrastructure.models.product import ProductModel
 from app.infrastructure.models.stock_movement import StockMovementModel

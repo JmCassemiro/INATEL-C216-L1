@@ -1,9 +1,10 @@
 """Regras do estoque (spec 011, research D3).
 
-O saldo de um produto só muda por movimentações: uma entrada de mercadoria ou um
-ajuste com motivo. `StockChange` é o pedido já validado; `apply` o aplica a um saldo
-e devolve a `StockMovement` registrada, ou recusa o resultado inválido. Quem chama
-`apply` (o repositório) garante que o saldo lido é o atual (research D4).
+O saldo de um produto só muda por movimentações: uma entrada de mercadoria, um
+ajuste com motivo ou a baixa por uma venda (spec 004). `StockChange` é o pedido já
+validado; `apply` o aplica a um saldo e devolve a `StockMovement` registrada, ou recusa
+o resultado inválido. Quem chama `apply` (o repositório) garante que o saldo lido é o
+atual (research D4).
 """
 
 import uuid
@@ -30,6 +31,7 @@ REASON_MIN_LENGTH = 3
 class MovementKind(StrEnum):
     ENTRY = "entry"
     ADJUSTMENT = "adjustment"
+    SALE = "sale"
 
 
 class StockStatus(StrEnum):
@@ -72,6 +74,13 @@ class StockChange:
             MovementKind.ADJUSTMENT,
             adjustment_quantity(quantity),
             normalize_reason(reason),
+        )
+
+    @classmethod
+    def sale(cls, quantity: int, sale_number: int) -> Self:
+        """Baixa por venda: retira a quantidade vendida (spec 004, FR-019)."""
+        return cls(
+            MovementKind.SALE, -entry_quantity(quantity), f"Venda nº {sale_number}"
         )
 
     def apply(

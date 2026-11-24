@@ -214,6 +214,37 @@ def test_apply_rejects_balance_above_the_limit():
         )
 
 
+# --- baixa por venda (spec 004) -----------------------------------------------
+
+
+def test_sale_change_takes_the_quantity_out_with_the_sale_number():
+    """FR-019 (spec 004): a baixa por venda é negativa e traz o número da venda."""
+    change = StockChange.sale(2, 12)
+
+    assert change.kind is MovementKind.SALE
+    assert change.quantity == -2
+    assert change.note == "Venda nº 12"
+
+
+@pytest.mark.parametrize("quantity", [0, -1, MAX_MOVEMENT_QUANTITY + 1, True])
+def test_sale_change_rejects_quantity_out_of_range(quantity):
+    """FR-019 (spec 004): a quantidade vendida é um inteiro positivo."""
+    with pytest.raises(InvalidDataError) as error:
+        StockChange.sale(quantity, 1)
+
+    assert error.value.field == "quantity"
+
+
+def test_apply_sale_subtracts_and_refuses_insufficient_stock():
+    """FR-015 (spec 004): a baixa segue a regra do saldo nunca negativo."""
+    movement = StockChange.sale(2, 7).apply(PRODUCT_ID, balance=10, sequence=5, at=AT)
+
+    assert movement.balance_after == 8
+    with pytest.raises(InsufficientStockError) as error:
+        StockChange.sale(3, 8).apply(PRODUCT_ID, balance=2, sequence=6, at=AT)
+    assert error.value.available == 2
+
+
 # --- mínimo, falta e situação -----------------------------------------------
 
 
