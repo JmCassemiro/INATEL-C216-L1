@@ -1,12 +1,17 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version change: 1.1.0 → 1.2.0
-Bump rationale: MINOR — nova decisão (C-12, recorte e ordem do Projeto Final) e mudança material
-de escopo da spec 007 (recorte do painel de produtos); inclui também transições de status e a
-confirmação da C-03.
+Version change: 1.2.0 → 1.3.0
+Bump rationale: MINOR — nova entrada de spec (011, controle de estoque), desmembrada da 002.
 
-Changes this revision:
+Changes this revision (1.3.0, 2026-11-24):
+  - Spec added: 011 — Controle de estoque [specced] (specs/011-estoque/)
+  - Scope changed on 002: estoque, mínimo e alertas passam para a 011; resta a alteração de
+    preço só por Admin
+
+Specs affected: 002, 011
+
+Changes in 1.2.0 (2026-11-19):
   - Decision confirmed: C-03 — stack de front-end confirmada e registrada na constituição v2.1.0
     (Princípio III)
   - Decision recorded: C-12 — Projeto Final (prazo 2026-11-28): 007 painel de produtos →
@@ -161,6 +166,33 @@ O NexoPDV é um sistema híbrido de automação comercial (frente de caixa) e ge
   viram uma spec própria no Projeto Final (C-12, número a definir), e a alteração de preço só
   por Admin (depende da 001). A spec 007 inverte a ordem padrão da listagem (FR-009 daqui):
   mais recentes primeiro.
+  **2026-11-24:** estoque, estoque mínimo e alertas saíram da 002 para a spec **011**; aqui
+  resta só a alteração de preço restrita ao Admin (depende da 001).
+
+### 011 — Controle de estoque  [status: specced]
+
+- **Description:** quantidade em estoque e estoque mínimo por produto, entrada de mercadoria,
+  ajuste com motivo obrigatório, histórico de movimentações e lista de reposição, na API e no
+  painel (seção Estoque).
+- **Outcome:** o lojista registra entradas e ajustes pelo painel, vê o saldo e o histórico de
+  cada produto, e os produtos abaixo do mínimo aparecem na lista de reposição e nos indicadores.
+- **Scope (in):** saldo que só muda por movimentação; entrada (com observação opcional) e ajuste
+  para mais ou para menos (com motivo obrigatório); saldo nunca negativo; movimentações imutáveis;
+  movimentações simultâneas sem perda; estoque mínimo no formulário de produto; lista de reposição
+  (quantidade < mínimo, maior falta primeiro); seção Estoque com indicadores; quantidade na lista
+  de produtos.
+- **Scope (out):** baixa por venda (004); sincronização entre caixas e estoque negativo offline
+  (009, Q3); autoria das movimentações (001); estoque inicial no cadastro; quantidades
+  fracionadas; fornecedores e pedidos de compra; estorno ou edição de movimentações.
+- **Depends on:** 002, 007
+- **Governed by:** C-11, C-12
+- **Addresses:** docs/product/visao.md §3 (Controle de Estoque)
+- **Spec dir:** specs/011-estoque/
+- **Notes:** desmembrada da 002 no Projeto Final (C-12). Número 011, e não o próximo sequencial
+  (008), para que o número da pasta continue igual ao da entrada do roadmap. Decisões da spec
+  (2026-11-24): "para repor" é quantidade **menor** que o mínimo (mínimo 0 desliga o alerta);
+  ajuste informado como diferença (adicionar ou retirar), não como novo saldo contado, para que
+  ajustes simultâneos se somem; limites de 99.999 por movimentação e 999.999 de saldo.
 
 ### 003 — Turno de caixa  [status: planned]
 
@@ -323,4 +355,4 @@ O NexoPDV é um sistema híbrido de automação comercial (frente de caixa) e ge
 
 ---
 
-**Version**: 1.2.0 | **Ratified**: 2026-10-02 | **Last Amended**: 2026-11-19
+**Version**: 1.3.0 | **Ratified**: 2026-10-02 | **Last Amended**: 2026-11-24
