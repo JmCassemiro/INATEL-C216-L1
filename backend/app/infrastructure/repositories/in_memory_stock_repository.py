@@ -1,5 +1,4 @@
 import builtins
-from dataclasses import replace
 from datetime import datetime
 from decimal import Decimal
 from uuid import UUID
@@ -28,18 +27,7 @@ class InMemoryStockRepository:
             product = store.active(product_id)
             if product is None:
                 raise ProductNotFoundError()
-            history = store.movements.setdefault(product_id, [])
-            movement = change.apply(
-                product_id,
-                balance=product.stock_quantity,
-                sequence=len(history) + 1,
-                at=at,
-            )
-            store.products[product_id] = replace(
-                product, stock_quantity=movement.balance_after
-            )
-            history.append(movement)
-            return movement
+            return store.apply_change(product, change, at)
 
     def movements(
         self, product_id: UUID, offset: int, limit: int

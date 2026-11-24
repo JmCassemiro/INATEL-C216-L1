@@ -3,7 +3,7 @@ from datetime import datetime
 from decimal import Decimal
 from uuid import UUID
 
-from sqlalchemy import func, select, update
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.domain.errors import ProductNotFoundError
@@ -11,6 +11,7 @@ from app.domain.money import CENT
 from app.domain.stock import StockChange, StockMovement, StockSummary
 from app.infrastructure.models.product import ProductModel
 from app.infrastructure.models.stock_movement import StockMovementModel
+from app.infrastructure.repositories.stock_ledger import apply_stock_change
 
 _ACTIVE = ProductModel.removed_at.is_(None)
 
@@ -23,10 +24,10 @@ class SqlAlchemyStockRepository:
     1. `SELECT … FOR UPDATE` bloqueia a linha do produto ativo. Outra movimentação no
        mesmo produto espera aqui até esta terminar, e então lê o saldo já atualizado;
        produtos diferentes não se bloqueiam.
-    2. O próximo número da movimentação é `max(sequence) + 1`, calculado sob o bloqueio
-       (D5).
-    3. O domínio (`StockChange.apply`) decide: devolve a movimentação ou recusa.
-    4. O novo saldo e a movimentação são gravados e confirmados juntos.
+    2. `apply_stock_change` (o mesmo usado pelas vendas, spec 004) calcula o próximo
+       número da movimentação sob o bloqueio (D5), deixa o domínio decidir
+       (`StockChange.apply`) e grava o novo saldo e a movimentação.
+    3. A transação é confirmada.
 
     Qualquer erro desfaz a transação e libera o bloqueio. No SQLite (só nos testes), o
     `FOR UPDATE` é ignorado; o teste de concorrência roda no PostgreSQL.
@@ -47,20 +48,7 @@ class SqlAlchemyStockRepository:
             )
             if balance is None:
                 raise ProductNotFoundError()
-            last_sequence = session.scalar(
-                select(func.max(StockMovementModel.sequence)).where(
-                    StockMovementModel.product_id == product_id
-                )
-            )
-            movement = change.apply(
-                product_id, balance=balance, sequence=(last_sequence or 0) + 1, at=at
-            )
-            session.execute(
-                update(ProductModel)
-                .where(ProductModel.id == product_id)
-                .values(stock_quantity=movement.balance_after)
-            )
-            session.add(StockMovementModel.from_entity(movement))
+            movement = apply_stock_change(session, product_id, balance, change, at)
             session.commit()
         except BaseException:
             session.rollback()
