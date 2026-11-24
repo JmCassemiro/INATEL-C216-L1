@@ -2,6 +2,7 @@ import { Navigate, type RouteObject } from "react-router";
 import { LandingPage } from "@/features/landing/landing-page";
 import { ProductsPage } from "@/features/products/products-page";
 import { NewSalePage } from "@/features/sales/new-sale-page";
+import { SalesPage } from "@/features/sales/sales-page";
 import { StockPage } from "@/features/stock/stock-page";
 import { AppLayout } from "./app-layout";
 
@@ -28,6 +29,11 @@ export const routes: RouteObject[] = [
         path: "/sales/new",
         element: <NewSalePage />,
         handle: { title: "Nova venda" },
+      },
+      {
+        path: "/sales",
+        element: <SalesPage />,
+        handle: { title: "Vendas" },
       },
     ],
   },

@@ -64,7 +64,7 @@ const FEATURES: Feature[] = [
     title: "Frente de caixa",
     text: "Venda pelo leitor de código, com vários meios de pagamento e troco calculado na hora.",
     icon: ShoppingCartIcon,
-    available: false,
+    available: true,
     tone: "from-sky-400 to-indigo-500",
   },
   {
@@ -225,8 +225,9 @@ export function LandingPage() {
             Tudo o que o balcão precisa, num sistema só.
           </h2>
           <p className="mt-4 max-w-2xl text-lg text-muted-foreground">
-            O NexoPDV cresce por partes. O catálogo e o estoque já estão no ar;
-            o caixa e o crediário chegam nas próximas versões.
+            O NexoPDV cresce por partes. O catálogo, o estoque e a frente de
+            caixa já estão no ar; o crediário e a venda sem internet chegam nas
+            próximas versões.
           </p>
           <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {FEATURES.map((feature) => (
