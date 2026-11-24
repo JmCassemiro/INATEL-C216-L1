@@ -127,10 +127,10 @@ commit seguem a tabela "Ordem de implementação e commits" do plano.
 
 **Independent Test**: com mínimo acima do saldo, o produto aparece em "Para repor"; uma entrada que leva o saldo ao mínimo o tira de lá.
 
-- [ ] T046 [P] [US2] Escrever `frontend/tests/integration/stock-restock.test.tsx`: grupo "Mostrar" com "Todos" e "Para repor" (`aria-pressed`); "Para repor" pede `restock=true&sort=shortfall` e grava `view=restock`; "Repor · faltam 6"; estado "Nenhum produto precisa de reposição."; indicadores "Para repor", "Sem estoque" e "Valor em estoque" (R$) com esqueleto e "—" no erro; após uma entrada, o produto sai da reposição e os números mudam sem recarregar
-- [ ] T047 [P] [US2] Atualizar `frontend/tests/integration/products-overview.test.tsx` (indicador "Estoque" com "Para repor" e o link "Ver lista de reposição" → `/stock?view=restock`), `frontend/tests/integration/app-shell.test.tsx` (número para repor no menu, oculto do leitor de tela; some quando é 0) e `frontend/tests/integration/landing.test.tsx` ("Estoque com alerta" como "Disponível")
-- [ ] T048 [US2] Implementar o filtro e o estado vazio da visão em `frontend/src/features/stock/stock-page.tsx` e `stock-list.tsx`, e `frontend/src/features/stock/stock-overview.tsx`
-- [ ] T049 [US2] Implementar o número no menu em `frontend/src/app/sidebar.tsx`, o indicador em `frontend/src/features/products/catalog-overview.tsx` e o estoque disponível em `frontend/src/features/landing/landing-page.tsx`
+- [X] T046 [P] [US2] Escrever `frontend/tests/integration/stock-restock.test.tsx`: grupo "Mostrar" com "Todos" e "Para repor" (`aria-pressed`); "Para repor" pede `restock=true&sort=shortfall` e grava `view=restock`; "Repor · faltam 6"; estado "Nenhum produto precisa de reposição."; indicadores "Para repor", "Sem estoque" e "Valor em estoque" (R$) com esqueleto e "—" no erro; após uma entrada, o produto sai da reposição e os números mudam sem recarregar
+- [X] T047 [P] [US2] Atualizar `frontend/tests/integration/products-overview.test.tsx` (indicador "Estoque" com "Para repor" e o link "Ver lista de reposição" → `/stock?view=restock`), `frontend/tests/integration/app-shell.test.tsx` (número para repor no menu, oculto do leitor de tela; some quando é 0) e `frontend/tests/integration/landing.test.tsx` ("Estoque com alerta" como "Disponível")
+- [X] T048 [US2] Implementar o filtro e o estado vazio da visão em `frontend/src/features/stock/stock-page.tsx` e `stock-list.tsx`, e `frontend/src/features/stock/stock-overview.tsx`
+- [X] T049 [US2] Implementar o número no menu em `frontend/src/app/sidebar.tsx`, o indicador em `frontend/src/features/products/catalog-overview.tsx` e o estoque disponível em `frontend/src/features/landing/landing-page.tsx`
 
 **Checkpoint (commit 7)**: `feat(estoque): mostra a lista de reposicao e os indicadores`.
 

@@ -1,10 +1,13 @@
 /**
  * Indicadores do catálogo: só dados reais da API. O total vem da contagem do
  * servidor; preço médio e faixa de preços olham os cadastros mais recentes (a
- * primeira página), e o rótulo diz isso. Estoque depende da próxima spec: "em breve".
+ * primeira página), e o rótulo diz isso. O estoque mostra quantos produtos estão
+ * para repor, com atalho para a lista de reposição (spec 011, FR-026).
  */
 import { BoxesIcon, PackageCheckIcon, ScaleIcon, TagIcon } from "lucide-react";
+import { Link } from "react-router";
 import { StatCard } from "@/components/stat-card";
+import { useStockSummary } from "@/features/stock/queries";
 import { averagePrice, formatPrice, priceRange } from "@/lib/money";
 import { useCatalogFirstPage } from "./queries";
 
@@ -16,6 +19,7 @@ export function CatalogOverview() {
   const prices = data?.items.map((product) => product.price) ?? [];
   const average = averagePrice(prices);
   const range = priceRange(prices);
+  const stock = useStockSummary();
 
   /** Valor do cartão: esqueleto carregando, travessão com erro ou sem produtos. */
   function value<T>(
@@ -71,13 +75,24 @@ export function CatalogOverview() {
       <StatCard
         label="Estoque"
         icon={BoxesIcon}
-        tone="muted"
+        tone="warning"
         value={
-          <span className="inline-flex rounded-full bg-muted px-3 py-1 text-sm font-semibold text-muted-foreground">
-            em breve
+          stock.isError
+            ? NO_VALUE
+            : stock.data && String(stock.data.restock_count)
+        }
+        hint={
+          <span className="flex flex-wrap items-center gap-x-1.5">
+            Para repor
+            <span aria-hidden="true">·</span>
+            <Link
+              to="/stock?view=restock"
+              className="font-semibold text-primary underline-offset-4 hover:underline"
+            >
+              Ver lista de reposição
+            </Link>
           </span>
         }
-        hint="Quantidade, mínimo e alerta de reposição na próxima versão."
       />
     </section>
   );

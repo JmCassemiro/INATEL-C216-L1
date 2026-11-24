@@ -27,7 +27,7 @@ as camadas, com o teste de 50 entradas simultâneas em PostgreSQL e um E2E novo.
 **Primary Dependencies**: FastAPI, Pydantic, SQLAlchemy, Alembic (back-end); React 19, Vite 8,
 Tailwind CSS 4, shadcn/ui (base Radix), React Router 8, TanStack Query 5, sonner, lucide-react
 (front-end). **Nenhuma dependência nova**: os componentes shadcn novos (`dialog`, `radio-group`,
-`toggle-group`) usam o pacote `radix-ui` já instalado
+`toggle`) usam o pacote `radix-ui` já instalado
 
 **Storage**: PostgreSQL 17 (Compose). Duas colunas novas em `products` e a tabela
 `stock_movements`, por migração nova e reversível ([data-model §3](data-model.md))
@@ -156,7 +156,7 @@ frontend/src/
 │   └── sidebar.tsx                    # Estoque vira link, com o número para repor          [alterado]
 ├── components/
 │   ├── list-pagination.tsx            # paginação numerada (era products-pagination)       [movido]
-│   └── ui/dialog.tsx, radio-group.tsx, toggle-group.tsx, toggle.tsx   # shadcn (gerados)   [novos]
+│   └── ui/dialog.tsx, radio-group.tsx, toggle.tsx   # shadcn (gerados)                   [novos]
 ├── lib/
 │   ├── use-list-params.ts             # busca e página na URL (era use-product-list-params) [movido]
 │   ├── quantity.ts                    # parseQuantity: inteiro com separador de milhar       [novo]

@@ -6,6 +6,7 @@
 import {
   EllipsisVerticalIcon,
   HistoryIcon,
+  PackageCheckIcon,
   PackageOpenIcon,
   PackagePlusIcon,
   SearchXIcon,
@@ -346,6 +347,16 @@ export function StockNoResults({
         Limpar busca
       </Button>
     </EmptyState>
+  );
+}
+
+export function StockNothingToRestock() {
+  return (
+    <EmptyState
+      icon={<PackageCheckIcon />}
+      title="Nenhum produto precisa de reposição."
+      description="Todos os produtos estão no mínimo ou acima dele."
+    />
   );
 }
 

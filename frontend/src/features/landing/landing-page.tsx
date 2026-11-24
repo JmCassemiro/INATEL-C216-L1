@@ -71,7 +71,7 @@ const FEATURES: Feature[] = [
     title: "Estoque com alerta",
     text: "Entradas e ajustes com motivo, histórico de movimentos e aviso quando um item fica abaixo do mínimo.",
     icon: BoxesIcon,
-    available: false,
+    available: true,
     tone: "from-emerald-400 to-teal-600",
   },
   {
@@ -225,8 +225,8 @@ export function LandingPage() {
             Tudo o que o balcão precisa, num sistema só.
           </h2>
           <p className="mt-4 max-w-2xl text-lg text-muted-foreground">
-            O NexoPDV cresce por partes. O catálogo já está no ar; o caixa, o
-            estoque e o crediário chegam nas próximas versões.
+            O NexoPDV cresce por partes. O catálogo e o estoque já estão no ar;
+            o caixa e o crediário chegam nas próximas versões.
           </p>
           <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {FEATURES.map((feature) => (

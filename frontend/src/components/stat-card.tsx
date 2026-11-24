@@ -7,6 +7,8 @@ const TONES = {
   brand: "bg-accent text-primary",
   tag: "bg-price-tag/25 text-warning",
   success: "bg-success/10 text-success",
+  warning: "bg-warning/10 text-warning",
+  danger: "bg-destructive/10 text-destructive",
   muted: "bg-muted text-muted-foreground",
 } as const;
 

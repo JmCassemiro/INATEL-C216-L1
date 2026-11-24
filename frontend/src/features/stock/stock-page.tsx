@@ -11,10 +11,11 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import { Toggle } from "@/components/ui/toggle";
 import type { Product } from "@/features/products/types";
 import { formatUnits } from "@/lib/quantity";
 import { useSearchTerm } from "@/lib/use-search-term";
-import { PAGE_SIZE, useStockPage } from "./queries";
+import { PAGE_SIZE, type StockView, useStockPage } from "./queries";
 import { StockEntryDialog } from "./stock-entry-dialog";
 import {
   StockEmpty,
@@ -22,12 +23,51 @@ import {
   StockListSkeleton,
   StockLoadError,
   StockNoResults,
+  StockNothingToRestock,
 } from "./stock-list";
+import { StockOverview } from "./stock-overview";
 import type { StockMovement } from "./types";
 import { useStockListParams } from "./use-stock-list-params";
 
-function countLabel(total: number): string {
-  return total === 1 ? "1 produto" : `${total} produtos`;
+function countLabel(total: number, view: StockView): string {
+  const products = total === 1 ? "1 produto" : `${total} produtos`;
+  return view === "restock" ? `${products} para repor` : products;
+}
+
+const VIEWS: { value: StockView; label: string }[] = [
+  { value: "all", label: "Todos" },
+  { value: "restock", label: "Para repor" },
+];
+
+/** Escolha entre todos os produtos e só os para repor (FR-017). */
+function ViewSwitch({
+  view,
+  onChange,
+}: {
+  view: StockView;
+  onChange: (view: StockView) => void;
+}) {
+  return (
+    // biome-ignore lint/a11y/useSemanticElements: `fieldset` é para campos de formulário; aqui são dois botões de alternância.
+    <div
+      role="group"
+      aria-label="Mostrar"
+      className="inline-flex rounded-full bg-muted p-1"
+    >
+      {VIEWS.map((option) => (
+        <Toggle
+          key={option.value}
+          pressed={view === option.value}
+          onPressedChange={(pressed) => {
+            if (pressed) onChange(option.value);
+          }}
+          className="h-8 rounded-full px-4 font-semibold text-muted-foreground data-[state=on]:bg-card data-[state=on]:text-foreground data-[state=on]:shadow-sm"
+        >
+          {option.label}
+        </Toggle>
+      ))}
+    </div>
+  );
 }
 
 /** Faixa de título noturna, no mesmo desenho da seção Produtos (DESIGN.md). */
@@ -57,7 +97,8 @@ function PageBand({ count }: { count: string | null }) {
 }
 
 export function StockPage() {
-  const { search, page, view, setSearch, setPage } = useStockListParams();
+  const { search, page, view, setSearch, setPage, setView } =
+    useStockListParams();
   const query = useStockPage(search, page, view);
   const data = query.data;
   const {
@@ -113,11 +154,13 @@ export function StockPage() {
   } else if (!data) {
     content = <StockListSkeleton />;
   } else if (data.total === 0) {
-    content = search ? (
-      <StockNoResults term={search} onClear={clearSearch} />
-    ) : (
-      <StockEmpty />
-    );
+    if (search) {
+      content = <StockNoResults term={search} onClear={clearSearch} />;
+    } else if (view === "restock") {
+      content = <StockNothingToRestock />;
+    } else {
+      content = <StockEmpty />;
+    }
   } else {
     content = (
       <>
@@ -142,10 +185,12 @@ export function StockPage() {
       <PageBand
         count={
           data && data.total > 0 && !query.isError
-            ? countLabel(data.total)
+            ? countLabel(data.total, view)
             : null
         }
       />
+
+      <StockOverview />
 
       <section
         aria-label="Posição de estoque"
@@ -164,6 +209,7 @@ export function StockPage() {
               onChange={(event) => setTerm(event.target.value)}
             />
           </InputGroup>
+          <ViewSwitch view={view} onChange={setView} />
         </div>
         {content}
       </section>

@@ -13,6 +13,7 @@ import {
 import { Link, NavLink } from "react-router";
 import { BrandMark } from "@/components/brand/brand-mark";
 import { useCatalogFirstPage } from "@/features/products/queries";
+import { useStockSummary } from "@/features/stock/queries";
 import { useOnlineStatus } from "@/lib/use-online-status";
 import { cn } from "@/lib/utils";
 
@@ -40,12 +41,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
       <nav aria-label="Seções" className="flex flex-col gap-1 px-3">
         <p className="type-eyebrow px-3 pb-2 text-sidebar-muted">Retaguarda</p>
         <ProductsLink onNavigate={onNavigate} />
-        <SectionLink
-          to="/stock"
-          label="Estoque"
-          icon={BoxesIcon}
-          onNavigate={onNavigate}
-        />
+        <StockLink onNavigate={onNavigate} />
         {UPCOMING.map(({ label, icon: Icon }) => (
           <span
             key={label}
@@ -82,6 +78,30 @@ function ProductsLink({ onNavigate }: { onNavigate?: () => void }) {
             className="ml-auto rounded-full bg-price-tag px-2 py-0.5 text-[11px] font-bold tabular-nums text-price-tag-foreground"
           >
             {total}
+          </span>
+        )
+      }
+    />
+  );
+}
+
+/** Estoque, com o número de produtos para repor quando há algum (spec 011, FR-026). */
+function StockLink({ onNavigate }: { onNavigate?: () => void }) {
+  const restock = useStockSummary().data?.restock_count ?? 0;
+  return (
+    <SectionLink
+      to="/stock"
+      label="Estoque"
+      icon={BoxesIcon}
+      onNavigate={onNavigate}
+      badge={
+        restock > 0 && (
+          // O número repete o da seção; para o leitor de tela, o link é só "Estoque".
+          <span
+            aria-hidden="true"
+            className="ml-auto rounded-full bg-warning px-2 py-0.5 text-[11px] font-bold tabular-nums text-white"
+          >
+            {restock}
           </span>
         )
       }

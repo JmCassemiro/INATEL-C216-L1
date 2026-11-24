@@ -38,11 +38,25 @@ describe("Visão geral do catálogo (indicadores)", () => {
     expect(range).toHaveTextContent("R$ 159,90");
   });
 
-  it("mostra o estoque como 'em breve', sem número inventado", async () => {
-    seedClothes();
+  it("FR-026 (011): o indicador de estoque mostra quantos estão para repor, com atalho", async () => {
+    catalog.seed(
+      {
+        name: "Camiseta Básica Branca M",
+        barcode: "7891000315507",
+        stock_quantity: 4,
+        min_stock: 10,
+      },
+      { name: "Meia Cano Curto", barcode: "7894900011517", min_stock: 2 },
+      { name: "Calça Jeans Azul 42", barcode: "7896543210982" },
+    );
     renderApp();
 
-    expect(await findIndicator("Estoque")).toHaveTextContent("em breve");
+    const stock = await findIndicator("Estoque");
+    expect(await within(stock).findByText("2")).toBeVisible();
+    expect(stock).toHaveTextContent("Para repor");
+    expect(
+      within(stock).getByRole("link", { name: "Ver lista de reposição" }),
+    ).toHaveAttribute("href", "/stock?view=restock");
   });
 
   it("os indicadores olham o catálogo inteiro, não a busca", async () => {

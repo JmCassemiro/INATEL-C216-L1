@@ -218,8 +218,14 @@ Decisões técnicas da spec 011. Cada uma traz o que foi escolhido, por quê e o
   histórico abre num `Sheet` lateral, como o formulário de produto. O ajuste usa um
   `RadioGroup` "Adicionar / Retirar", a quantidade sempre positiva e a prévia "Saldo: 36 → 34"
   (FR-020), calculada a partir do saldo exibido. Componentes shadcn novos, gerados pela CLI:
-  `dialog`, `radio-group` e `toggle-group` (filtro "Todos / Para repor"); o pacote `radix-ui`
-  já instalado cobre os três, então não há dependência nova.
+  `dialog`, `radio-group` e `toggle` (filtro "Todos / Para repor", dois `Toggle` com
+  `aria-pressed` num grupo "Mostrar"); o pacote `radix-ui` já instalado cobre os três, então não
+  há dependência nova.
+- **Na implementação (2026-11-24):** o `toggle-group` chegou a ser gerado e foi descartado: o
+  `ToggleGroup` do Radix, no modo de escolha única, expõe os itens com papel de rádio, e o
+  contrato da interface pede botões com `aria-pressed`. O `add dialog` perguntou se sobrescrevia o
+  `button.tsx`; a resposta foi não, para manter a altura de 36 px da 007. O botão de fechar do
+  `dialog` foi traduzido ("Fechar").
 - **Por quê:** o diálogo mantém a lista visível atrás e é o padrão para ações curtas; o painel
   lateral comporta a tabela paginada do histórico. O lojista nunca digita sinal de menos: a
   direção é uma escolha explícita.
