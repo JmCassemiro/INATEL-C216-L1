@@ -171,13 +171,13 @@ commit seguem a tabela "Ordem de implementação e commits" do plano.
 
 **Checkpoint (commit 10)**: `test(e2e): cobre reposicao, entrada e ajuste com persistencia`.
 
-- [ ] T058 [P] Documentar: seção de estoque e `make test-postgres` no `README.md`; comando em `CLAUDE.md`; pílulas de situação em `frontend/DESIGN.md`; nota em `specs/002-produtos/spec.md` de que estoque e alertas foram para a 011
-- [ ] T059 Rodar `make check-all` e `make test-postgres`; conferir o roteiro de [quickstart.md](quickstart.md) na stack do Compose
+- [X] T058 [P] Documentar: seção de estoque e `make test-postgres` no `README.md`; comando em `CLAUDE.md`; pílulas de situação em `frontend/DESIGN.md`; nota em `specs/002-produtos/spec.md` de que estoque e alertas foram para a 011
+- [X] T059 Rodar `make check-all` e `make test-postgres`; conferir o roteiro de [quickstart.md](quickstart.md) na stack do Compose
 
 **Checkpoint (commit 11)**: `docs(estoque): documenta o controle de estoque`.
 
-- [ ] T060 Escrever `explicacao/07-spec-011-estoque.md` (local, nunca versionado): o que foi feito, por que o bloqueio da linha, a sequência do histórico e como explicar no vídeo
-- [ ] T061 Push da branch `011-estoque` e PR para `projeto-final` com os labels de costume (o PR #12 entra antes; até lá, o diff mostra também os commits dele)
+- [X] T060 Escrever `explicacao/07-spec-011-estoque.md` (local, nunca versionado): o que foi feito, por que o bloqueio da linha, a sequência do histórico e como explicar no vídeo
+- [X] T061 Push da branch `011-estoque` e PR para `projeto-final` com os labels de costume (o PR #12 entra antes; até lá, o diff mostra também os commits dele)
 
 ---
 

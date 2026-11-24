@@ -14,6 +14,8 @@ Rodar a partir da raiz do repositório:
 
 - `make install` — instala as dependências do back-end (Poetry)
 - `make test` — roda os testes (pytest)
+- `make test-postgres` — os mesmos testes num PostgreSQL descartável (Docker), como no CI; só
+  nele roda o teste de concorrência do estoque
 - `make lint` — verifica o código (`ruff check`)
 - `make format` — formata o código (`ruff format`); o CI falha se o código não estiver formatado
 - `make up` / `make down` — sobe/derruba a stack (painel, API e PostgreSQL) no Docker Compose

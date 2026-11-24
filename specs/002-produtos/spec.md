@@ -19,7 +19,7 @@ caixa registra a venda no balcão. Esta feature entrega esse catálogo — a bas
 specs de vendas, estoque e dashboard (roadmap 003–006) vão ser construídas.
 
 **Fora desta spec** (registrado no roadmap): quantidade em estoque, estoque mínimo e alertas de
-reposição; restrição de alteração de preço ao Admin (depende da spec 001, autenticação);
+reposição (feitos na spec 011, `specs/011-estoque/`); restrição de alteração de preço ao Admin (depende da spec 001, autenticação);
 armazenamento permanente em banco de dados (próxima Prática).
 
 ## User Scenarios & Testing *(mandatory)*
