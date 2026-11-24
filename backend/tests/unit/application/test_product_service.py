@@ -4,7 +4,7 @@ from decimal import Decimal
 
 import pytest
 
-from app.application.commands import ProductChanges, ProductData
+from app.application.commands import ProductChanges, ProductData, ProductOrder
 from app.application.pagination import Page
 from app.application.services.product_service import ProductService
 from app.domain.barcode import Barcode
@@ -321,3 +321,46 @@ def test_remove_unknown_id_raises_not_found(service):
     """FR-008: remover id desconhecido é "não encontrado"."""
     with pytest.raises(ProductNotFoundError):
         service.remove(uuid.uuid7())
+
+
+# --- estoque (spec 011) -------------------------------------------------------
+
+
+def test_create_stores_the_minimum_stock(service, repository):
+    """FR-012 (011): o mínimo informado no cadastro é gravado."""
+    product = service.create(product_data(min_stock=10))
+
+    assert product.min_stock == 10
+    assert repository.get_by_id(product.id) == product
+
+
+def test_replace_sets_the_minimum_stock(service):
+    """FR-012 (011): o PUT troca o mínimo; omitido, ele volta a 0."""
+    product = service.create(product_data(min_stock=10))
+
+    assert service.replace(product.id, product_data(min_stock=3)).min_stock == 3
+    assert service.replace(product.id, product_data()).min_stock == 0
+
+
+def test_update_changes_only_the_minimum_stock(service):
+    """FR-012 (011): o PATCH pode mudar só o mínimo."""
+    product = service.create(product_data(min_stock=10))
+
+    changed = service.update(product.id, ProductChanges(min_stock=4))
+
+    assert changed.min_stock == 4
+    assert changed.name == product.name
+
+
+def test_list_passes_restock_filter_and_order(service):
+    """FR-014, FR-016 (011): a listagem repassa o filtro e a ordem ao repositório."""
+    service.create(product_data(name="Banana", barcode=gtin13(1), min_stock=2))
+    service.create(product_data(name="Abacate", barcode=gtin13(2), min_stock=5))
+    service.create(product_data(name="Caju", barcode=gtin13(3)))
+
+    by_name = service.list(1, 10, None, order=ProductOrder.NAME)
+    restock = service.list(1, 10, None, restock_only=True, order=ProductOrder.SHORTFALL)
+
+    assert [p.name for p in by_name.items] == ["Abacate", "Banana", "Caju"]
+    assert [p.name for p in restock.items] == ["Abacate", "Banana"]
+    assert restock.total == 2

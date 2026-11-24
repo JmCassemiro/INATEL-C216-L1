@@ -64,6 +64,7 @@ describe("Cadastro de produto (US2)", () => {
       description: null,
       barcode: "7891000315507",
       price: "49.90",
+      min_stock: 0,
     });
     await waitFor(() =>
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
@@ -254,5 +255,50 @@ describe("Cadastro de produto (US2)", () => {
     expect(
       await screen.findByRole("dialog", { name: "Novo produto" }),
     ).toBeVisible();
+  });
+
+  it("FR-012 (011): envia o estoque mínimo informado, com a explicação do campo", async () => {
+    const { user } = renderApp();
+    const dialog = await openForm(user);
+    const minimum = within(dialog).getByRole("textbox", {
+      name: "Estoque mínimo (opcional)",
+    });
+
+    expect(minimum).toHaveAccessibleDescription(
+      "Abaixo dessa quantidade, o produto entra na lista de reposição.",
+    );
+    await fill(user, dialog, CAMISETA);
+    await user.type(minimum, "10");
+    await user.click(
+      within(dialog).getByRole("button", { name: "Cadastrar produto" }),
+    );
+
+    expect(await screen.findByText("Produto cadastrado")).toBeInTheDocument();
+    expect(catalog.requestsTo("POST")[0]?.body).toMatchObject({
+      min_stock: 10,
+    });
+  });
+
+  it("FR-012 (011): mínimo inválido não é enviado e mostra o motivo no campo", async () => {
+    const { user } = renderApp();
+    const dialog = await openForm(user);
+
+    await fill(user, dialog, CAMISETA);
+    await user.type(
+      within(dialog).getByRole("textbox", {
+        name: "Estoque mínimo (opcional)",
+      }),
+      "1,5",
+    );
+    await user.click(
+      within(dialog).getByRole("button", { name: "Cadastrar produto" }),
+    );
+
+    expect(
+      await within(dialog).findByText(
+        "Use só números inteiros, como 24 ou 1.000.",
+      ),
+    ).toBeInTheDocument();
+    expect(catalog.requestsTo("POST")).toHaveLength(0);
   });
 });

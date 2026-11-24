@@ -9,6 +9,7 @@ const VALID: ProductFormValues = {
   description: "",
   barcode: "7891000315507",
   price: "49,90",
+  min_stock: "",
 };
 
 describe("validateProductForm (FR-009, data-model §2)", () => {
@@ -26,6 +27,7 @@ describe("validateProductForm (FR-009, data-model §2)", () => {
         description: null,
         barcode: "7891000315507",
         price: "49.90",
+        min_stock: 0,
       },
     });
   });
@@ -72,6 +74,7 @@ describe("validateProductForm (FR-009, data-model §2)", () => {
         description: "",
         barcode: "7891000315508",
         price: "0",
+        min_stock: "",
       }),
     ).toEqual({
       ok: false,
@@ -80,6 +83,30 @@ describe("validateProductForm (FR-009, data-model §2)", () => {
         barcode: "Confira os dígitos: o código de barras não é válido.",
         price: "Informe um preço maior que zero.",
       },
+    });
+  });
+});
+
+describe("validateProductForm: estoque mínimo (spec 011, FR-012)", () => {
+  it.each([
+    ["", 0],
+    ["10", 10],
+    [" 7 ", 7],
+    ["1.000", 1000],
+  ])("aceita %j como %i", (text, expected) => {
+    const result = validateProductForm({ ...VALID, min_stock: text });
+
+    expect(result.ok && result.input.min_stock).toBe(expected);
+  });
+
+  it.each([
+    ["-1", "Use só números inteiros, como 24 ou 1.000."],
+    ["1,5", "Use só números inteiros, como 24 ou 1.000."],
+    ["100000", "Use no máximo 99.999."],
+  ])("recusa %j no campo min_stock", (text, error) => {
+    expect(validateProductForm({ ...VALID, min_stock: text })).toEqual({
+      ok: false,
+      errors: { min_stock: error },
     });
   });
 });

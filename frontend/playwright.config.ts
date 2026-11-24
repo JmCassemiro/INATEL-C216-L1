@@ -6,6 +6,9 @@ const baseURL = process.env.E2E_BASE_URL ?? "http://localhost:5173";
 
 export default defineConfig({
   testDir: "./tests/e2e",
+  // Os testes usam o mesmo banco real: em paralelo, um veria os cadastros do outro
+  // (o produto "mais novo" da lista, códigos gerados no mesmo milissegundo).
+  workers: 1,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "list",

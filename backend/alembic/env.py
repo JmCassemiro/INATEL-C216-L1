@@ -10,6 +10,7 @@ from alembic import context
 from sqlalchemy import Connection, create_engine, pool
 
 import app.infrastructure.models.product  # noqa: F401 (registra a tabela no metadata)
+import app.infrastructure.models.stock_movement  # noqa: F401 (idem)
 from app.infrastructure.database.base import Base
 from app.infrastructure.database.session import database_url
 

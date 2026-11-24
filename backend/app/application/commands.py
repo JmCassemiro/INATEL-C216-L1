@@ -16,6 +16,17 @@ UNSET = _Unset.UNSET
 type Unset = Literal[_Unset.UNSET]
 
 
+class ProductOrder(Enum):
+    """Ordem da listagem de produtos (spec 011, research D7)."""
+
+    NEWEST = "newest"
+    """Do mais recente para o mais antigo (spec 007): o padrão."""
+    NAME = "name"
+    """Alfabética, sem diferenciar maiúsculas e acentos; empate pelo id."""
+    SHORTFALL = "shortfall"
+    """Maior falta para o mínimo primeiro; empate pelo nome."""
+
+
 @dataclass(frozen=True, slots=True)
 class ProductData:
     """Cadastro completo de um produto: usado para cadastrar e substituir."""
@@ -24,6 +35,7 @@ class ProductData:
     description: str | None
     barcode: str
     price: Decimal
+    min_stock: int = 0
 
 
 @dataclass(frozen=True, slots=True)
@@ -34,6 +46,7 @@ class ProductChanges:
     description: str | None | Unset = UNSET
     barcode: str | Unset = UNSET
     price: Decimal | Unset = UNSET
+    min_stock: int | Unset = UNSET
 
     def is_empty(self) -> bool:
         return all(getattr(self, field.name) is UNSET for field in fields(self))

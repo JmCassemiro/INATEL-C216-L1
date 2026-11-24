@@ -11,6 +11,7 @@ from app.api.schemas.product import (
     ProductOutput,
     ProductPageOutput,
 )
+from app.application.commands import ProductOrder
 from app.application.pagination import DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE
 from app.application.services.product_service import ProductService
 
@@ -34,8 +35,14 @@ def list_products(
     page: Annotated[int, Query(ge=1)] = 1,
     size: Annotated[int, Query(ge=1, le=MAX_PAGE_SIZE)] = DEFAULT_PAGE_SIZE,
     name: str | None = None,
+    restock: bool = False,
+    sort: ProductOrder = ProductOrder.NEWEST,
 ) -> ProductPageOutput:
-    return ProductPageOutput.from_page(service.list(page, size, name))
+    """`restock=true` deixa só os produtos abaixo do mínimo; `sort` escolhe a ordem
+    (spec 011, D7)."""
+    return ProductPageOutput.from_page(
+        service.list(page, size, name, restock_only=restock, order=sort)
+    )
 
 
 @router.get("/barcode/{barcode}")

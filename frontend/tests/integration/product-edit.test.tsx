@@ -73,6 +73,7 @@ describe("Edição de produto (US3)", () => {
           description: "Algodão penteado",
           barcode: "7891000315507",
           price: "54.90",
+          min_stock: 0,
         },
       },
     ]);
@@ -190,5 +191,29 @@ describe("Edição de produto (US3)", () => {
     expect(
       await screen.findByRole("dialog", { name: "Editar produto" }),
     ).toBeVisible();
+  });
+
+  it("FR-012 (011): abre com o mínimo atual e o envia no PUT", async () => {
+    const [camiseta] = catalog.seed({
+      name: "Camiseta Básica Branca M",
+      barcode: "7891000315507",
+      price: "49.90",
+      min_stock: 5,
+    });
+    const { user } = renderApp();
+    const dialog = within(await openEdit(user, "Camiseta Básica Branca M"));
+    const minimum = dialog.getByRole("textbox", {
+      name: "Estoque mínimo (opcional)",
+    });
+
+    expect(minimum).toHaveValue("5");
+    await replaceText(user, minimum, "12");
+    await user.click(dialog.getByRole("button", { name: "Salvar alterações" }));
+
+    expect(await screen.findByText("Alterações salvas")).toBeInTheDocument();
+    expect(catalog.requestsTo("PUT")[0]).toMatchObject({
+      path: `/products/${camiseta?.id}`,
+      body: { min_stock: 12 },
+    });
   });
 });

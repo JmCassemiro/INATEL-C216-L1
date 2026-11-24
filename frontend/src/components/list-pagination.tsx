@@ -3,7 +3,9 @@ import { Button } from "@/components/ui/button";
 import { pageItems } from "@/lib/pagination";
 import { cn } from "@/lib/utils";
 
-type ProductsPaginationProps = {
+type ListPaginationProps = {
+  /** Nome acessível da navegação; cada lista da tela tem o seu. */
+  label?: string;
   page: number;
   pageSize: number;
   total: number;
@@ -11,22 +13,24 @@ type ProductsPaginationProps = {
 };
 
 /**
- * Paginação da lista (FR-002): onde o lojista está, quantas páginas existem e os
- * números para pular direto; a página atual fica em índigo (DESIGN.md).
+ * Paginação de uma lista (spec 007, FR-002): onde o lojista está, quantas páginas
+ * existem e os números para pular direto; a página atual fica em índigo (DESIGN.md).
+ * Usada pelos produtos, pelo estoque e pelo histórico de movimentações.
  */
-export function ProductsPagination({
+export function ListPagination({
+  label = "Paginação",
   page,
   pageSize,
   total,
   onPageChange,
-}: ProductsPaginationProps) {
+}: ListPaginationProps) {
   const pages = Math.max(1, Math.ceil(total / pageSize));
   const first = (page - 1) * pageSize + 1;
   const last = Math.min(page * pageSize, total);
 
   return (
     <nav
-      aria-label="Paginação"
+      aria-label={label}
       className="flex flex-wrap items-center justify-between gap-3 border-t px-4 py-4 sm:px-6"
     >
       <div className="flex flex-col">

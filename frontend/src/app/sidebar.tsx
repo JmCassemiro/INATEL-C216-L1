@@ -13,6 +13,7 @@ import {
 import { Link, NavLink } from "react-router";
 import { BrandMark } from "@/components/brand/brand-mark";
 import { useCatalogFirstPage } from "@/features/products/queries";
+import { useStockSummary } from "@/features/stock/queries";
 import { useOnlineStatus } from "@/lib/use-online-status";
 import { cn } from "@/lib/utils";
 
@@ -21,7 +22,6 @@ const ITEM =
 
 /** Seções que ainda dependem de uma spec: aparecem, mas sem link (nunca link morto). */
 const UPCOMING: { label: string; icon: LucideIcon }[] = [
-  { label: "Estoque", icon: BoxesIcon },
   { label: "Vendas", icon: ShoppingCartIcon },
 ];
 
@@ -41,6 +41,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
       <nav aria-label="Seções" className="flex flex-col gap-1 px-3">
         <p className="type-eyebrow px-3 pb-2 text-sidebar-muted">Retaguarda</p>
         <ProductsLink onNavigate={onNavigate} />
+        <StockLink onNavigate={onNavigate} />
         {UPCOMING.map(({ label, icon: Icon }) => (
           <span
             key={label}
@@ -64,8 +65,67 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
 function ProductsLink({ onNavigate }: { onNavigate?: () => void }) {
   const total = useCatalogFirstPage().data?.total;
   return (
-    <NavLink
+    <SectionLink
       to="/products"
+      label="Produtos"
+      icon={PackageIcon}
+      onNavigate={onNavigate}
+      badge={
+        total !== undefined && (
+          // A contagem repete a da página; para o leitor de tela, o link é só "Produtos".
+          <span
+            aria-hidden="true"
+            className="ml-auto rounded-full bg-price-tag px-2 py-0.5 text-[11px] font-bold tabular-nums text-price-tag-foreground"
+          >
+            {total}
+          </span>
+        )
+      }
+    />
+  );
+}
+
+/** Estoque, com o número de produtos para repor quando há algum (spec 011, FR-026). */
+function StockLink({ onNavigate }: { onNavigate?: () => void }) {
+  const restock = useStockSummary().data?.restock_count ?? 0;
+  return (
+    <SectionLink
+      to="/stock"
+      label="Estoque"
+      icon={BoxesIcon}
+      onNavigate={onNavigate}
+      badge={
+        restock > 0 && (
+          // O número repete o da seção; para o leitor de tela, o link é só "Estoque".
+          <span
+            aria-hidden="true"
+            className="ml-auto rounded-full bg-warning px-2 py-0.5 text-[11px] font-bold tabular-nums text-white"
+          >
+            {restock}
+          </span>
+        )
+      }
+    />
+  );
+}
+
+/** Link de uma seção do painel; a seção atual fica destacada (`aria-current`). */
+function SectionLink({
+  to,
+  label,
+  icon: Icon,
+  badge,
+  onNavigate,
+}: {
+  to: string;
+  label: string;
+  icon: LucideIcon;
+  badge?: React.ReactNode;
+  onNavigate?: () => void;
+}) {
+  return (
+    <NavLink
+      to={to}
       onClick={onNavigate}
       className={cn(
         ITEM,
@@ -73,20 +133,12 @@ function ProductsLink({ onNavigate }: { onNavigate?: () => void }) {
         "aria-[current=page]:bg-sidebar-accent aria-[current=page]:text-night-foreground aria-[current=page]:shadow-[inset_0_1px_0_rgb(255_255_255/0.06)]",
       )}
     >
-      <PackageIcon
+      <Icon
         className="size-[18px] group-aria-[current=page]:text-price-tag"
         aria-hidden="true"
       />
-      Produtos
-      {total !== undefined && (
-        // A contagem repete a da página; para o leitor de tela, o link é só "Produtos".
-        <span
-          aria-hidden="true"
-          className="ml-auto rounded-full bg-price-tag px-2 py-0.5 text-[11px] font-bold tabular-nums text-price-tag-foreground"
-        >
-          {total}
-        </span>
-      )}
+      {label}
+      {badge}
     </NavLink>
   );
 }

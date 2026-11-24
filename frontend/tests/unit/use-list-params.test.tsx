@@ -2,7 +2,7 @@ import { act, renderHook } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { MemoryRouter, useLocation } from "react-router";
 import { describe, expect, it } from "vitest";
-import { useProductListParams } from "@/features/products/use-product-list-params";
+import { useListParams } from "@/lib/use-list-params";
 
 function renderParams(url: string) {
   const wrapper = ({ children }: { children: ReactNode }) => (
@@ -12,7 +12,7 @@ function renderParams(url: string) {
     () => {
       const location = useLocation();
       return {
-        ...useProductListParams(),
+        ...useListParams(),
         url: location.pathname + location.search,
       };
     },
@@ -20,7 +20,7 @@ function renderParams(url: string) {
   );
 }
 
-describe("useProductListParams (FR-003, FR-004, data-model §3)", () => {
+describe("useListParams (FR-003, FR-004, data-model §3)", () => {
   it("lê a busca e a página da URL", () => {
     const { result } = renderParams("/products?search=camis&page=2");
 

@@ -14,6 +14,15 @@ PRODUCT = {
 }
 
 
+NEW_STOCK = {
+    "stock_quantity": 0,
+    "min_stock": 0,
+    "shortfall": 0,
+    "stock_status": "out_of_stock",
+}
+"""Campos de estoque de um produto recém-cadastrado (spec 011)."""
+
+
 def create_product(client, **overrides) -> dict:
     response = client.post("/products", json=PRODUCT | overrides)
     assert response.status_code == 201, response.text
@@ -40,6 +49,7 @@ def test_post_creates_product_and_returns_201(client):
         "description": "Algodão",
         "barcode": "7891000315507",
         "price": "49.90",
+        **NEW_STOCK,
     }
 
 
@@ -300,7 +310,7 @@ def test_put_replaces_all_data_and_keeps_id(client, product):
     response = client.put(f"/products/{product['id']}", json=NEW_DATA)
 
     assert response.status_code == 200
-    assert response.json() == {"id": product["id"], **NEW_DATA}
+    assert response.json() == {"id": product["id"], **NEW_DATA, **NEW_STOCK}
     assert client.get(f"/products/{product['id']}").json() == response.json()
 
 
@@ -463,3 +473,107 @@ def test_delete_malformed_id_returns_422(client):
 def test_delete_unknown_id_returns_404(client):
     """FR-008: remover id desconhecido devolve 404."""
     assert client.delete(f"/products/{uuid.uuid7()}").status_code == 404
+
+
+# --- estoque (spec 011) ---------------------------------------------------------
+
+
+def test_post_accepts_the_minimum_stock(client):
+    """FR-012 (011): o mínimo vai no cadastro; o saldo começa em 0."""
+    body = create_product(client, min_stock=10)
+
+    assert body["min_stock"] == 10
+    assert body["stock_quantity"] == 0
+    assert body["shortfall"] == 10
+    assert body["stock_status"] == "out_of_stock"
+
+
+@pytest.mark.parametrize("min_stock", [-1, 100_000, "10", 1.5, None])
+def test_post_rejects_invalid_minimum_stock(client, min_stock):
+    """FR-001 (011): mínimo inteiro de 0 a 99.999, no campo `min_stock`."""
+    response = client.post("/products", json=PRODUCT | {"min_stock": min_stock})
+
+    assert response.status_code == 422
+    assert error_locs(response) == [["body", "min_stock"]]
+
+
+def test_stock_quantity_sent_in_the_body_is_ignored(client, product):
+    """FR-002 (011): o cadastro não altera o saldo, nem se o cliente o enviar."""
+    created = create_product(client, barcode="96385074", stock_quantity=50)
+    replaced = client.put(
+        f"/products/{product['id']}", json=NEW_DATA | {"stock_quantity": 50}
+    )
+
+    assert created["stock_quantity"] == 0
+    assert replaced.json()["stock_quantity"] == 0
+
+
+def test_put_without_minimum_stock_resets_it_to_zero(client):
+    """FR-012 (011), D9: o PUT substitui o cadastro; mínimo omitido vira 0."""
+    product = create_product(client, min_stock=10)
+
+    response = client.put(f"/products/{product['id']}", json=NEW_DATA)
+
+    assert response.json()["min_stock"] == 0
+
+
+def test_patch_changes_only_the_minimum_stock(client, product):
+    """FR-012 (011): o PATCH aceita só o mínimo."""
+    response = client.patch(f"/products/{product['id']}", json={"min_stock": 7})
+
+    assert response.status_code == 200
+    assert response.json() == product | {
+        "min_stock": 7,
+        "shortfall": 7,
+        "stock_status": "out_of_stock",
+    }
+
+
+def test_patch_rejects_null_minimum_stock(client, product):
+    """FR-012 (011): no PATCH, `null` não é um mínimo."""
+    response = client.patch(f"/products/{product['id']}", json={"min_stock": None})
+
+    assert response.status_code == 422
+    assert error_locs(response) == [["body", "min_stock"]]
+
+
+@pytest.fixture
+def shelf(client) -> dict[str, dict]:
+    """Cadastrados numa ordem que não é a alfabética nem a da falta."""
+    return {
+        "abacate": create_product(client, name="abacate", barcode=gtin13(13)),
+        "agua": create_product(
+            client, name="Água Mineral", barcode=gtin13(12), min_stock=9
+        ),
+        "banana": create_product(
+            client, name="Banana", barcode=gtin13(11), min_stock=4
+        ),
+    }
+
+
+def names(response) -> list[str]:
+    return [item["name"] for item in response.json()["items"]]
+
+
+def test_list_sorted_by_name(client, shelf):
+    """FR-016 (011): `sort=name` ordena sem diferenciar maiúsculas e acentos."""
+    response = client.get("/products", params={"sort": "name"})
+
+    assert response.status_code == 200
+    assert names(response) == ["abacate", "Água Mineral", "Banana"]
+
+
+def test_list_restock_sorted_by_shortfall(client, shelf):
+    """FR-014 (011): `restock=true&sort=shortfall`, maior falta primeiro."""
+    response = client.get("/products", params={"restock": "true", "sort": "shortfall"})
+
+    assert response.json()["total"] == 2
+    assert names(response) == ["Água Mineral", "Banana"]
+
+
+def test_list_rejects_unknown_sort(client):
+    """RP-002 (011): ordem desconhecida é recusada."""
+    response = client.get("/products", params={"sort": "price"})
+
+    assert response.status_code == 422
+    assert error_locs(response) == [["query", "sort"]]

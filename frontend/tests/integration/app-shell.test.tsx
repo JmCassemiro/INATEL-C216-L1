@@ -44,10 +44,13 @@ describe("Layout do painel (FR-018)", () => {
     renderApp();
 
     const sections = await screen.findByRole("navigation", { name: "Seções" });
-    expect(within(sections).getByText("Estoque")).toBeVisible();
     expect(within(sections).getByText("Vendas")).toBeVisible();
-    expect(within(sections).getAllByText("em breve")).toHaveLength(2);
-    expect(within(sections).getAllByRole("link")).toHaveLength(1);
+    expect(within(sections).getAllByText("em breve")).toHaveLength(1);
+    expect(
+      within(sections)
+        .getAllByRole("link")
+        .map((link) => link.textContent),
+    ).toEqual([expect.stringContaining("Produtos"), "Estoque"]);
   });
 
   it("a barra superior tem a troca de tema e o botão do menu", async () => {

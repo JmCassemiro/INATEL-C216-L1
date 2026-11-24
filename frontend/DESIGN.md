@@ -108,7 +108,7 @@ Desktop (≥ 1024 px)
 │ ▣ Produtos │ ╭─ faixa noite com brilho ──────────────────────────────╮   │
 │   12       │ │ Catálogo da loja                          ╱R$ 49,⁹⁰╱   │   │
 │ ▢ Estoque  │ │ Produtos             [+ Novo produto]                  │   │
-│   em breve │ ╰───────────────────────────────────────────────────────╯   │
+│   3        │ ╰───────────────────────────────────────────────────────╯   │
 │ ▢ Vendas   │ [Catálogo 12] [Último cadastrado] [Códigos] [Estoque]       │
 │   em breve │ ╭─ tabela ──────────────────────────────────────────────╮   │
 │            │ │ [🔍 Buscar pelo nome]                                  │   │
@@ -125,8 +125,17 @@ Desktop (≥ 1024 px)
 - **Faixa de título**: gradiente noite com brilhos, título grande, contagem do catálogo e a ação
   principal em pílula amarela com brilho. À direita, a etiqueta inclinada com o preço do produto
   mais recente (decorativa, oculta para leitor de tela).
-- **Indicadores**: só dados reais da API. O que depende de uma spec futura (estoque) aparece como
-  "em breve", nunca com número inventado.
+- **Indicadores**: só dados reais da API. O que depende de uma spec futura aparece como
+  "em breve", nunca com número inventado. O de estoque mostra quantos produtos estão para repor,
+  com o atalho para a lista de reposição.
+- **Seção Estoque** (spec 011): a mesma faixa noite, três indicadores (para repor, sem estoque e
+  valor em estoque, este em amarelo por ser dinheiro), a busca com o filtro "Todos / Para
+  repor" e a tabela com saldo, mínimo, situação e as ações de entrada, ajuste e histórico.
+  Entrada e ajuste abrem em `Dialog` com ícone no cabeçalho; o histórico, em `Sheet` com
+  cabeçalho noite. O número de produtos para repor aparece em âmbar ao lado de Estoque no menu.
+- **Situação do estoque**: pílula com texto sempre visível. "Sem estoque" em Remarcação
+  (`destructive`), "Repor" (ou "Repor · faltam N") em Alerta (`warning`, âmbar), "Em dia" em
+  Caixa livre (`success`). Na tabela de produtos, só aparece quando não está em dia.
 - **Tabela** dentro de um cartão: busca no topo, bloco colorido com as iniciais em cada linha,
   pílula do tipo de código (EAN-13, EAN-8, UPC-A, GTIN-14), etiqueta de preço e ações.
   Paginação numerada com a página ativa em índigo.
@@ -159,6 +168,9 @@ shadcn/ui (estilo `nova`), tematizado pelos tokens de `src/index.css`.
 | Ações secundárias | `Button` `outline`, `ghost` + ícone na linha, `destructive` para confirmar remoção |
 | Formulário | `Field`/`FieldGroup`, `Input`, `Textarea`, `InputGroup` (prefixo `R$`) |
 | Cadastro e edição | `Sheet` pela direita, com cabeçalho noite |
+| Entrada e ajuste de estoque | `Dialog` com ícone no cabeçalho; ajuste com `RadioGroup` (Retirar / Adicionar) |
+| Histórico de movimentações | `Sheet` pela direita, com cabeçalho noite |
+| Filtro de visão | dois `Toggle` com `aria-pressed` num grupo em pílula |
 | Remover | `AlertDialog` |
 | Menu no celular | `Sheet` pela esquerda |
 | Carregando, vazio, erro | `Skeleton`, `Empty`, `Alert` |

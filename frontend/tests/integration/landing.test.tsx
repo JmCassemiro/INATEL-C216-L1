@@ -62,7 +62,7 @@ describe("Página de entrada", () => {
     expect(featureCard("Catálogo de produtos")).toHaveTextContent("Disponível");
     expect(featureCard("Etiqueta de gôndola")).toHaveTextContent("Disponível");
     expect(featureCard("Frente de caixa")).toHaveTextContent("Em breve");
-    expect(featureCard("Estoque com alerta")).toHaveTextContent("Em breve");
+    expect(featureCard("Estoque com alerta")).toHaveTextContent("Disponível");
   });
 
   it("explica o offline em três passos", async () => {

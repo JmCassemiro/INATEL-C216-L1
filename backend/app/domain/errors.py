@@ -36,3 +36,24 @@ class ProductNotFoundError(NotFoundError):
 class DuplicateBarcodeError(ConflictError):
     def __init__(self) -> None:
         super().__init__("Código de barras já cadastrado")
+
+
+class InsufficientStockError(ConflictError):
+    """A retirada deixaria o saldo negativo (spec 011, FR-006)."""
+
+    def __init__(self, available: int) -> None:
+        super().__init__(f"Saldo insuficiente: há {_units(available)} em estoque")
+        self.available = available
+
+
+class StockLimitExceededError(ConflictError):
+    """A movimentação levaria o saldo acima do teto (spec 011, FR-004)."""
+
+    def __init__(self) -> None:
+        super().__init__("O saldo não pode passar de 999.999 unidades")
+
+
+def _units(quantity: int) -> str:
+    """Quantidade no formato brasileiro, com a palavra no singular ou no plural."""
+    number = f"{quantity:,}".replace(",", ".")
+    return f"{number} unidade" if quantity == 1 else f"{number} unidades"

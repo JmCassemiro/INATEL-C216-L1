@@ -82,3 +82,11 @@ def test_configured_origin_replaces_the_default(monkeypatch, engine, session_fac
     with TestClient(create_app(engine)) as client:
         assert preflight(client, "http://localhost:5174").status_code == 200
         assert preflight(client, FRONTEND).status_code == 400
+
+
+def test_preflight_for_stock_entry_is_authorized(client):
+    """RP-005 (spec 011): o painel registra entradas com POST, já liberado."""
+    response = preflight(client, FRONTEND, "POST", f"{PRODUCT_PATH}/stock/entries")
+
+    assert response.status_code == 200
+    assert "POST" in response.headers["access-control-allow-methods"]
