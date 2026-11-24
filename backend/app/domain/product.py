@@ -7,6 +7,13 @@ from uuid import UUID
 from app.domain.barcode import Barcode
 from app.domain.errors import InvalidDataError, ProductNotFoundError
 from app.domain.price import Price
+from app.domain.stock import (
+    StockStatus,
+    needs_restock,
+    normalize_min_stock,
+    shortfall,
+    stock_status,
+)
 
 NAME_MAX_LENGTH = 120
 DESCRIPTION_MAX_LENGTH = 500
@@ -37,7 +44,11 @@ def normalize_description(text: str | None) -> str | None:
 
 @dataclass(frozen=True, slots=True)
 class Product:
-    """Produto do catálogo (data-model). Imutável: cada mudança gera nova instância."""
+    """Produto do catálogo (data-model). Imutável: cada mudança gera nova instância.
+
+    `min_stock` é dado do cadastro. `stock_quantity` é só leitura para o cadastro:
+    começa em 0 e só muda por movimentação de estoque (spec 011, FR-002, research D2).
+    """
 
     id: UUID
     name: str
@@ -45,10 +56,24 @@ class Product:
     barcode: Barcode
     price: Price
     removed_at: datetime | None = None
+    min_stock: int = 0
+    stock_quantity: int = 0
 
     @property
     def is_active(self) -> bool:
         return self.removed_at is None
+
+    @property
+    def shortfall(self) -> int:
+        return shortfall(self.stock_quantity, self.min_stock)
+
+    @property
+    def needs_restock(self) -> bool:
+        return needs_restock(self.stock_quantity, self.min_stock)
+
+    @property
+    def stock_status(self) -> StockStatus:
+        return stock_status(self.stock_quantity, self.min_stock)
 
     @classmethod
     def create(
@@ -57,14 +82,16 @@ class Product:
         description: str | None,
         barcode: str,
         price: Decimal | int | str,
+        min_stock: int = 0,
     ) -> Product:
-        """Cria um produto ativo, com id UUID v7 e os dados normalizados."""
+        """Cria um produto ativo, com id UUID v7, os dados normalizados e saldo 0."""
         return cls(
             id=uuid.uuid7(),
             name=normalize_name(name),
             description=normalize_description(description),
             barcode=Barcode(barcode),
             price=Price(price),
+            min_stock=normalize_min_stock(min_stock),
         )
 
     def updated(
@@ -73,8 +100,12 @@ class Product:
         description: str | None,
         barcode: str,
         price: Decimal | int | str,
+        min_stock: int = 0,
     ) -> Product:
-        """Nova versão com o cadastro completo trocado e o mesmo id (FR-012, FR-015)."""
+        """Nova versão com o cadastro completo trocado e o mesmo id (FR-012, FR-015).
+
+        O saldo (`stock_quantity`) continua o mesmo: o cadastro não o altera.
+        """
         self._ensure_active()
         return replace(
             self,
@@ -82,6 +113,7 @@ class Product:
             description=normalize_description(description),
             barcode=Barcode(barcode),
             price=Price(price),
+            min_stock=normalize_min_stock(min_stock),
         )
 
     def removed(self, at: datetime) -> Product:

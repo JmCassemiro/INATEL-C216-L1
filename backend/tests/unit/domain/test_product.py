@@ -1,4 +1,4 @@
-from dataclasses import FrozenInstanceError, fields
+from dataclasses import FrozenInstanceError, fields, replace
 from datetime import UTC, datetime
 from decimal import Decimal
 
@@ -8,6 +8,7 @@ from app.domain.barcode import Barcode
 from app.domain.errors import InvalidDataError, ProductNotFoundError
 from app.domain.price import Price
 from app.domain.product import Product, normalize_description, normalize_name
+from app.domain.stock import StockStatus
 
 FIELDS = [field.name for field in fields(Product)]
 
@@ -220,3 +221,66 @@ def test_removed_product_cannot_be_updated():
 
     with pytest.raises(ProductNotFoundError):
         removed.updated("Outro", None, "96385074", "1.00")
+
+
+# --- estoque (spec 011) -------------------------------------------------------------
+
+
+def test_new_product_starts_with_zero_stock_and_zero_minimum():
+    """FR-001 (011): produto novo começa com saldo 0 e, sem informar, mínimo 0."""
+    product = make_product()
+
+    assert product.stock_quantity == 0
+    assert product.min_stock == 0
+
+
+def test_create_accepts_the_minimum_stock():
+    """FR-012 (011): o mínimo é definido no cadastro."""
+    assert make_product(min_stock=10).min_stock == 10
+
+
+@pytest.mark.parametrize("value", [-1, 100_000])
+def test_create_rejects_invalid_minimum_stock(value):
+    """FR-001 (011): mínimo fora de 0 a 99.999 é recusado no campo `min_stock`."""
+    with pytest.raises(InvalidDataError) as error:
+        make_product(min_stock=value)
+
+    assert error.value.field == "min_stock"
+
+
+def test_updated_changes_the_minimum_and_keeps_the_stock_quantity():
+    """FR-002, FR-012 (011): editar o cadastro muda o mínimo, nunca o saldo."""
+    product = replace(make_product(min_stock=5), stock_quantity=36)
+
+    changed = product.updated("Camiseta", None, "7891000315507", "49.90", min_stock=10)
+
+    assert changed.min_stock == 10
+    assert changed.stock_quantity == 36
+
+
+def test_updated_rejects_invalid_minimum_stock():
+    """FR-001 (011): a edição aplica a mesma regra do mínimo."""
+    with pytest.raises(InvalidDataError) as error:
+        make_product().updated("Camiseta", None, "7891000315507", "49.90", min_stock=-1)
+
+    assert error.value.field == "min_stock"
+
+
+@pytest.mark.parametrize(
+    ("quantity", "minimum", "shortfall", "needs_restock", "status"),
+    [
+        (4, 10, 6, True, StockStatus.RESTOCK),
+        (10, 10, 0, False, StockStatus.OK),
+        (0, 10, 10, True, StockStatus.OUT_OF_STOCK),
+        (0, 0, 0, False, StockStatus.OUT_OF_STOCK),
+    ],
+)
+def test_product_exposes_stock_situation(
+    quantity, minimum, shortfall, needs_restock, status
+):
+    """FR-013, FR-015 (011): falta, reposição e situação calculadas pelo domínio."""
+    product = replace(make_product(min_stock=minimum), stock_quantity=quantity)
+
+    assert product.shortfall == shortfall
+    assert product.needs_restock is needs_restock
+    assert product.stock_status is status

@@ -4,9 +4,11 @@ from app.domain.errors import (
     ConflictError,
     DomainError,
     DuplicateBarcodeError,
+    InsufficientStockError,
     InvalidDataError,
     NotFoundError,
     ProductNotFoundError,
+    StockLimitExceededError,
 )
 
 
@@ -50,6 +52,34 @@ def test_duplicate_barcode_error_is_conflict_with_message():
     assert isinstance(error, ConflictError)
     assert isinstance(error, DomainError)
     assert str(error) == "Código de barras já cadastrado"
+
+
+@pytest.mark.parametrize(
+    ("available", "message"),
+    [
+        (0, "Saldo insuficiente: há 0 unidades em estoque"),
+        (1, "Saldo insuficiente: há 1 unidade em estoque"),
+        (3, "Saldo insuficiente: há 3 unidades em estoque"),
+        (1500, "Saldo insuficiente: há 1.500 unidades em estoque"),
+    ],
+)
+def test_insufficient_stock_error_is_conflict_with_the_available_quantity(
+    available, message
+):
+    """FR-006 (spec 011): a recusa diz o saldo disponível, no formato brasileiro."""
+    error = InsufficientStockError(available)
+
+    assert isinstance(error, ConflictError)
+    assert error.available == available
+    assert str(error) == message
+
+
+def test_stock_limit_exceeded_error_is_conflict_with_message():
+    """FR-004 (spec 011): o saldo tem teto de 999.999 unidades."""
+    error = StockLimitExceededError()
+
+    assert isinstance(error, ConflictError)
+    assert str(error) == "O saldo não pode passar de 999.999 unidades"
 
 
 @pytest.mark.parametrize(
