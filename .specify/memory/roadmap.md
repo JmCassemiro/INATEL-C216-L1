@@ -1,10 +1,16 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version change: 1.4.0 → 1.5.0
-Bump rationale: MINOR — 004 especificada (recorte de venda mínima) e PR da 011 mergeado.
+Version change: 1.5.0 → 1.6.0
+Bump rationale: MINOR — 004 (recorte de venda mínima) implementada.
 
-Changes this revision (1.5.0, 2026-11-24):
+Changes this revision (1.6.0, 2026-11-24):
+  - Status: 004 specced → implemented (branch 004-vendas, PR → projeto-final, em revisão)
+  - Notes on 004: o que ficou provado nos testes (concorrência sem impasse, idempotência)
+
+Specs affected: 004
+
+Changes in 1.5.0 (2026-11-24):
   - Status: 004 planned → specced (recorte de venda mínima em specs/004-vendas/)
   - Notes on 004: decisões da spec (saldo nunca negativo, troco só em dinheiro, preço do momento,
     id da venda criado no painel para envio idempotente, número legível atribuído pelo banco)
@@ -239,7 +245,7 @@ O NexoPDV é um sistema híbrido de automação comercial (frente de caixa) e ge
 - **Governed by:** C-08, C-10
 - **Addresses:** docs/product/visao.md §3 (Abertura e Fechamento de Turno), jornada 1
 
-### 004 — Vendas  [status: specced]
+### 004 — Vendas  [status: implemented]
 
 - **Description:** registro de venda por código de barras, com pagamento dividido em vários meios,
   baixa de estoque e vínculo com o operador e o turno.
@@ -270,6 +276,11 @@ O NexoPDV é um sistema híbrido de automação comercial (frente de caixa) e ge
   (UUID) da venda é criado no painel e torna o envio idempotente, base da sincronização da 009; o
   número legível é atribuído pelo banco. Continuam fora: operador e turno, desconto (Q4) e
   cancelamento.
+  **Implementada em 2026-11-24** (branch `004-vendas`, 11 commits, PR para `projeto-final`): a
+  venda trava os produtos em ordem de id; no PostgreSQL, 25 vendas disputando 20 unidades
+  registram exatamente 20, e vendas com os mesmos produtos em ordens opostas terminam sem
+  impasse. Falta o `/speckit-roadmap-debrief` para passar a `verified`. O restante da 004
+  (operador, turno, desconto e cancelamento) continua planejado para depois da entrega.
 - **Spec dir:** specs/004-vendas/
 
 ### 005 — Clientes e crediário  [status: planned]
@@ -402,4 +413,4 @@ O NexoPDV é um sistema híbrido de automação comercial (frente de caixa) e ge
 
 ---
 
-**Version**: 1.5.0 | **Ratified**: 2026-10-02 | **Last Amended**: 2026-11-24
+**Version**: 1.6.0 | **Ratified**: 2026-10-02 | **Last Amended**: 2026-11-24

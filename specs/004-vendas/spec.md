@@ -4,7 +4,7 @@
 
 **Created**: 2026-11-24
 
-**Status**: Draft
+**Status**: Implemented (2026-11-24)
 
 **Input**: Parent roadmap: `.specify/memory/roadmap.md` → entry **004 — Vendas** (recorte de venda
 mínima) e decisão **C-12** (terceira etapa do Projeto Final). Carrinho por código de barras, um ou

@@ -208,11 +208,16 @@ Back-end primeiro (fundação comum às três histórias), depois o front-end po
 | 2 | Domínio: `sale.py`, `StockChange.sale`, erros | `feat(vendas): modela venda, pagamentos e troco no dominio` |
 | 3 | Banco: migração, modelos, `stock_ledger`, repositórios (bloqueio em ordem, idempotência, número) | `feat(vendas): grava a venda e baixa o estoque numa transacao so` |
 | 4 | API: serviço, schemas, rotas, tradutor do 409 | `feat(vendas): expoe registro, consulta e resumo de vendas na API` |
-| 5 | US1: nova venda (leitura, busca, carrinho, pagamento, finalização, comprovante, recusa, menu) | `feat(vendas): registra a venda pelo codigo de barras no painel` |
-| 6 | US2: pagamento dividido (regras de troco, remoção, recálculo) | `feat(vendas): divide o pagamento em varios meios com troco` |
-| 7 | US3: histórico, detalhe, indicadores, tipo "Venda" no estoque, site | `feat(vendas): mostra o historico e os indicadores do dia` |
-| 8 | E2E e capturas de tela revisadas | `test(e2e): cobre a venda com baixa de estoque e persistencia` |
-| 9 | README e DESIGN.md | `docs(vendas): documenta a venda minima` |
+| 5 | Base do front-end: dinheiro, datas, cliente HTTP, API de vendas, API simulada, tipo "Venda" no estoque | `feat(vendas): prepara dinheiro, datas e a API de vendas no painel` |
+| 6 | Carrinho (redutor puro e armazenamento no navegador) | `feat(vendas): monta o carrinho com as regras de quantidade e troco` |
+| 7 | US1: nova venda (leitura, busca, carrinho, pagamento, finalização, comprovante, recusa, menu) | `feat(vendas): registra a venda pelo codigo de barras no painel` |
+| 8 | US2: cenários de pagamento dividido na tela (as regras vieram no carrinho) | `test(vendas): cobre o pagamento dividido e as regras de troco na tela` |
+| 9 | US3: histórico, detalhe, indicadores, site | `feat(vendas): mostra o historico e os indicadores do dia` |
+| 10 | E2E e capturas de tela revisadas | `test(e2e): cobre a venda com baixa de estoque e persistencia` |
+| 11 | README, DESIGN.md, tarefas concluídas, notas da implementação, roadmap 1.6.0 | `docs(vendas): documenta a venda minima` |
+
+Na implementação, a base do front-end e o carrinho viraram commits próprios (eram parte da US1),
+para cada commit ficar revisável.
 
 ## Complexity Tracking
 

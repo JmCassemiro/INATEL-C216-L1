@@ -275,3 +275,20 @@ repositório) continuam valendo e são reaproveitadas aqui.
   uma venda pelo código com pagamento em Pix e em dinheiro com troco, vê o comprovante, confere o
   saldo baixado e a movimentação "Venda", recarrega e confere a venda no histórico.
 - **Por quê:** Princípio I e RP-006; os nomes acessíveis estão em [contracts/ui.md](contracts/ui.md).
+
+## Na implementação (2026-11-24)
+
+- **Dinheiro no domínio:** a leitura de valores em reais saiu de `price.py` para
+  `domain/money.py` (`parse_money` e `format_brl`), usada pelo `Price` e pelo `Payment`, para as
+  duas regras (exato, maior que zero, duas casas, teto) não se repetirem.
+- **Baixa por venda:** `StockChange.sale` aceita de 1 a 99.999 unidades, a faixa de qualquer
+  movimentação; o teto de 999 é da linha da venda (`SaleLine`), conferido antes.
+- **Comprovante e detalhe** usam o mesmo bloco (`sale-breakdown.tsx`): itens, pagamentos e
+  totais.
+- **Menu:** o número de itens da venda em andamento ao lado de "Nova venda" ficou de fora (exigiria
+  um estado global só para isso); o contrato da interface foi ajustado.
+- **US2:** as regras de pagamento entraram no carrinho já na US1, guiadas pelos testes unitários
+  de `cart.test.ts`; por isso os testes de integração da US2 passaram na primeira execução e
+  servem como cenários de aceitação na tela.
+- **Concorrência verificada no PostgreSQL:** 25 vendas disputando 20 unidades (20 registradas, 5
+  recusadas, saldo 0) e 20 vendas com os mesmos dois produtos em ordens opostas, sem impasse.
