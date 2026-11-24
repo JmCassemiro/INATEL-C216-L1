@@ -20,16 +20,23 @@ export class ApiError extends Error {
   readonly kind: ApiErrorKind;
   /** Erros de validação (422) por campo, a partir de `detail[].loc[1]`. */
   readonly fieldErrors: Record<string, string>;
+  /**
+   * Corpo da resposta de erro, para quem precisa de mais que a mensagem (ex.: os
+   * problemas de cada item na recusa de uma venda, spec 004, research D16).
+   */
+  readonly body: unknown;
 
   constructor(
     kind: ApiErrorKind,
     message: string,
     fieldErrors: Record<string, string> = {},
+    body: unknown = null,
   ) {
     super(message);
     this.name = "ApiError";
     this.kind = kind;
     this.fieldErrors = fieldErrors;
+    this.body = body;
   }
 }
 
@@ -78,14 +85,15 @@ function toApiError(status: number, data: unknown): ApiError {
   const detail = (data as { detail?: unknown } | null)?.detail;
   switch (status) {
     case 404:
-      return new ApiError("not-found", messageOf(detail));
+      return new ApiError("not-found", messageOf(detail), {}, data);
     case 409:
-      return new ApiError("conflict", messageOf(detail));
+      return new ApiError("conflict", messageOf(detail), {}, data);
     case 422:
       return new ApiError(
         "validation",
         UNEXPECTED_MESSAGE,
         fieldErrorsOf(detail),
+        data,
       );
     default:
       return new ApiError("unexpected", UNEXPECTED_MESSAGE);

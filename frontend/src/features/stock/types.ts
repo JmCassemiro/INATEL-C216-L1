@@ -1,6 +1,7 @@
 /** Contrato da API de estoque (spec 011, contracts/stock-api.md). */
 
-export type MovementKind = "entry" | "adjustment";
+/** `sale`: baixa por venda (spec 004), com o texto "Venda nº {n}". */
+export type MovementKind = "entry" | "adjustment" | "sale";
 
 export type StockMovement = {
   id: string;

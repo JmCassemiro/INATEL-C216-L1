@@ -64,6 +64,27 @@ describe("Histórico de movimentações (US4)", () => {
     expect(entry?.getByText(/24\/11\/2026/)).toBeVisible();
   });
 
+  it("spec 004, FR-019: a baixa por venda aparece como 'Venda' com o número", async () => {
+    const shirt = seedShirtWithHistory();
+    catalog.registerSale({
+      id: "sale-a",
+      items: [
+        { product_id: shirt?.id ?? "", quantity: 2, unit_price: "10.00" },
+      ],
+      payments: [{ method: "pix", amount: "20.00" }],
+    });
+    const { user } = renderApp("/stock");
+
+    const sheet = await openHistory(user);
+
+    const table = await sheet.findByRole("table", { name: "Movimentações" });
+    const sale = within(within(table).getAllByRole("row")[1] as HTMLElement);
+    expect(sale.getByText("Venda")).toBeVisible();
+    expect(sale.getByText("−2")).toBeVisible();
+    expect(sale.getByText("20 un.")).toBeVisible();
+    expect(sale.getByText("Venda nº 1")).toBeVisible();
+  });
+
   it("US4-4: não há como editar nem apagar uma movimentação", async () => {
     seedShirtWithHistory();
     const { user } = renderApp("/stock");

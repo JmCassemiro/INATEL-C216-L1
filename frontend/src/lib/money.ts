@@ -59,14 +59,74 @@ export function parsePriceInput(text: string): PriceInputResult {
 }
 
 /** "49.90" → 4990. Centavos inteiros: somar e comparar sem erro de arredondamento. */
-function toCents(price: string): number {
+export function toCents(price: string): number {
   const { integer, cents } = splitPrice(price);
   return Number(integer.replaceAll(".", "")) * 100 + Number(cents);
 }
 
 /** 4990 → "49.90". */
-function fromCents(cents: number): string {
+export function fromCents(cents: number): string {
   return `${Math.floor(cents / 100)}.${String(cents % 100).padStart(2, "0")}`;
+}
+
+/** 123456 → "R$ 1.234,56". */
+export function formatCents(cents: number): string {
+  return formatPrice(fromCents(cents));
+}
+
+export const MONEY_MESSAGES = {
+  required: "Informe o valor.",
+  format: PRICE_MESSAGES.format,
+  zero: "Informe um valor maior que zero.",
+  decimals: PRICE_MESSAGES.decimals,
+  max: "O valor máximo é R$ 999.999,99.",
+} as const;
+
+/** Inteiro com pontos de milhar: "1.234" ou "999.999". */
+const GROUPED = /^\d{1,3}(?:\.\d{3})+$/;
+/** Sem vírgula, um ponto seguido de uma ou duas casas é o decimal: "49.90". */
+const DOT_DECIMAL = /^(\d+)\.(\d{1,2})$/;
+
+/**
+ * Lê um valor em reais digitado no caixa (spec 004, research D14) e devolve o texto
+ * que a API espera ("1234.56"). Aceita "100", "87,5", "49.90" e "1.234,56": com
+ * vírgula, os pontos são de milhar; sem vírgula, só "1.234" (milhar) ou "49.90"
+ * (decimal). Nada de `float`: as regras são conferidas no próprio texto.
+ */
+export function parseMoneyInput(text: string): PriceInputResult {
+  const trimmed = text.trim();
+  if (trimmed === "") return { ok: false, error: MONEY_MESSAGES.required };
+  const parts = splitMoney(trimmed);
+  if (!parts) return { ok: false, error: MONEY_MESSAGES.format };
+  const { integer: rawInteger, decimals } = parts;
+  if (decimals.length > 2) return { ok: false, error: MONEY_MESSAGES.decimals };
+
+  const integer = rawInteger.replace(/^0+(?=\d)/, "");
+  const cents = decimals.padEnd(2, "0");
+  if (integer === "0" && cents === "00")
+    return { ok: false, error: MONEY_MESSAGES.zero };
+  if (integer.length > 6) return { ok: false, error: MONEY_MESSAGES.max };
+  return { ok: true, value: `${integer}.${cents}` };
+}
+
+function splitMoney(
+  text: string,
+): { integer: string; decimals: string } | null {
+  const commaParts = text.split(",");
+  if (commaParts.length > 2) return null;
+  if (commaParts.length === 2) {
+    const [integer = "", decimals = ""] = commaParts;
+    const validInteger = /^\d+$/.test(integer) || GROUPED.test(integer);
+    if (!validInteger || !/^\d+$/.test(decimals)) return null;
+    return { integer: integer.replaceAll(".", ""), decimals };
+  }
+  const dotDecimal = DOT_DECIMAL.exec(text);
+  if (dotDecimal)
+    return { integer: dotDecimal[1] ?? "", decimals: dotDecimal[2] ?? "" };
+  if (GROUPED.test(text))
+    return { integer: text.replaceAll(".", ""), decimals: "" };
+  if (/^\d+$/.test(text)) return { integer: text, decimals: "" };
+  return null;
 }
 
 /** Média dos preços, arredondando meio centavo para cima; `null` sem preços. */
