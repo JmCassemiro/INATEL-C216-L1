@@ -93,6 +93,21 @@ describe("apiRequest (research D7)", () => {
     expect(error.message).toBe("Código de barras já cadastrado");
   });
 
+  it("spec 004, D16: o erro guarda o corpo da resposta (os problemas da venda)", async () => {
+    const body = {
+      detail: "Não foi possível finalizar a venda. Revise os itens destacados.",
+      problems: [{ product_id: "p1", reason: "unavailable", message: "x" }],
+    };
+    server.use(http.post(URL, () => HttpResponse.json(body, { status: 409 })));
+
+    const error = await failureOf(
+      apiRequest("/test", { method: "POST", body: {} }),
+    );
+
+    expect(error.kind).toBe("conflict");
+    expect(error.body).toEqual(body);
+  });
+
   it("FR-011: 422 vira 'validation' com os erros por campo de detail[].loc", async () => {
     server.use(
       http.post(URL, () =>

@@ -63,6 +63,7 @@ type MovementsSheetProps = {
 const KIND_LABELS: Record<MovementKind, string> = {
   entry: "Entrada",
   adjustment: "Ajuste",
+  sale: "Venda",
 };
 
 /** "+24" numa entrada, "−2" (sinal de menos de verdade) numa retirada. */

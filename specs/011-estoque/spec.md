@@ -4,7 +4,7 @@
 
 **Created**: 2026-11-24
 
-**Status**: Draft
+**Status**: Implemented (PR #13, 2026-11-24)
 
 **Input**: Parent roadmap: `.specify/memory/roadmap.md` → entry **002 — Produtos e estoque** (parte
 pendente) e decisão **C-12** (segunda etapa do Projeto Final). Quantidade em estoque e estoque

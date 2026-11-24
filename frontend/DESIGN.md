@@ -118,8 +118,9 @@ Desktop (≥ 1024 px)
 └────────────┴─────────────────────────────────────────────────────────────┘
 ```
 
-- **Menu lateral** (noite, 256 px) com a marca, as seções e o cartão de conexão. Seções que
-  ainda não existem aparecem desabilitadas com "em breve": nunca link morto.
+- **Menu lateral** (noite, 256 px) com a marca, as seções em dois grupos ("Frente de caixa" e
+  "Retaguarda") e o cartão de conexão. Seções que ainda não existem aparecem desabilitadas com
+  "em breve": nunca link morto.
 - **Barra superior** (papel translúcido com desfoque): trilha, link para o site e tema. Abaixo
   de 1024 px o menu lateral sai e um botão "Abrir menu" abre o mesmo menu numa gaveta.
 - **Faixa de título**: gradiente noite com brilhos, título grande, contagem do catálogo e a ação
@@ -133,6 +134,16 @@ Desktop (≥ 1024 px)
   repor" e a tabela com saldo, mínimo, situação e as ações de entrada, ajuste e histórico.
   Entrada e ajuste abrem em `Dialog` com ícone no cabeçalho; o histórico, em `Sheet` com
   cabeçalho noite. O número de produtos para repor aparece em âmbar ao lado de Estoque no menu.
+- **Nova venda** (spec 004): faixa noite compacta com "Descartar venda"; à esquerda, o cartão
+  de leitura (campo do código grande, com foco, e a busca por nome) e o carrinho (tabela com
+  quantidade em − / campo / +, subtotal e remover; problema da recusa numa pílula âmbar ou
+  vermelha junto ao nome); à direita, fixo no desktop, o pagamento: o resumo noite com o total
+  na etiqueta amarela grande, os quatro meios em `RadioGroup`, o valor com prefixo `R$`, a lista
+  de pagamentos, a situação ("Falta pagar", "Troco", "Pagamento completo", em verde quando
+  fecha) e o botão amarelo "Finalizar venda". O comprovante abre num `Dialog` com selo verde.
+- **Vendas**: a mesma faixa noite com o botão amarelo "Nova venda", três indicadores do dia
+  (faturamento e ticket médio em amarelo, por serem dinheiro), a tabela das vendas e o detalhe
+  em `Sheet` com cabeçalho noite. No menu, o grupo "Frente de caixa" vem antes da retaguarda.
 - **Situação do estoque**: pílula com texto sempre visível. "Sem estoque" em Remarcação
   (`destructive`), "Repor" (ou "Repor · faltam N") em Alerta (`warning`, âmbar), "Em dia" em
   Caixa livre (`success`). Na tabela de produtos, só aparece quando não está em dia.

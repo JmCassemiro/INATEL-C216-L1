@@ -12,6 +12,12 @@ import type {
   StockStatus,
 } from "@/features/products/types";
 import type {
+  Payment,
+  Sale,
+  SaleInput,
+  SaleProblem,
+} from "@/features/sales/types";
+import type {
   AdjustmentInput,
   EntryInput,
   MovementKind,
@@ -38,12 +44,18 @@ export type SeedProduct = Partial<
 > &
   Pick<Product, "name" | "barcode">;
 
-type ErrorBody = { detail: string };
+type ErrorBody = { detail: unknown; problems?: SaleProblem[] };
 
 export type CatalogResult =
   | { status: 200 | 201; body: unknown }
   | { status: 204 }
-  | { status: 404 | 409; body: ErrorBody };
+  | { status: 404 | 409 | 422; body: ErrorBody };
+
+export type SeedSale = Partial<
+  Pick<Sale, "id" | "occurred_at" | "payments">
+> & {
+  items: { product: Product; quantity: number }[];
+};
 
 const NOT_FOUND = { detail: "Produto não encontrado" };
 const DUPLICATE_BARCODE = { detail: "Código de barras já cadastrado" };
@@ -72,6 +84,34 @@ function units(quantity: number): string {
   return quantity === 1 ? `${number} unidade` : `${number} unidades`;
 }
 
+function cents(amount: string): number {
+  const [integer = "0", decimals = ""] = amount.split(".");
+  return Number(integer) * 100 + Number(decimals.padEnd(2, "0").slice(0, 2));
+}
+
+function money(value: number): string {
+  return `${Math.floor(value / 100)}.${String(value % 100).padStart(2, "0")}`;
+}
+
+function brl(value: number): string {
+  const [integer = "0", decimals = "00"] = money(value).split(".");
+  return `R$ ${integer.replace(/\B(?=(\d{3})+(?!\d))/g, ".")},${decimals}`;
+}
+
+function paymentsError(message: string): CatalogResult {
+  return {
+    status: 422,
+    body: {
+      detail: [
+        { loc: ["body", "payments"], msg: message, type: "value_error" },
+      ],
+    },
+  };
+}
+
+const SALE_REJECTED =
+  "Não foi possível finalizar a venda. Revise os itens destacados.";
+
 function shortfallOf(product: StoredProduct): number {
   return Math.max(product.min_stock - product.stock_quantity, 0);
 }
@@ -84,12 +124,14 @@ function statusOf(product: StoredProduct): StockStatus {
 class FakeCatalog {
   private products: StoredProduct[] = [];
   private movements = new Map<string, StockMovement[]>();
+  private sales: Sale[] = [];
   private nextId = 1;
   readonly requests: RecordedRequest[] = [];
 
   reset(): void {
     this.products = [];
     this.movements.clear();
+    this.sales = [];
     this.nextId = 1;
     this.requests.length = 0;
   }
@@ -221,6 +263,172 @@ class FakeCatalog {
         .length,
       out_of_stock_count: active.filter((p) => p.stock_quantity === 0).length,
       stock_value: (cents / 100).toFixed(2),
+    };
+  }
+
+  byBarcode(code: string): CatalogResult {
+    const product = this.products.find(
+      (item) => !item.removed && sameBarcode(item.barcode, code),
+    );
+    return product
+      ? { status: 200, body: publicProduct(product) }
+      : { status: 404, body: NOT_FOUND };
+  }
+
+  /** Venda registrada direto no catálogo (sem baixar o saldo), para o histórico. */
+  seedSale(sale: SeedSale): Sale {
+    const items = sale.items.map(({ product, quantity }) => ({
+      product_id: product.id,
+      name: product.name,
+      barcode: product.barcode,
+      unit_price: product.price,
+      quantity,
+      subtotal: money(cents(product.price) * quantity),
+    }));
+    const total = items.reduce((sum, item) => sum + cents(item.subtotal), 0);
+    const payments = sale.payments ?? [{ method: "pix", amount: money(total) }];
+    const paid = payments.reduce((sum, p) => sum + cents(p.amount), 0);
+    const stored: Sale = {
+      id: sale.id ?? `sale-${this.sales.length + 1}`,
+      number: this.sales.length + 1,
+      occurred_at: sale.occurred_at ?? new Date().toISOString(),
+      items,
+      payments,
+      total: money(total),
+      paid: money(paid),
+      change: money(paid - total),
+      item_count: items.reduce((sum, item) => sum + item.quantity, 0),
+    };
+    this.sales.push(stored);
+    return stored;
+  }
+
+  /** `POST /sales`: idempotente pelo id, com as recusas e as regras do back-end. */
+  registerSale(input: SaleInput): CatalogResult {
+    const existing = this.sales.find((sale) => sale.id === input.id);
+    if (existing) return { status: 200, body: existing };
+
+    const problems = input.items.flatMap((line): SaleProblem[] => {
+      const product = this.active(line.product_id);
+      if (!product) {
+        const known = this.products.find((p) => p.id === line.product_id);
+        return [
+          {
+            product_id: line.product_id,
+            reason: "unavailable",
+            message: `${known?.name ?? "Produto"} não está mais à venda`,
+            available: null,
+            current_price: null,
+          },
+        ];
+      }
+      if (cents(product.price) !== cents(line.unit_price)) {
+        return [
+          {
+            product_id: product.id,
+            reason: "price_changed",
+            message: `O preço de ${product.name} mudou para ${brl(cents(product.price))}`,
+            available: null,
+            current_price: product.price,
+          },
+        ];
+      }
+      if (product.stock_quantity < line.quantity) {
+        const available = product.stock_quantity;
+        return [
+          {
+            product_id: product.id,
+            reason: "insufficient_stock",
+            message:
+              available === 0
+                ? `${product.name} está sem estoque`
+                : `Há só ${available} un. de ${product.name} em estoque`,
+            available,
+            current_price: null,
+          },
+        ];
+      }
+      return [];
+    });
+    if (problems.length > 0) {
+      return { status: 409, body: { detail: SALE_REJECTED, problems } };
+    }
+
+    const total = input.items.reduce(
+      (sum, line) => sum + cents(line.unit_price) * line.quantity,
+      0,
+    );
+    const paid = input.payments.reduce((sum, p) => sum + cents(p.amount), 0);
+    const cash = input.payments
+      .filter((p: Payment) => p.method === "cash")
+      .reduce((sum, p) => sum + cents(p.amount), 0);
+    if (paid < total) {
+      return paymentsError(
+        `Os pagamentos não cobrem o total: faltam ${brl(total - paid)}`,
+      );
+    }
+    if (paid - cash > total) {
+      return paymentsError(
+        "Só o pagamento em dinheiro pode passar do total e gerar troco",
+      );
+    }
+    if (paid > total && paid - total >= cash) {
+      return paymentsError(
+        "O troco não pode ser igual ou maior que o valor pago em dinheiro",
+      );
+    }
+
+    const sale = this.seedSale({
+      id: input.id,
+      payments: input.payments,
+      items: input.items.map((line) => ({
+        product: publicProduct(this.active(line.product_id) as StoredProduct),
+        quantity: line.quantity,
+      })),
+    });
+    for (const line of input.items) {
+      this.move(
+        line.product_id,
+        "sale",
+        -line.quantity,
+        `Venda nº ${sale.number}`,
+      );
+    }
+    return { status: 201, body: sale };
+  }
+
+  listSales(page: number, size: number) {
+    const newest = [...this.sales].reverse();
+    const start = (page - 1) * size;
+    return {
+      items: newest.slice(start, start + size),
+      total: newest.length,
+      page,
+      size,
+    };
+  }
+
+  getSale(id: string): CatalogResult {
+    const sale = this.sales.find((item) => item.id === id);
+    return sale
+      ? { status: 200, body: sale }
+      : { status: 404, body: { detail: "Venda não encontrada" } };
+  }
+
+  salesSummary(start: string, end: string) {
+    const from = Date.parse(start);
+    const to = Date.parse(end);
+    const today = this.sales.filter((sale) => {
+      const at = Date.parse(sale.occurred_at);
+      return from <= at && at < to;
+    });
+    const revenue = today.reduce((sum, sale) => sum + cents(sale.total), 0);
+    return {
+      count: today.length,
+      revenue: money(revenue),
+      average_ticket: money(
+        today.length === 0 ? 0 : Math.round(revenue / today.length),
+      ),
     };
   }
 

@@ -1,3 +1,5 @@
+import uuid
+
 import pytest
 
 from app.domain.errors import (
@@ -8,8 +10,11 @@ from app.domain.errors import (
     InvalidDataError,
     NotFoundError,
     ProductNotFoundError,
+    SaleNotFoundError,
+    SaleRejectedError,
     StockLimitExceededError,
 )
+from app.domain.sale import ProblemReason, SaleProblem
 
 
 def test_invalid_data_error_is_domain_error_and_value_error():
@@ -80,6 +85,32 @@ def test_stock_limit_exceeded_error_is_conflict_with_message():
 
     assert isinstance(error, ConflictError)
     assert str(error) == "O saldo não pode passar de 999.999 unidades"
+
+
+def test_sale_rejected_error_is_conflict_with_the_problems():
+    """FR-014 (spec 004): a recusa da venda é um conflito que lista os problemas."""
+    problem = SaleProblem(
+        product_id=uuid.uuid4(),
+        reason=ProblemReason.INSUFFICIENT_STOCK,
+        message="Há só 1 un. de Meia em estoque",
+        available=1,
+    )
+
+    error = SaleRejectedError([problem])
+
+    assert isinstance(error, ConflictError)
+    assert error.problems == (problem,)
+    assert (
+        str(error) == "Não foi possível finalizar a venda. Revise os itens destacados."
+    )
+
+
+def test_sale_not_found_error_is_not_found_with_message():
+    """FR-022 (spec 004): venda inexistente é da categoria "não encontrado"."""
+    error = SaleNotFoundError()
+
+    assert isinstance(error, NotFoundError)
+    assert str(error) == "Venda não encontrada"
 
 
 @pytest.mark.parametrize(

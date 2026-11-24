@@ -18,3 +18,17 @@ export function formatDateTime(iso: string, timeZone?: string): string {
   }).format(moment);
   return `${date} ${time}`;
 }
+
+/**
+ * O dia de hoje no fuso do navegador, da meia-noite à meia-noite seguinte, em ISO
+ * (UTC). É o intervalo que o painel pede ao resumo de vendas (spec 004, FR-023): a
+ * API não precisa saber o fuso da loja.
+ */
+export function todayRange(now: Date = new Date()): {
+  start: string;
+  end: string;
+} {
+  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  return { start: start.toISOString(), end: end.toISOString() };
+}

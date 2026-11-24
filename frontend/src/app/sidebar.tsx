@@ -6,6 +6,7 @@ import {
   BoxesIcon,
   type LucideIcon,
   PackageIcon,
+  ScanBarcodeIcon,
   ShoppingCartIcon,
   WifiIcon,
   WifiOffIcon,
@@ -19,11 +20,6 @@ import { cn } from "@/lib/utils";
 
 const ITEM =
   "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium outline-none transition-colors";
-
-/** Seções que ainda dependem de uma spec: aparecem, mas sem link (nunca link morto). */
-const UPCOMING: { label: string; icon: LucideIcon }[] = [
-  { label: "Vendas", icon: ShoppingCartIcon },
-];
 
 export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   return (
@@ -39,22 +35,27 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
       </div>
 
       <nav aria-label="Seções" className="flex flex-col gap-1 px-3">
-        <p className="type-eyebrow px-3 pb-2 text-sidebar-muted">Retaguarda</p>
+        <p className="type-eyebrow px-3 pb-2 text-sidebar-muted">
+          Frente de caixa
+        </p>
+        <SectionLink
+          to="/sales/new"
+          label="Nova venda"
+          icon={ScanBarcodeIcon}
+          onNavigate={onNavigate}
+        />
+        <p className="type-eyebrow px-3 pt-4 pb-2 text-sidebar-muted">
+          Retaguarda
+        </p>
         <ProductsLink onNavigate={onNavigate} />
         <StockLink onNavigate={onNavigate} />
-        {UPCOMING.map(({ label, icon: Icon }) => (
-          <span
-            key={label}
-            aria-disabled="true"
-            className={cn(ITEM, "cursor-default text-sidebar-muted")}
-          >
-            <Icon className="size-[18px]" aria-hidden="true" />
-            {label}
-            <span className="ml-auto rounded-full border border-sidebar-border px-2 py-0.5 text-[11px] font-semibold">
-              em breve
-            </span>
-          </span>
-        ))}
+        <SectionLink
+          to="/sales"
+          end
+          label="Vendas"
+          icon={ShoppingCartIcon}
+          onNavigate={onNavigate}
+        />
       </nav>
 
       <ConnectionCard />
@@ -112,12 +113,15 @@ function StockLink({ onNavigate }: { onNavigate?: () => void }) {
 /** Link de uma seção do painel; a seção atual fica destacada (`aria-current`). */
 function SectionLink({
   to,
+  end,
   label,
   icon: Icon,
   badge,
   onNavigate,
 }: {
   to: string;
+  /** Só fica ativo no endereço exato (`/sales` não acende em `/sales/new`). */
+  end?: boolean;
   label: string;
   icon: LucideIcon;
   badge?: React.ReactNode;
@@ -126,6 +130,7 @@ function SectionLink({
   return (
     <NavLink
       to={to}
+      end={end}
       onClick={onNavigate}
       className={cn(
         ITEM,

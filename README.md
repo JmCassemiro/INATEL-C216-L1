@@ -13,11 +13,11 @@ INATEL-C216-L1/
 │       └── ci-frontend.yml
 ├── backend/
 │   ├── app/                     # Clean Architecture: dependências apontam para dentro
-│   │   ├── domain/              # entidade Product, value objects Barcode e Price, erros
-│   │   ├── application/         # ProductService (casos de uso), portas, comandos
+│   │   ├── domain/              # produto, estoque e venda (regras), value objects, erros
+│   │   ├── application/         # casos de uso (produtos, estoque, vendas), portas, comandos
 │   │   ├── infrastructure/
 │   │   │   ├── database/        # Base ORM, engine e sessões (URL via DATABASE_URL)
-│   │   │   ├── models/          # modelo SQLAlchemy (tabela products)
+│   │   │   ├── models/          # modelos SQLAlchemy (produtos, movimentações e vendas)
 │   │   │   └── repositories/    # repositórios SQLAlchemy e em memória
 │   │   ├── api/                 # rotas, schemas Pydantic, CORS, tratamento de erros, dependências
 │   │   └── main.py              # create_app(): apenas compõe e inicializa a aplicação
@@ -38,12 +38,14 @@ INATEL-C216-L1/
 │   │   ├── components/          # ui/ (shadcn), marca, indicador e tema claro/escuro
 │   │   ├── features/landing/    # página de entrada do site (/)
 │   │   ├── features/products/   # seção de produtos: telas, API, consultas e regras do formulário
+│   │   ├── features/stock/      # seção de estoque: posição, entrada, ajuste e histórico
+│   │   ├── features/sales/      # frente de caixa (nova venda) e histórico de vendas
 │   │   ├── lib/                 # cliente HTTP, preço como texto e hooks utilitários
 │   │   └── index.css            # tokens do tema (cores, fontes, raios, sombras) do DESIGN.md
 │   ├── tests/
 │   │   ├── unit/                # Vitest: regras puras (GTIN, EAN, preço, validação, URL)
 │   │   ├── integration/         # Vitest + Testing Library: telas com a API simulada (MSW)
-│   │   ├── msw/                 # catálogo falso que segue o contrato de /products
+│   │   ├── msw/                 # API falsa que segue o contrato de produtos, estoque e vendas
 │   │   └── e2e/                 # Playwright contra a stack completa
 │   ├── DESIGN.md                # identidade visual do site e do painel
 │   ├── Dockerfile               # servidor de desenvolvimento do Vite
@@ -171,16 +173,16 @@ banco; o CI usa um PostgreSQL.
 
 `make test-postgres` faz o mesmo que o CI sem tocar no banco de desenvolvimento: sobe um
 PostgreSQL 17 descartável num container, roda a suíte contra ele e apaga o container no final,
-mesmo se algum teste falhar. Só nele (e no CI) roda o teste de concorrência do estoque, que o
-SQLite pula com o motivo escrito.
+mesmo se algum teste falhar. Só nele (e no CI) rodam os testes de concorrência do estoque e das
+vendas, que o SQLite pula com o motivo escrito.
 
 ### O que é testado
 
 | Tipo | Verificação |
 |---|---|
-| Unitário (`tests/unit`) | Domínio (produto e regras de estoque), `ProductService`, `StockService`, leitura do `DATABASE_URL` e a regra de dependência entre camadas, sem banco e sem servidor |
-| Integração (`tests/integration`) | Todos os endpoints (`/`, `/products` e o estoque) pelo `TestClient`; CORS (origem desconhecida e métodos liberados); o contrato dos repositórios de produto e de estoque nas implementações SQLAlchemy e em memória, inclusive 50 entradas simultâneas no mesmo produto; migrations (`upgrade`/`downgrade` e conferência com os modelos); persistência após reiniciar a aplicação |
-| Erro | `404` para rota ou produto inexistente, `405` para método não permitido, `409` para código de barras repetido ou saldo que ficaria negativo ou acima do teto, `422` para dados inválidos |
+| Unitário (`tests/unit`) | Domínio (produto, regras de estoque e de venda: itens, total, pagamento e troco), `ProductService`, `StockService`, `SaleService`, leitura do `DATABASE_URL` e a regra de dependência entre camadas, sem banco e sem servidor |
+| Integração (`tests/integration`) | Todos os endpoints (`/`, `/products`, o estoque e `/sales`) pelo `TestClient`; CORS (origem desconhecida e métodos liberados); o contrato dos repositórios de produto, estoque e venda nas implementações SQLAlchemy e em memória, inclusive 50 entradas simultâneas no mesmo produto, 25 vendas disputando 20 unidades e vendas com os mesmos produtos em ordens opostas (sem impasse); idempotência da venda; migrations (`upgrade`/`downgrade` e conferência com os modelos); persistência após reiniciar a aplicação |
+| Erro | `404` para rota, produto ou venda inexistente, `405` para método não permitido, `409` para código de barras repetido, saldo que ficaria negativo ou acima do teto e venda recusada (com os problemas de cada item), `422` para dados inválidos |
 
 ## CORS
 
@@ -280,6 +282,60 @@ gravados juntos. A segunda transação espera a primeira terminar e já lê o sa
 de contrato prova isso com 50 entradas simultâneas, que somam exatamente 50; ele roda no
 PostgreSQL (`make test-postgres` e CI), porque o SQLite dos testes locais ignora o `FOR UPDATE`.
 
+A venda (abaixo) também baixa o saldo: cada item vendido vira uma movimentação do tipo `sale`,
+com a quantidade negativa e o texto `"Venda nº 12"`.
+
+## Vendas
+
+A frente de caixa registra uma venda com um ou mais itens e um ou mais pagamentos, e baixa o
+estoque de todos os itens **na mesma transação** (tabelas `sales`, `sale_items` e
+`sale_payments`). Uma venda registrada não se edita nem se apaga.
+
+| Método | Rota | Sucesso | Descrição |
+|---|---|---|---|
+| `POST` | `/sales` | 201 ou 200 | Registra a venda (201); se o mesmo `id` já foi registrado, devolve a venda existente (200) |
+| `GET` | `/sales?page=1&size=20` | 200 | Vendas, da mais recente para a mais antiga, com itens e pagamentos |
+| `GET` | `/sales/{sale_id}` | 200 | Uma venda |
+| `GET` | `/sales/summary?start=…&end=…` | 200 | Vendas, faturamento e ticket médio das vendas com `start ≤ momento < end` (datas ISO com fuso) |
+
+Corpo de `POST /sales`:
+
+```json
+{
+  "id": "0193a7c2-5f1e-7c3a-9d2b-1f4e6a8b0c11",
+  "items": [{ "product_id": "…", "quantity": 2, "unit_price": "49.90" }],
+  "payments": [
+    { "method": "pix", "amount": "50.00" },
+    { "method": "cash", "amount": "100.00" }
+  ]
+}
+```
+
+A resposta traz o `number` (nº legível, dado pelo banco), `occurred_at`, os itens com nome,
+código, preço e subtotal do momento da venda, os pagamentos, `total`, `paid`, `change` (troco) e
+`item_count`. Valores em dinheiro saem como string com duas casas.
+
+Regras:
+
+- De 1 a 100 itens distintos, de 1 a 999 unidades cada, total de até R$ 999.999,99.
+- De 1 a 5 pagamentos: `cash` (dinheiro), `pix`, `credit_card` ou `debit_card`.
+- A soma dos pagamentos cobre o total; **só o dinheiro gera troco** (o que não é dinheiro não passa
+  do total, e o troco é menor que o valor em dinheiro). Senão, `422` no campo `payments`.
+- `409` quando algum item não pode ser vendido, com todos os problemas de uma vez em `problems`:
+  produto fora do catálogo (`unavailable`), preço diferente do que o caixa mostrou
+  (`price_changed`, com o `current_price`) ou saldo insuficiente (`insufficient_stock`, com o
+  `available`). Nada é gravado.
+
+**Idempotência.** O `id` da venda é criado pelo painel quando a venda começa. Se a resposta se
+perde (queda de conexão) e o painel tenta de novo, a API devolve a venda já registrada, sem
+registrar outra e sem baixar o estoque de novo. É a mesma base que a sincronização dos caixas
+offline vai usar.
+
+**Concorrência.** A venda trava as linhas de todos os seus produtos (`SELECT … FOR UPDATE`) **em
+ordem de id**: duas vendas com os mesmos produtos em ordens diferentes esperam uma pela outra em
+vez de se travarem mutuamente. Com 20 unidades e 25 vendas simultâneas de 1 unidade, exatamente
+20 são registradas, 5 são recusadas e o saldo termina em 0 (teste de contrato no PostgreSQL).
+
 ## Frontend
 
 Painel do NexoPDV em React, TypeScript (estrito), Vite, Tailwind CSS e shadcn/ui, com tema
@@ -287,8 +343,13 @@ claro e escuro. A seção de produtos faz o CRUD completo do catálogo: lista pa
 por nome (busca e página ficam na URL), cadastro e edição num painel lateral com prévia da
 etiqueta de gôndola, e remoção com confirmação. A seção de estoque mostra o saldo, o mínimo e a
 situação de cada produto, com indicadores, a lista do que precisa de reposição, entrada de
-mercadoria, ajuste com motivo (com a prévia do saldo) e o histórico de movimentações. Cada ação
-mostra carregando, sucesso e erro. Os dados vêm da API pelo TanStack Query; a identidade visual
+mercadoria, ajuste com motivo (com a prévia do saldo) e o histórico de movimentações. A **nova
+venda** (`/sales/new`) lê os produtos pelo código de barras (o leitor USB digita e tecla Enter)
+ou pela busca por nome, monta o carrinho, recebe em um ou mais meios com o troco calculado e
+mostra o comprovante; a venda em andamento fica guardada no navegador até ser finalizada ou
+descartada. A seção **Vendas** (`/sales`) mostra os indicadores do dia (vendas, faturamento e
+ticket médio), o histórico paginado e o detalhe de cada venda. Cada ação mostra carregando,
+sucesso e erro. Os dados vêm da API pelo TanStack Query; a identidade visual
 está em `frontend/DESIGN.md`.
 
 A URL da API vem de `VITE_API_URL` (padrão `http://localhost:8000`). Como o React roda no
@@ -319,9 +380,9 @@ make frontend-dev   # http://localhost:5173
 
 | Tipo | Ferramenta | O que verifica |
 |---|---|---|
-| Unitário | Vitest | Regras puras: GTIN, código de barras EAN, preço e quantidade como texto, datas, validação dos formulários, parâmetros da URL e o cliente HTTP |
-| Integração | Vitest + Testing Library + MSW | As telas com a API simulada na rede: produtos (lista, busca, paginação, cadastro, edição e remoção) e estoque (posição, reposição, indicadores, entrada, ajuste e histórico), com os estados de carregando, vazio, erro, `404`, `409` e `422`, tema e teclado |
-| E2E | Playwright | navegador real → React → FastAPI → PostgreSQL, sem mocks: o CRUD de produtos e o fluxo do estoque (reposição, entrada e ajuste), recarregando a página para provar a persistência |
+| Unitário | Vitest | Regras puras: GTIN, código de barras EAN, preço, valor e quantidade como texto, datas, validação dos formulários, o carrinho da venda (itens, pagamentos, troco e recusas), parâmetros da URL e o cliente HTTP |
+| Integração | Vitest + Testing Library + MSW | As telas com a API simulada na rede: produtos (lista, busca, paginação, cadastro, edição e remoção), estoque (posição, reposição, indicadores, entrada, ajuste e histórico) e vendas (leitura, busca, carrinho, pagamento dividido, troco, finalização, recusa, falha de rede com nova tentativa, comprovante, histórico e indicadores), com os estados de carregando, vazio, erro, `404`, `409` e `422`, tema e teclado |
+| E2E | Playwright | navegador real → React → FastAPI → PostgreSQL, sem mocks: o CRUD de produtos, o fluxo do estoque (reposição, entrada e ajuste) e uma venda pelo código com Pix e dinheiro, recarregando a página para provar a persistência |
 
 `make e2e` sobe uma stack **separada** da de desenvolvimento (projeto Compose `nexopdv-e2e`,
 frontend em `5174`, API em `8001`, banco em `5434` e volume próprio), roda o Playwright e

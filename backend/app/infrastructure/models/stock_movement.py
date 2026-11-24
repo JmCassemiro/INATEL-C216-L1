@@ -29,7 +29,7 @@ class StockMovementModel(Base):
     __tablename__ = "stock_movements"
     __table_args__ = (
         UniqueConstraint("product_id", "sequence"),
-        CheckConstraint("kind IN ('entry', 'adjustment')", name="kind"),
+        CheckConstraint("kind IN ('entry', 'adjustment', 'sale')", name="kind"),
         CheckConstraint("quantity <> 0", name="quantity_not_zero"),
         CheckConstraint("balance_after >= 0", name="balance_not_negative"),
     )

@@ -1,11 +1,15 @@
 import { describe, expect, it } from "vitest";
 import {
   averagePrice,
+  formatCents,
   formatPrice,
+  fromCents,
+  parseMoneyInput,
   parsePriceInput,
   priceForInput,
   priceRange,
   splitPrice,
+  toCents,
 } from "@/lib/money";
 
 describe("formatPrice (FR-001)", () => {
@@ -91,5 +95,59 @@ describe("priceRange (indicadores)", () => {
 
   it("devolve null sem preços", () => {
     expect(priceRange([])).toBeNull();
+  });
+});
+
+describe("parseMoneyInput (spec 004, research D14)", () => {
+  it.each([
+    ["100", "100.00"],
+    ["87,5", "87.50"],
+    ["87,50", "87.50"],
+    ["49.90", "49.90"],
+    ["1.5", "1.50"],
+    ["1.234,56", "1234.56"],
+    ["1.234", "1234.00"],
+    ["  0,01 ", "0.01"],
+    ["999.999,99", "999999.99"],
+  ])("lê %s como %s", (text, expected) => {
+    expect(parseMoneyInput(text)).toEqual({ ok: true, value: expected });
+  });
+
+  it.each([
+    ["", "Informe o valor."],
+    ["   ", "Informe o valor."],
+    ["abc", "Use só números, com vírgula para os centavos."],
+    ["-5", "Use só números, com vírgula para os centavos."],
+    ["1,2,3", "Use só números, com vírgula para os centavos."],
+    ["0", "Informe um valor maior que zero."],
+    ["0,00", "Informe um valor maior que zero."],
+    ["1,234", "Use no máximo duas casas decimais."],
+    ["1000000", "O valor máximo é R$ 999.999,99."],
+  ])("recusa %j com a mensagem certa", (text, error) => {
+    expect(parseMoneyInput(text)).toEqual({ ok: false, error });
+  });
+});
+
+describe("centavos (spec 004, research D14)", () => {
+  it.each([
+    ["49.90", 4990],
+    ["0.05", 5],
+    ["999999.99", 99999999],
+  ])("toCents(%s) = %i", (amount, cents) => {
+    expect(toCents(amount)).toBe(cents);
+  });
+
+  it.each([
+    [4990, "49.90"],
+    [5, "0.05"],
+    [0, "0.00"],
+    [123456, "1234.56"],
+  ])("fromCents(%i) = %s", (cents, amount) => {
+    expect(fromCents(cents)).toBe(amount);
+  });
+
+  it("formatCents mostra em reais", () => {
+    expect(formatCents(123456)).toBe("R$ 1.234,56");
+    expect(formatCents(0)).toBe("R$ 0,00");
   });
 });

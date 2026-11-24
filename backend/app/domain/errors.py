@@ -3,6 +3,12 @@
 A borda HTTP traduz cada categoria num status (D8); o domínio não conhece HTTP.
 """
 
+from collections.abc import Sequence
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.domain.sale import SaleProblem
+
 
 class DomainError(Exception):
     """Base de todos os erros de domínio."""
@@ -51,6 +57,25 @@ class StockLimitExceededError(ConflictError):
 
     def __init__(self) -> None:
         super().__init__("O saldo não pode passar de 999.999 unidades")
+
+
+class SaleRejectedError(ConflictError):
+    """Algum item da venda conflita com o catálogo ou o saldo (spec 004, FR-014).
+
+    Carrega todos os problemas encontrados, um por item, para o caixa corrigir de uma
+    vez (research D7).
+    """
+
+    def __init__(self, problems: Sequence[SaleProblem]) -> None:
+        super().__init__(
+            "Não foi possível finalizar a venda. Revise os itens destacados."
+        )
+        self.problems = tuple(problems)
+
+
+class SaleNotFoundError(NotFoundError):
+    def __init__(self) -> None:
+        super().__init__("Venda não encontrada")
 
 
 def _units(quantity: int) -> str:

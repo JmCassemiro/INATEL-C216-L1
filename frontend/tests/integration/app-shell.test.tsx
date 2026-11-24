@@ -40,17 +40,28 @@ describe("Layout do painel (FR-018)", () => {
     ).toHaveAttribute("aria-current", "page");
   });
 
-  it("mostra as seções futuras como 'em breve', sem link", async () => {
+  it("spec 004, FR-024: frente de caixa e retaguarda, todas com link", async () => {
     renderApp();
 
     const sections = await screen.findByRole("navigation", { name: "Seções" });
-    expect(within(sections).getByText("Vendas")).toBeVisible();
-    expect(within(sections).getAllByText("em breve")).toHaveLength(1);
+    expect(within(sections).getByText("Frente de caixa")).toBeVisible();
+    expect(within(sections).queryByText("em breve")).not.toBeInTheDocument();
     expect(
       within(sections)
         .getAllByRole("link")
         .map((link) => link.textContent),
-    ).toEqual([expect.stringContaining("Produtos"), "Estoque"]);
+    ).toEqual([
+      "Nova venda",
+      expect.stringContaining("Produtos"),
+      "Estoque",
+      "Vendas",
+    ]);
+    expect(
+      within(sections).getByRole("link", { name: "Nova venda" }),
+    ).toHaveAttribute("href", "/sales/new");
+    expect(
+      within(sections).getByRole("link", { name: "Vendas" }),
+    ).toHaveAttribute("href", "/sales");
   });
 
   it("a barra superior tem a troca de tema e o botão do menu", async () => {

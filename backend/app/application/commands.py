@@ -4,6 +4,7 @@ from dataclasses import dataclass, fields
 from decimal import Decimal
 from enum import Enum
 from typing import Literal
+from uuid import UUID
 
 
 class _Unset(Enum):
@@ -50,3 +51,20 @@ class ProductChanges:
 
     def is_empty(self) -> bool:
         return all(getattr(self, field.name) is UNSET for field in fields(self))
+
+
+@dataclass(frozen=True, slots=True)
+class SaleLineData:
+    """Uma linha do carrinho como o caixa a enviou (spec 004)."""
+
+    product_id: UUID
+    quantity: int
+    unit_price: Decimal
+
+
+@dataclass(frozen=True, slots=True)
+class PaymentData:
+    """Um pagamento como o caixa o enviou (spec 004)."""
+
+    method: str
+    amount: Decimal

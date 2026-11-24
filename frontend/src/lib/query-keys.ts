@@ -9,3 +9,6 @@ export const PRODUCTS_KEY = ["products"] as const;
 
 /** Resumo e histórico do estoque. */
 export const STOCK_KEY = ["stock"] as const;
+
+/** Histórico e resumo das vendas (spec 004, research D17). */
+export const SALES_KEY = ["sales"] as const;
