@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  averagePrice,
   formatPrice,
   parsePriceInput,
   priceForInput,
+  priceRange,
   splitPrice,
 } from "@/lib/money";
 
@@ -58,5 +60,36 @@ describe("parsePriceInput (FR-009, FR-010, data-model §2)", () => {
 describe("priceForInput (edição)", () => {
   it("mostra o preço da API com vírgula", () => {
     expect(priceForInput("49.90")).toBe("49,90");
+  });
+});
+
+describe("averagePrice (indicadores)", () => {
+  it("calcula a média em centavos inteiros, sem float", () => {
+    expect(averagePrice(["49.90", "159.90", "12.50"])).toBe("74.10");
+  });
+
+  it("arredonda meio centavo para cima", () => {
+    expect(averagePrice(["0.01", "0.02"])).toBe("0.02");
+  });
+
+  it("aceita preços de seis dígitos", () => {
+    expect(averagePrice(["999999.99", "999999.99"])).toBe("999999.99");
+  });
+
+  it("devolve null sem preços", () => {
+    expect(averagePrice([])).toBeNull();
+  });
+});
+
+describe("priceRange (indicadores)", () => {
+  it("devolve o menor e o maior preço, comparando em centavos", () => {
+    expect(priceRange(["49.90", "1249.99", "12.50", "159.90"])).toEqual({
+      min: "12.50",
+      max: "1249.99",
+    });
+  });
+
+  it("devolve null sem preços", () => {
+    expect(priceRange([])).toBeNull();
   });
 });

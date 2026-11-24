@@ -2,7 +2,7 @@
  * Seção de produtos: orquestra a busca, a lista e a paginação. A busca e a página
  * vivem na URL; os dados vêm do TanStack Query (research D5 e D6).
  */
-import { PlusIcon, SearchIcon } from "lucide-react";
+import { PackageIcon, PlusIcon, SearchIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,9 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { useDebouncedValue } from "@/lib/use-debounced-value";
+import { CatalogOverview } from "./catalog-overview";
 import { DeleteProductDialog } from "./delete-product-dialog";
+import { PriceTag } from "./price-tag";
 import { ProductFormSheet } from "./product-form-sheet";
 import {
   ProductsEmpty,
@@ -22,7 +24,7 @@ import {
   ProductsNoResults,
 } from "./products-list";
 import { ProductsPagination } from "./products-pagination";
-import { PAGE_SIZE, useProductsPage } from "./queries";
+import { PAGE_SIZE, useCatalogFirstPage, useProductsPage } from "./queries";
 import type { Product } from "./types";
 import { useProductListParams } from "./use-product-list-params";
 
@@ -34,6 +36,59 @@ function countLabel(total: number, searching: boolean): string {
   return total === 1
     ? "1 produto no catálogo"
     : `${total} produtos no catálogo`;
+}
+
+/**
+ * Faixa de título (DESIGN.md): superfície noturna com brilho, a ação principal em
+ * amarelo e, como enfeite, a etiqueta inclinada com o preço do produto mais novo.
+ */
+function PageBand({
+  count,
+  onCreate,
+}: {
+  count: string | null;
+  onCreate: () => void;
+}) {
+  const newest = useCatalogFirstPage().data?.items[0];
+  return (
+    <section className="relative isolate overflow-hidden rounded-3xl bg-night-glow px-6 py-7 text-night-foreground shadow-lg sm:px-8 sm:py-8">
+      <div className="bg-grid-faint absolute inset-0 -z-10 opacity-60" />
+      {newest && (
+        <PriceTag
+          price={newest.price}
+          size="label"
+          decorative
+          className="absolute top-1/2 right-10 hidden -translate-y-1/2 -rotate-6 rounded-md border-0 px-5 py-3 shadow-xl ring-4 ring-white/10 lg:inline-flex"
+        />
+      )}
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between lg:pr-72">
+        <div className="flex flex-col gap-1.5">
+          <p className="flex items-center gap-2 text-sm font-medium text-night-muted">
+            <PackageIcon className="size-4" aria-hidden="true" />
+            Catálogo da loja
+          </p>
+          <h1 className="type-page-title">Produtos</h1>
+          <p className="max-w-xl text-night-muted">
+            Cadastre, ajuste preços e acompanhe o que está na prateleira.
+          </p>
+          <p
+            className="type-meta min-h-[1.4em] font-semibold text-price-tag"
+            aria-live="polite"
+          >
+            {count}
+          </p>
+        </div>
+        <Button
+          variant="highlight"
+          className="h-11 shrink-0 self-start px-5 sm:self-auto"
+          onClick={onCreate}
+        >
+          <PlusIcon data-icon="inline-start" />
+          Novo produto
+        </Button>
+      </div>
+    </section>
+  );
 }
 
 export function ProductsPage() {
@@ -165,43 +220,53 @@ export function ProductsPage() {
     );
   }
 
+  const searchField = (
+    <InputGroup className="h-10 bg-background sm:max-w-sm">
+      <InputGroupAddon>
+        <SearchIcon />
+      </InputGroupAddon>
+      <InputGroupInput
+        type="search"
+        aria-label="Buscar pelo nome"
+        placeholder="Buscar pelo nome"
+        value={term}
+        onChange={(event) => setTerm(event.target.value)}
+      />
+    </InputGroup>
+  );
+
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <h1 className="type-page-title">Produtos</h1>
-          <p
-            className="type-meta min-h-[1.4em] text-muted-foreground"
-            aria-live="polite"
-          >
-            {data && data.total > 0 && !query.isError
-              ? countLabel(data.total, Boolean(search))
-              : null}
-          </p>
-        </div>
-        <Button onClick={openCreate}>
-          <PlusIcon data-icon="inline-start" />
-          Novo produto
-        </Button>
-      </div>
+      <title>Produtos | NexoPDV</title>
+      <PageBand
+        count={
+          data && data.total > 0 && !query.isError
+            ? countLabel(data.total, Boolean(search))
+            : null
+        }
+        onCreate={openCreate}
+      />
 
-      <InputGroup className="max-w-md bg-card">
-        <InputGroupAddon>
-          <SearchIcon />
-        </InputGroupAddon>
-        <InputGroupInput
-          type="search"
-          aria-label="Buscar pelo nome"
-          placeholder="Buscar pelo nome"
-          value={term}
-          onChange={(event) => setTerm(event.target.value)}
-        />
-      </InputGroup>
+      <CatalogOverview />
 
       {query.isError ? (
-        content
+        <>
+          {searchField}
+          {content}
+        </>
       ) : (
-        <section className="overflow-hidden rounded-xl border bg-card">
+        <section
+          aria-label="Lista de produtos"
+          className="overflow-hidden rounded-2xl bg-card shadow-sm ring-1 ring-border"
+        >
+          <div className="flex flex-wrap items-center gap-3 border-b px-4 py-4 sm:px-6">
+            {searchField}
+            {search && (
+              <span className="inline-flex items-center rounded-full bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground">
+                Filtrando por “{search}”
+              </span>
+            )}
+          </div>
           {content}
         </section>
       )}

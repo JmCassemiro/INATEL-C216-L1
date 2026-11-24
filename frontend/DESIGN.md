@@ -1,233 +1,183 @@
 ---
-name: NexoPDV — Painel
+name: NexoPDV — Painel e site
 colors:
   light:
-    gondola: "#EEF1F3"      # fundo da aplicação (aço claro da gôndola)
-    papel: "#FFFFFF"        # superfícies: lista, formulários, diálogos
-    grafite: "#1B1E2E"      # texto principal
-    grafite-suave: "#5B6075" # texto secundário
-    linha: "#D9DDE4"        # divisórias e bordas estruturais
+    nevoa: "#F3F5FB"        # fundo da aplicação
+    papel: "#FFFFFF"        # cartões, tabela, formulários, diálogos
+    tinta: "#141938"        # texto principal
+    tinta-suave: "#5B6180"  # texto secundário
+    linha: "#E3E7F0"        # divisórias e contorno de cartões
     linha-campo: "#8A90A5"  # borda de campos (≥ 3:1 sobre o papel)
-    tinta: "#2B39A8"        # cor da marca e ação principal (azul de caneta)
-    etiqueta: "#FFD43B"     # amarelo de etiqueta de preço — só em preço
-    etiqueta-borda: "#D9AE00"
-    remarcacao: "#C21F32"   # vermelho: remover, erros
-    caixa-livre: "#1F7A4D"  # verde: confirmações
+    indigo: "#4F46E5"       # cor da marca: ação, página ativa, foco
+    violeta: "#7C3AED"      # par do índigo nos gradientes e brilhos
+    noite: "#0E1330"        # menu lateral, faixa de título, hero do site
+    noite-2: "#161C44"      # segunda parada do gradiente da noite
+    etiqueta: "#FFD43B"     # amarelo de etiqueta: preço e a ação principal
+    etiqueta-borda: "#E5B800"
+    remarcacao: "#E11D48"   # vermelho: remover, erros
+    caixa-livre: "#047857"  # verde: confirmações, "online"
+    alerta: "#B45309"       # âmbar: avisos
   dark:
-    gondola: "#121528"
-    papel: "#1A1E36"
-    grafite: "#E8EAF4"
-    grafite-suave: "#A2A7C0"
-    linha: "#2C3150"
-    linha-campo: "#6E7499"
-    tinta: "#8F9BFF"        # texto sobre ela: #121528
+    nevoa: "#0B0F26"
+    papel: "#131938"
+    tinta: "#E8EAF6"
+    tinta-suave: "#A3A9C9"
+    linha: "#262E5A"
+    linha-campo: "#6E77A6"
+    indigo: "#8B87FF"       # texto sobre ele: #0B0F26
+    noite: "#080B1F"
     etiqueta: "#FFD43B"     # igual nos dois temas: é um adesivo físico
-    etiqueta-borda: "#D9AE00"
-    remarcacao: "#FF7A7A"
-    caixa-livre: "#5FD69A"
+    remarcacao: "#FB7185"
+    caixa-livre: "#34D399"
+    alerta: "#FBBF24"
 typography:
-  family: "Archivo Variable (eixos wght 100–900 e wdth 62–125), auto-hospedada"
-  widths:
-    letreiro: 118   # marca e títulos de página
-    leitura: 100    # interface e texto corrido
-    etiqueta: 72    # preços
+  ui: "Plus Jakarta Sans Variable (wght 200–800), auto-hospedada"
+  preco: "Archivo Variable (wght e wdth), auto-hospedada; só em preço"
   scale:
-    page-title: { size: "clamp(24px, 1.6vw + 16px, 30px)", weight: 760, width: 118, line-height: 1.15, tracking: "-0.01em" }
-    brand: { size: 18px, weight: 800, width: 125, line-height: 1 }
-    body: { size: 15px, weight: 400, width: 100, line-height: 1.5 }
-    table: { size: 14px, weight: 400, width: 100, line-height: 1.4 }
-    meta: { size: 13px, weight: 450, width: 100, line-height: 1.4 }
-    price-list: { size: 20px, weight: 800, width: 72, cents: 12px }
-    price-label: { size: 48px, weight: 850, width: 68, cents: 22px }
+    display: { size: "clamp(40px, 5vw + 12px, 64px)", weight: 800, tracking: "-0.035em", line-height: 1.04 }
+    page-title: { size: "clamp(28px, 2vw + 18px, 40px)", weight: 800, tracking: "-0.025em" }
+    kpi: { size: 30px, weight: 800, tracking: "-0.02em" }
+    body: { size: 15px, weight: 400, line-height: 1.5 }
+    meta: { size: 13px, weight: 500 }
+    price-list: { family: Archivo, size: 20px, weight: 850, width: 72 }
+    price-label: { family: Archivo, size: 48px, weight: 850, width: 68 }
 rounded:
-  tag: 2px        # etiquetas de preço (adesivo)
-  control: 6px    # botões, campos, itens de menu
-  surface: 10px   # lista, painel lateral, diálogos, toasts
-spacing:
-  base: 4px
-  gutter-mobile: 16px
-  gutter-desktop: 32px
-  content-max: 1120px
-controls:
-  height: 36px
-  icon-button: 36px
+  tag: 6px        # etiqueta de preço
+  control: 12px   # campos e botões quadrados
+  pill: 9999px    # botões de ação, filtros, status
+  card: 20px      # cartões, tabela, painel lateral
+  band: 28px      # faixa de título, hero
 elevation:
-  flat: "nenhuma sombra; superfícies separadas por 1px de linha"
-  overlay: "0 16px 40px -12px rgb(18 21 40 / 0.28)"
+  card: "0 1px 2px rgb(20 25 56 / .04), 0 8px 24px -12px rgb(20 25 56 / .12)"
+  float: "0 24px 60px -20px rgb(14 19 48 / .45)"
+  glow-brand: "0 10px 30px -8px rgb(79 70 229 / .55)"
+  glow-tag: "0 10px 30px -10px rgb(255 212 59 / .6)"
 ---
 
-# NexoPDV — Painel
+# NexoPDV — Painel e site
 
 ## Visão geral
 
-**Assunto:** o painel de retaguarda do NexoPDV, sistema de frente de caixa e gestão para lojas de
-varejo físico pequenas e médias no Brasil (roupas, papelaria, material de construção, mercadinho).
+**Assunto:** o NexoPDV, frente de caixa e retaguarda offline-first para lojas de varejo físico.
+São duas superfícies: o **site** (página de entrada em `/`, que apresenta o produto) e o
+**painel** (retaguarda em `/products`, onde o lojista mantém o catálogo).
 
-**Quem usa:** o dono ou o gerente da loja, no computador ou no tablet da retaguarda, todo dia,
-entre um atendimento e outro. Não é especialista em sistemas; conhece bem a loja.
+**Quem usa:** o dono ou o gerente da loja, no computador ou no tablet. Não é especialista em
+sistemas; quer uma ferramenta que pareça profissional e confiável, como os SaaS de gestão que já
+conhece.
 
-**Trabalho principal da tela de produtos:** manter o catálogo certo, rápido e sem medo de errar:
-achar um produto, conferir ou corrigir o preço, cadastrar o que chegou.
-
-**Conceito: a etiqueta de gôndola.** O objeto mais característico do varejo físico é a etiqueta
-de preço na borda da prateleira: amarela, preço em numeral condensado e pesado, centavos menores
-e elevados, código de barras embaixo. O painel trata o catálogo como a loja trata a prateleira: a
-lista é calma e organizada (aço e papel), e o preço é a única coisa que "grita", sempre no mesmo
-formato de etiqueta. É aí que gastamos a ousadia; o resto fica quieto e disciplinado.
+**Direção: SaaS de varejo, rico e confiante.** Profundidade (cartões com sombra suave sobre um
+fundo névoa), uma cor de marca forte (índigo → violeta), superfícies noturnas com brilho para dar
+peso ao topo de cada tela, e o **amarelo da etiqueta de gôndola** como assinatura: é a cor do
+preço e da ação principal. A etiqueta inclinada, com o preço em numeral condensado e centavos
+elevados, é o elemento que ninguém confunde com outro produto.
 
 ## Cores
 
-- **Gôndola** (fundo) e **Papel** (superfícies): neutros frios, como prateleira de aço e papel de
-  bobina térmica. Nada de creme.
-- **Grafite**: texto. Derivado da Tinta, para a paleta ficar coesa.
-- **Tinta**: o azul de caneta esferográfica do caderno de fiado e da nota preenchida à mão. É a
-  cor da marca e da ação principal (um botão primário por tela).
-- **Etiqueta**: amarelo de etiqueta de preço. **Regra: amarelo só aparece onde há dinheiro**
-  (preço na lista, prévia da etiqueta, destaque da linha que acabou de mudar de preço). Não é cor
-  de botão, de link nem de alerta.
-- **Remarcação** (vermelho) para remover e para erros; **Caixa livre** (verde) para confirmações.
+- **Noite** (`#0E1330`) com gradiente para **Noite 2** e brilhos radiais de **Índigo** e
+  **Violeta**: menu lateral, faixa de título do painel e hero do site.
+- **Névoa** e **Papel**: fundo frio e cartões brancos, separados por sombra suave e 1 px de linha.
+- **Índigo**: marca, página ativa da paginação, foco, ícones de destaque.
+- **Etiqueta** (amarelo): preço, botão da ação principal da tela ("Novo produto", "Abrir o
+  painel"), item ativo do menu e destaques de texto no site. Texto sobre ela é sempre Noite
+  (contraste 12,8:1).
+- **Remarcação** (vermelho) para remover e erros; **Caixa livre** (verde) para confirmação e
+  "online"; **Alerta** (âmbar) para avisos.
+- Os blocos coloridos das linhas usam seis gradientes fixos (céu, âmbar, índigo, esmeralda,
+  ardósia, rosa), sorteados de forma estável pelo id do produto.
 
-Contraste verificado (WCAG 2.x): todo par de texto ≥ 4,5:1 nos dois temas (menor: verde sobre
-papel claro, 5,32:1); borda de campo ≥ 3:1 (3,18 claro, 3,60 escuro). O amarelo sobre o papel
-branco tem 1,43:1, por isso a etiqueta leva a borda `etiqueta-borda`; o texto sobre ela tem
-11,58:1.
+Contraste (WCAG 2.x): texto ≥ 4,5:1 nos dois temas; verde #047857 sobre papel 5,48:1; vermelho
+#E11D48 sobre papel 4,70:1; texto do menu (#C3C8E6 sobre #0E1330) 11,0:1; branco sobre índigo 6,29:1.
 
 ## Tipografia
 
-Uma família só, **Archivo**, usada em três larguras do eixo `wdth`, como a sinalização de uma
-loja:
+- **Plus Jakarta Sans** em toda a interface: geométrica, amigável, com peso 800 para títulos
+  grandes e espaçamento negativo. Lembra os SaaS de gestão brasileiros sem copiar nenhum.
+- **Archivo condensada** só no preço: `R$` pequeno, inteiro grande, `,90` menor e elevado. Leitor
+  de tela ouve o preço inteiro ("R$ 49,90"); as partes visuais ficam ocultas.
+- Código de barras em algarismos tabulares com respiro de `0.04em`.
+- As duas fontes são auto-hospedadas (pacotes npm), sem CDN: a loja pode ter internet ruim.
 
-- **Letreiro** (expandida, pesada): a marca e o título da página. Lembra fachada e placa de
-  seção.
-- **Leitura** (largura normal): tudo o que se lê na interface.
-- **Etiqueta** (condensada, pesadíssima): preços. Lembra o numeral da etiqueta de gôndola.
-
-Números de preço e código de barras usam algarismos tabulares (`tabular-nums`), para alinhar em
-coluna. O código de barras **não** usa fonte monoespaçada: é a Archivo de leitura com algarismos
-tabulares e um respiro de `0.02em`.
-
-Preço é sempre composto assim: `R$` pequeno, inteiro grande, `,90` menor e elevado. Para leitores
-de tela, o conjunto tem rótulo único ("R$ 49,90") e as partes visuais ficam ocultas.
-
-A fonte é auto-hospedada (pacote npm), sem CDN: o NexoPDV nasce para funcionar em loja com
-internet ruim.
-
-## Layout
-
-Barra superior com a marca, as seções e a troca de tema; conteúdo alinhado à esquerda numa coluna
-de até 1120 px. Não há menu lateral: com uma seção só, ele seria uma coluna vazia. As próximas
-seções (Estoque, Vendas) entram como novas abas na barra.
+## Layout do painel
 
 ```text
 Desktop (≥ 1024 px)
-┌──────────────────────────────────────────────────────────────────────────┐
-│ ▌▌▍▌ NexoPDV    Produtos                                      ◐ Tema     │  barra 56 px
-├──────────────────────────────────────────────────────────────────────────┤
-│  Produtos                                            [+ Novo produto]    │
-│  128 produtos no catálogo                                                │
-│  [🔍 Buscar pelo nome                         ]                          │
-│ ┌──────────────────────────────────────────────────────────────────────┐ │
-│ │ Produto                        Código de barras        Preço         │ │
-│ │──────────────────────────────────────────────────────────────────────│ │
-│ │ Camiseta Básica Branca M       7891000315507       ▕R$ 49,⁹⁰▏  ✎ 🗑   │ │
-│ │ Algodão penteado, gola careca                                        │ │
-│ │──────────────────────────────────────────────────────────────────────│ │
-│ │ Calça Jeans Azul 42            7896543210985      ▕R$ 159,⁹⁰▏  ✎ 🗑   │ │
-│ │──────────────────────────────────────────────────────────────────────│ │
-│ │ Mostrando 1–10 de 128            Página 1 de 13   [Anterior][Próxima]│ │
-│ └──────────────────────────────────────────────────────────────────────┘ │
-└──────────────────────────────────────────────────────────────────────────┘
+┌────────────┬─────────────────────────────────────────────────────────────┐
+│ ▌▌▍▌ Nexo  │ Painel / Produtos                     ⟳ Ver site   ◐        │ barra 64 px
+│            ├─────────────────────────────────────────────────────────────┤
+│ ▣ Produtos │ ╭─ faixa noite com brilho ──────────────────────────────╮   │
+│   12       │ │ Catálogo da loja                          ╱R$ 49,⁹⁰╱   │   │
+│ ▢ Estoque  │ │ Produtos             [+ Novo produto]                  │   │
+│   em breve │ ╰───────────────────────────────────────────────────────╯   │
+│ ▢ Vendas   │ [Catálogo 12] [Último cadastrado] [Códigos] [Estoque]       │
+│   em breve │ ╭─ tabela ──────────────────────────────────────────────╮   │
+│            │ │ [🔍 Buscar pelo nome]                                  │   │
+│ ╭────────╮ │ │ ▣ Camiseta Básica   7891000315507  EAN-13  R$49,⁹⁰ ✎ 🗑 │   │
+│ │Conectado│ │ │ Mostrando 1–10 de 12      ‹ [1] 2 ›                    │   │
+│ ╰────────╯ │ ╰───────────────────────────────────────────────────────╯   │
+└────────────┴─────────────────────────────────────────────────────────────┘
 ```
 
-A coluna de preços, com as etiquetas amarelas empilhadas, lembra a borda de uma prateleira.
+- **Menu lateral** (noite, 256 px) com a marca, as seções e o cartão de conexão. Seções que
+  ainda não existem aparecem desabilitadas com "em breve": nunca link morto.
+- **Barra superior** (papel translúcido com desfoque): trilha, link para o site e tema. Abaixo
+  de 1024 px o menu lateral sai e um botão "Abrir menu" abre o mesmo menu numa gaveta.
+- **Faixa de título**: gradiente noite com brilhos, título grande, contagem do catálogo e a ação
+  principal em pílula amarela com brilho. À direita, a etiqueta inclinada com o preço do produto
+  mais recente (decorativa, oculta para leitor de tela).
+- **Indicadores**: só dados reais da API. O que depende de uma spec futura (estoque) aparece como
+  "em breve", nunca com número inventado.
+- **Tabela** dentro de um cartão: busca no topo, bloco colorido com as iniciais em cada linha,
+  pílula do tipo de código (EAN-13, EAN-8, UPC-A, GTIN-14), etiqueta de preço e ações.
+  Paginação numerada com a página ativa em índigo.
+- **Celular** (< 640 px): a tabela vira lista empilhada; ações num menu `⋯`.
 
-```text
-Painel lateral de cadastro e edição (abre pela direita; tela cheia no celular)
-┌───────────────────────────────┐
-│ Novo produto               ✕  │
-│ ┌───────────────────────────┐ │
-│ │ Camiseta Básica Branca M  │ │  prévia da etiqueta de gôndola,
-│ │ R$ 49,⁹⁰                  │ │  atualizada enquanto se digita
-│ │ ▌▍▌▌▍▌▍▌▌▍  7891000315507 │ │  (barras só com código válido)
-│ └───────────────────────────┘ │
-│ Nome                          │
-│ [                           ] │
-│ Descrição (opcional)          │
-│ [                           ] │
-│ Código de barras              │
-│ [                           ] │
-│ Preço de venda                │
-│ [ R$                        ] │
-│                               │
-│ [Cancelar] [Cadastrar produto]│
-└───────────────────────────────┘
-```
+## Layout do site (`/`)
 
-```text
-Celular (< 640 px): a tabela vira lista de linhas, sem cartões
-┌──────────────────────────────┐
-│ ▌▌▍▌ NexoPDV          ◐      │
-├──────────────────────────────┤
-│ Produtos          [+ Novo]   │
-│ [🔍 Buscar pelo nome       ] │
-│ Camiseta Básica Branca M     │
-│ 7891000315507   ▕R$ 49,⁹⁰▏ ⋯ │
-│──────────────────────────────│
-│ Calça Jeans Azul 42          │
-│ 7896543210985  ▕R$ 159,⁹⁰▏ ⋯ │
-│──────────────────────────────│
-│ 1–10 de 128   [‹] [›]        │
-└──────────────────────────────┘
-```
-
-Alinhamento: texto à esquerda; preço à direita (moeda se compara pela direita); código de barras
-em coluna de largura fixa.
+Hero noite com brilhos e uma grade sutil; manchete enorme com a palavra de destaque em gradiente
+amarelo; pílulas de recurso; à direita, a ilustração de uma venda no caixa com cartões flutuando
+(sincronização, estoque baixo, faturamento). Uma faixa de números sobrepõe o fim do hero. Depois:
+recursos em cartões (com selo "Disponível" ou "Em breve", conforme o que já existe), "como o
+offline funciona" em três passos, chamada final e rodapé. Toda ação leva ao painel; não há
+"Entrar" nem "Teste grátis" enquanto não houver login.
 
 ## Elevação e formas
 
-- Plano por padrão: superfícies se separam por 1 px de `linha`, sem sombra.
-- Sombra só no que flutua sobre a página: painel lateral, diálogo, toast, dica (tooltip). Uma
-  sombra só (`overlay`).
-- Raios por hierarquia, não um raio para tudo: 2 px na etiqueta (adesivo), 6 px nos controles,
-  10 px nas superfícies.
+- Cartões com a sombra `card` e 1 px de linha; flutuantes (gaveta, diálogo, toast, cartões do
+  hero) com `float`.
+- Brilho colorido só no que é ação ou marca: `glow-brand` no logotipo e na página ativa,
+  `glow-tag` no botão amarelo.
+- Raios grandes: 12 px em campos, pílula em botões de ação, 20 px em cartões, 28 px nas faixas.
 
 ## Componentes
 
-shadcn/ui (estilo `nova`, compacto), tematizado pelos tokens acima, com controles de 36 px.
+shadcn/ui (estilo `nova`), tematizado pelos tokens de `src/index.css`.
 
 | Necessidade | Componente |
 |---|---|
-| Ações | `Button`: `default` (Tinta) para a ação principal, `outline` para cancelar, `ghost` + ícone para editar e remover na linha, `destructive` para confirmar remoção |
-| Formulário | `Field`/`FieldGroup`, `Input`, `Textarea`, `InputGroup` (prefixo `R$` no preço) |
-| Cadastro e edição | `Sheet` pela direita |
+| Ação principal | `Button` variante `highlight` (pílula amarela com brilho) |
+| Ações secundárias | `Button` `outline`, `ghost` + ícone na linha, `destructive` para confirmar remoção |
+| Formulário | `Field`/`FieldGroup`, `Input`, `Textarea`, `InputGroup` (prefixo `R$`) |
+| Cadastro e edição | `Sheet` pela direita, com cabeçalho noite |
 | Remover | `AlertDialog` |
-| Lista | `Table` (desktop) e a mesma informação em linhas empilhadas (celular) |
-| Carregando | `Skeleton` com o formato das linhas |
-| Vazio e busca sem resultado | `Empty` |
-| Erro ao carregar | `Alert` com "Tentar de novo" |
+| Menu no celular | `Sheet` pela esquerda |
+| Carregando, vazio, erro | `Skeleton`, `Empty`, `Alert` |
 | Retorno das ações | toast (`sonner`) |
-| Dicas dos botões de ícone | `Tooltip` |
 
-Componentes próprios do NexoPDV:
-
-- **Etiqueta de preço** (`PriceTag`): amarelo, numeral condensado, centavos elevados. Dois
-  tamanhos: lista e prévia.
-- **Prévia da etiqueta de gôndola** (`ShelfLabel`): nome, preço e código de barras desenhado em
-  barras reais (EAN-13, UPC-A e EAN-8) quando o código é válido. *(Extra — fora do PDF.)*
-- **Marca** (`BrandMark`): cinco barras verticais de larguras 1-2-1-3-1, em Tinta, com o nome
-  NexoPDV em Letreiro. Também é o favicon.
+Componentes próprios: `PriceTag` (etiqueta), `ShelfLabel` (prévia da etiqueta de gôndola com
+barras reais), `BrandMark` (cinco barras 1-2-1-3-1 num quadrado índigo → violeta, com
+"Nexo**PDV**"), `ProductAvatar` (bloco colorido com iniciais), `StatCard` (indicador).
 
 ## Movimento
 
-Um único momento, em resposta ao lojista: a linha que acabou de ser cadastrada ou editada recebe
-uma lavagem amarela-etiqueta que some em 1,2 s, para mostrar o que mudou. Abrir e fechar o painel
-lateral e o diálogo usam a animação padrão dos componentes. Nada se move sozinho. Com
-`prefers-reduced-motion`, a lavagem fica estática por 2 s e some sem transição.
+- A linha cadastrada ou editada recebe uma lavagem amarela que some em 1,2 s.
+- Cartões e linhas sobem 1–2 px no hover; botões amarelos clareiam.
+- No site, os cartões do hero flutuam devagar (6 s). Com `prefers-reduced-motion`, nada se
+  move sozinho e a lavagem fica estática.
 
 ## Texto da interface
 
-Português do Brasil, frases curtas, voz ativa, sem caixa alta. A ação mantém o nome do botão ao
-toast:
+Português do Brasil, frases curtas, voz ativa. A ação mantém o nome do botão no toast:
 
 | Ação | Botão | Toast |
 |---|---|---|
@@ -235,37 +185,24 @@ toast:
 | Editar | "Salvar alterações" | "Alterações salvas" |
 | Remover | "Remover produto" | "Produto removido" |
 
-- Vazio: "Nenhum produto cadastrado ainda." / "Cadastre o primeiro produto para começar a
-  vender." / botão "Cadastrar produto".
-- Busca sem resultado: "Nenhum produto com “{termo}”." / botão "Limpar busca".
-- Erro ao carregar: "Não foi possível carregar os produtos." / "Verifique a conexão com o
-  servidor e tente de novo." / botão "Tentar de novo".
-- Remover: título "Remover {nome}?" / "O produto sai do catálogo. O código de barras {código}
-  continua reservado e não poderá ser usado em outro produto."
-- Produto sumiu: "Este produto não existe mais. A lista foi atualizada."
-- Erros de campo dizem o que fazer: "Informe o nome do produto.", "Confira os dígitos: o código
-  de barras não é válido.", "Use no máximo duas casas decimais."
+Os textos de vazio, busca sem resultado, erro e confirmação de remoção seguem os da spec 007
+(`specs/007-painel-produtos/contracts/ui.md`).
 
 ## Faça e não faça
 
-- **Faça:** usar só tokens semânticos; amarelo só em preço; um botão primário por tela; texto à
-  esquerda e preço à direita; rótulo visível em todo campo.
-- **Não faça:** cartões com sombra para cada produto; caixa alta com espaçamento em rótulos;
-  numeração decorativa (01/02/03); `→` em botões; separadores com ponto médio ("A · B"); fonte
-  monoespaçada para dados; gradientes; cores soltas (`bg-blue-500`); `dark:` manual.
+- **Faça:** só tokens semânticos (`bg-primary`, `bg-sidebar`, `text-price-tag-foreground`);
+  dados reais nos indicadores; "em breve" para o que ainda não existe; rótulo visível em todo
+  campo; foco visível em tudo.
+- **Não faça:** número inventado no painel; link para tela que não existe; cor solta
+  (`bg-blue-500`) fora dos gradientes de `ProductAvatar` e dos cartões de recurso do site;
+  `dark:` manual onde um token resolve; fonte monoespaçada para dados.
+- **Exceção:** a ilustração do caixa no hero do site é um "print" do produto, sempre clara, e
+  usa a paleta fixa do Tailwind. Os números dela são de exemplo, e ela é uma imagem (`role="img"`
+  com descrição) para leitores de tela.
 
 ## Responsivo
 
-- < 640 px: lista empilhada, ações num menu `⋯`, painel lateral em tela cheia, margem de 16 px.
-- ≥ 640 px: tabela, com a descrição numa segunda linha sob o nome; margem de 24 px até 1023 px
-  e de 32 px a partir de 1024 px.
+- < 640 px: lista empilhada, painel de cadastro em tela cheia, margem de 16 px.
+- 640–1023 px: tabela, menu na gaveta, indicadores em duas colunas.
+- ≥ 1024 px: menu lateral fixo, indicadores em quatro colunas, margem de 32 px.
 - Nunca rolagem horizontal da página.
-
-## Lacunas conhecidas
-
-- O tema escuro foi derivado da paleta clara (não há referência de marca para ele).
-- GTIN-14 (ITF-14) não é desenhado em barras na prévia: mostra só os dígitos.
-- Sem página de design system (showcase) nesta etapa; os tokens vivem em `src/index.css`.
-- Confirmar no plano que o pacote da Archivo traz o eixo `wdth`; se não trouxer, a alternativa é
-  usar só `wght` e trocar o "Letreiro" por peso, mantendo a Etiqueta numa fonte condensada da
-  mesma família de desenho.

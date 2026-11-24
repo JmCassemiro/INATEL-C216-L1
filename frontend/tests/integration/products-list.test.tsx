@@ -216,6 +216,36 @@ describe("Lista de produtos (US1)", () => {
     ).toBeVisible();
   });
 
+  it("FR-002: paginação numerada leva direto à página e marca a atual", async () => {
+    catalog.seedMany(25);
+    const { user, router } = renderApp();
+
+    const pagination = await screen.findByRole("navigation", {
+      name: "Paginação",
+    });
+    expect(
+      within(pagination).getByRole("button", { name: "Página 1" }),
+    ).toHaveAttribute("aria-current", "page");
+
+    await user.click(
+      within(pagination).getByRole("button", { name: "Página 3" }),
+    );
+
+    expect(await within(pagination).findByText("Página 3 de 3")).toBeVisible();
+    expect(currentUrl(router)).toBe("/products?page=3");
+    expect(
+      within(pagination).getByRole("button", { name: "Página 3" }),
+    ).toHaveAttribute("aria-current", "page");
+  });
+
+  it("cada linha mostra o tipo do código de barras", async () => {
+    seedClothes();
+    renderApp();
+
+    const [meia] = bodyRows(await findTable());
+    expect(within(meia as HTMLElement).getByText("EAN-13")).toBeVisible();
+  });
+
   it("FR-020: no celular, a tabela vira uma lista empilhada", async () => {
     setMediaMatches(MOBILE, true);
     seedClothes();

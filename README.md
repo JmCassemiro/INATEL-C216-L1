@@ -32,19 +32,20 @@ INATEL-C216-L1/
 │   ├── Dockerfile
 │   ├── poetry.lock
 │   └── pyproject.toml
-├── frontend/                    # painel do NexoPDV: React + TypeScript + Vite + shadcn/ui
+├── frontend/                    # site e painel do NexoPDV: React + TypeScript + Vite + shadcn/ui
 │   ├── src/
-│   │   ├── app/                 # composição: providers, rotas e layout (barra superior)
-│   │   ├── components/          # ui/ (shadcn), marca e tema claro/escuro
+│   │   ├── app/                 # composição: providers, rotas e layout (menu lateral e barra)
+│   │   ├── components/          # ui/ (shadcn), marca, indicador e tema claro/escuro
+│   │   ├── features/landing/    # página de entrada do site (/)
 │   │   ├── features/products/   # seção de produtos: telas, API, consultas e regras do formulário
 │   │   ├── lib/                 # cliente HTTP, preço como texto e hooks utilitários
-│   │   └── index.css            # tokens do tema (cores, fonte, raios) do DESIGN.md
+│   │   └── index.css            # tokens do tema (cores, fontes, raios, sombras) do DESIGN.md
 │   ├── tests/
 │   │   ├── unit/                # Vitest: regras puras (GTIN, EAN, preço, validação, URL)
 │   │   ├── integration/         # Vitest + Testing Library: telas com a API simulada (MSW)
 │   │   ├── msw/                 # catálogo falso que segue o contrato de /products
 │   │   └── e2e/                 # Playwright contra a stack completa
-│   ├── DESIGN.md                # identidade visual do painel
+│   ├── DESIGN.md                # identidade visual do site e do painel
 │   ├── Dockerfile               # servidor de desenvolvimento do Vite
 │   ├── biome.json
 │   ├── components.json          # configuração do shadcn/ui
