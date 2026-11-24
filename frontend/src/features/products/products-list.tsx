@@ -11,6 +11,7 @@ import {
   Trash2Icon,
   TriangleAlertIcon,
 } from "lucide-react";
+import { IconAction } from "@/components/icon-action";
 import {
   Alert,
   AlertAction,
@@ -42,11 +43,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { StockStatusPill } from "@/features/stock/stock-status";
 import { formatUnits } from "@/lib/quantity";
 import { useIsMobile } from "@/lib/use-is-mobile";
@@ -183,35 +179,6 @@ function BarcodeKind({ code }: { code: string }) {
     <span className="rounded-full bg-accent px-2 py-0.5 text-[11px] font-bold text-accent-foreground ring-1 ring-primary/15">
       {gtinKind(code)}
     </span>
-  );
-}
-
-function IconAction({
-  label,
-  tooltip,
-  onClick,
-  children,
-}: {
-  label: string;
-  tooltip: string;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label={label}
-          onClick={onClick}
-          className="text-muted-foreground hover:bg-card hover:text-foreground hover:shadow-sm"
-        >
-          {children}
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>{tooltip}</TooltipContent>
-    </Tooltip>
   );
 }
 

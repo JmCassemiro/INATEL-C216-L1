@@ -108,14 +108,14 @@ commit seguem a tabela "Ordem de implementação e commits" do plano.
 
 **Independent Test**: com produtos cadastrados, abrir `/stock`, registrar uma entrada, ver o novo saldo e recarregar.
 
-- [ ] T038 [P] [US1] Escrever `frontend/tests/unit/use-stock-list-params.test.tsx`: busca, página e `view=restock` na URL; trocar a visão volta à página 1
-- [ ] T039 [P] [US1] Escrever `frontend/tests/unit/stock-validation.test.ts`: entrada exige quantidade de 1 a 99.999 e aceita observação vazia (→ `null`) até 200 caracteres
-- [ ] T040 [P] [US1] Escrever `frontend/tests/integration/stock-list.test.tsx`: link "Estoque" no menu leva a `/stock` com `aria-current`; título "Estoque"; pede `sort=name`; colunas e situação; estados (carregando, erro com "Tentar de novo", catálogo vazio com "Ir para Produtos", busca sem resultado com "Limpar busca"); paginação; busca na URL
-- [ ] T041 [P] [US1] Escrever `frontend/tests/integration/stock-entry.test.tsx`: "Registrar entrada de {nome}" abre o diálogo com o saldo atual; erros no campo sem envio; envio com `quantity` e `note`; botão "Registrando…" sem envio duplicado; aviso "Entrada registrada: {nome} agora tem {n} un."; saldo novo na lista sem recarregar; 404 fecha e atualiza; erro de rede mantém os dados; Esc fecha sem gravar
-- [ ] T042 [US1] Implementar `frontend/src/features/stock/types.ts`, `api.ts` e `queries.ts` (chaves `["stock", …]`; mutações invalidam `["products"]` e `["stock"]`)
-- [ ] T043 [US1] Implementar `frontend/src/features/stock/use-stock-list-params.ts` e a validação da entrada em `frontend/src/features/stock/validation.ts`
-- [ ] T044 [US1] Implementar `frontend/src/features/stock/stock-list.tsx`, `frontend/src/features/stock/stock-entry-dialog.tsx` e `frontend/src/features/stock/stock-page.tsx`; rota `/stock` com `handle: { title: "Estoque" }` em `frontend/src/app/router.tsx`; "Estoque" vira link em `frontend/src/app/sidebar.tsx`; atualizar `frontend/tests/integration/app-shell.test.tsx`
-- [ ] T045 [US1] Capturas de tela da seção Estoque e do diálogo (claro, escuro, 360 px), revisadas antes do commit
+- [X] T038 [P] [US1] Escrever `frontend/tests/unit/use-stock-list-params.test.tsx`: busca, página e `view=restock` na URL; trocar a visão volta à página 1
+- [X] T039 [P] [US1] Escrever `frontend/tests/unit/stock-validation.test.ts`: entrada exige quantidade de 1 a 99.999 e aceita observação vazia (→ `null`) até 200 caracteres
+- [X] T040 [P] [US1] Escrever `frontend/tests/integration/stock-list.test.tsx`: link "Estoque" no menu leva a `/stock` com `aria-current`; título "Estoque"; pede `sort=name`; colunas e situação; estados (carregando, erro com "Tentar de novo", catálogo vazio com "Ir para Produtos", busca sem resultado com "Limpar busca"); paginação; busca na URL
+- [X] T041 [P] [US1] Escrever `frontend/tests/integration/stock-entry.test.tsx`: "Registrar entrada de {nome}" abre o diálogo com o saldo atual; erros no campo sem envio; envio com `quantity` e `note`; botão "Registrando…" sem envio duplicado; aviso "Entrada registrada: {nome} agora tem {n} un."; saldo novo na lista sem recarregar; 404 fecha e atualiza; erro de rede mantém os dados; Esc fecha sem gravar
+- [X] T042 [US1] Implementar `frontend/src/features/stock/types.ts`, `api.ts` e `queries.ts` (chaves `["stock", …]`; mutações invalidam `["products"]` e `["stock"]`)
+- [X] T043 [US1] Implementar `frontend/src/features/stock/use-stock-list-params.ts` e a validação da entrada em `frontend/src/features/stock/validation.ts`
+- [X] T044 [US1] Implementar `frontend/src/features/stock/stock-list.tsx`, `frontend/src/features/stock/stock-entry-dialog.tsx` e `frontend/src/features/stock/stock-page.tsx`; rota `/stock` com `handle: { title: "Estoque" }` em `frontend/src/app/router.tsx`; "Estoque" vira link em `frontend/src/app/sidebar.tsx`; atualizar `frontend/tests/integration/app-shell.test.tsx`
+- [X] T045 [US1] Capturas de tela da seção Estoque e do diálogo (claro, escuro, 360 px), revisadas antes do commit
 
 **Checkpoint (commit 6)**: `feat(estoque): cria a secao estoque com a entrada de mercadoria`.
 

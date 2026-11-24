@@ -3,7 +3,7 @@
  * vivem na URL; os dados vêm do TanStack Query (research D5 e D6).
  */
 import { PackageIcon, PlusIcon, SearchIcon } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ListPagination } from "@/components/list-pagination";
 import { Button } from "@/components/ui/button";
@@ -12,8 +12,8 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import { useDebouncedValue } from "@/lib/use-debounced-value";
 import { useListParams } from "@/lib/use-list-params";
+import { useSearchTerm } from "@/lib/use-search-term";
 import { CatalogOverview } from "./catalog-overview";
 import { DeleteProductDialog } from "./delete-product-dialog";
 import { PriceTag } from "./price-tag";
@@ -97,25 +97,11 @@ export function ProductsPage() {
   const data = query.data;
 
   // O campo de busca é local; o termo vai para a URL depois de uma pausa (FR-003).
-  const [term, setTerm] = useState(search);
-  const debouncedTerm = useDebouncedValue(term);
-  const submittedTerm = useRef(search);
-
-  useEffect(() => {
-    const trimmed = debouncedTerm.trim();
-    if (trimmed !== submittedTerm.current) {
-      submittedTerm.current = trimmed;
-      setSearch(trimmed);
-    }
-  }, [debouncedTerm, setSearch]);
-
-  // A URL mudou por fora (voltar do navegador): o campo acompanha.
-  useEffect(() => {
-    if (search !== submittedTerm.current) {
-      submittedTerm.current = search;
-      setTerm(search);
-    }
-  }, [search]);
+  const {
+    term,
+    setTerm,
+    clear: clearSearch,
+  } = useSearchTerm(search, setSearch);
 
   // Página além da última (endereço antigo ou digitado): vai para a última que existe.
   const lastPage = data ? Math.max(1, Math.ceil(data.total / PAGE_SIZE)) : 1;
@@ -124,12 +110,6 @@ export function ProductsPage() {
       setPage(lastPage, { replace: true });
     }
   }, [data, query.isPlaceholderData, page, lastPage, setPage]);
-
-  function clearSearch() {
-    submittedTerm.current = "";
-    setTerm("");
-    setSearch("");
-  }
 
   // Cada aviso tem um id fixo: o mesmo aviso de novo substitui o anterior em vez de empilhar.
   // Formulário (cadastro ou edição) e linha destacada depois de salvar (research D14).
