@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Self
 
 from sqlalchemy import (
@@ -65,5 +65,8 @@ class StockMovementModel(Base):
             quantity=self.quantity,
             balance_after=self.balance_after,
             note=self.note,
-            occurred_at=self.occurred_at,
+            # O SQLite devolve a data sem fuso; o valor gravado é sempre UTC.
+            occurred_at=self.occurred_at
+            if self.occurred_at.tzinfo is not None
+            else self.occurred_at.replace(tzinfo=UTC),
         )

@@ -70,15 +70,15 @@ commit seguem a tabela "Ordem de implementação e commits" do plano.
 
 ### Aplicação e API (D8, D9, D11, D19)
 
-- [ ] T020 [P] Escrever `backend/tests/unit/application/test_stock_service.py` (repositórios em memória e relógio fixo): `register_entry` e `adjust` devolvem a movimentação com o horário do relógio; erros de domínio sobem; `movements` devolve `Page` com `page` e `size`; `summary`
-- [ ] T021 [P] Acrescentar a `backend/tests/unit/application/test_product_service.py`: `create` e `replace` com `min_stock`; PATCH só de `min_stock`; `list` repassa `restock_only` e `order`
-- [ ] T022 Criar `backend/app/application/services/stock_service.py` e ajustar `ProductData`/`ProductChanges` (`min_stock`) em `backend/app/application/commands.py` e o `ProductService` em `backend/app/application/services/product_service.py`
-- [ ] T023 [P] Escrever `backend/tests/integration/test_stock_api.py` com todas as linhas de [contracts/stock-api.md](contracts/stock-api.md) §2–§6: 201 de entrada e de ajuste, 404, 422 por campo (`quantity` com `"2"`, `2.5`, `true`, 0 e fora da faixa; `note`; `reason`; id inválido), 409 com as mensagens exatas, nada gravado nos erros, histórico paginado e resumo
-- [ ] T024 [P] Acrescentar a `backend/tests/integration/test_products_api.py`: saída com `stock_quantity`, `min_stock`, `shortfall` e `stock_status`; `min_stock` no POST, PUT (omitido → 0) e PATCH (`null` → 422); `stock_quantity` enviado é ignorado; `restock=true`; `sort=name` e `sort=shortfall`; `sort=xyz` → 422 em `["query", "sort"]`
-- [ ] T025 [P] Acrescentar a `backend/tests/integration/test_cors.py`: preflight de `POST /products/{id}/stock/entries` vindo do front-end → 200
-- [ ] T026 Implementar `backend/app/api/schemas/product.py` (`min_stock` na entrada e no PATCH; campos de estoque na saída) e `backend/app/api/schemas/stock.py` (`EntryInput`, `AdjustmentInput` com `StrictInt`, `MovementOutput`, `MovementPageOutput`, `StockSummaryOutput`)
-- [ ] T027 Implementar `backend/app/api/routes/stock.py` (entries, adjustments, movements, summary), os parâmetros `restock` e `sort` em `backend/app/api/routes/products.py`, `get_stock_repository`/`get_stock_service` em `backend/app/api/dependencies.py` e o router em `backend/app/main.py`
-- [ ] T028 Criar o alvo `test-postgres` no `Makefile` (PostgreSQL 17 descartável, `TEST_DATABASE_URL`, container apagado mesmo com falha) e rodá-lo: nenhum teste pulado
+- [X] T020 [P] Escrever `backend/tests/unit/application/test_stock_service.py` (repositórios em memória e relógio fixo): `register_entry` e `adjust` devolvem a movimentação com o horário do relógio; erros de domínio sobem; `movements` devolve `Page` com `page` e `size`; `summary`
+- [X] T021 [P] Acrescentar a `backend/tests/unit/application/test_product_service.py`: `create` e `replace` com `min_stock`; PATCH só de `min_stock`; `list` repassa `restock_only` e `order`
+- [X] T022 Criar `backend/app/application/services/stock_service.py` e ajustar `ProductData`/`ProductChanges` (`min_stock`) em `backend/app/application/commands.py` e o `ProductService` em `backend/app/application/services/product_service.py`
+- [X] T023 [P] Escrever `backend/tests/integration/test_stock_api.py` com todas as linhas de [contracts/stock-api.md](contracts/stock-api.md) §2–§6: 201 de entrada e de ajuste, 404, 422 por campo (`quantity` com `"2"`, `2.5`, `true`, 0 e fora da faixa; `note`; `reason`; id inválido), 409 com as mensagens exatas, nada gravado nos erros, histórico paginado e resumo
+- [X] T024 [P] Acrescentar a `backend/tests/integration/test_products_api.py`: saída com `stock_quantity`, `min_stock`, `shortfall` e `stock_status`; `min_stock` no POST, PUT (omitido → 0) e PATCH (`null` → 422); `stock_quantity` enviado é ignorado; `restock=true`; `sort=name` e `sort=shortfall`; `sort=xyz` → 422 em `["query", "sort"]`
+- [X] T025 [P] Acrescentar a `backend/tests/integration/test_cors.py`: preflight de `POST /products/{id}/stock/entries` vindo do front-end → 200
+- [X] T026 Implementar `backend/app/api/schemas/product.py` (`min_stock` na entrada e no PATCH; campos de estoque na saída) e `backend/app/api/schemas/stock.py` (`EntryInput`, `AdjustmentInput` com `StrictInt`, `MovementOutput`, `MovementPageOutput`, `StockSummaryOutput`)
+- [X] T027 Implementar `backend/app/api/routes/stock.py` (entries, adjustments, movements, summary), os parâmetros `restock` e `sort` em `backend/app/api/routes/products.py`, `get_stock_repository`/`get_stock_service` em `backend/app/api/dependencies.py` e o router em `backend/app/main.py`
+- [X] T028 Criar o alvo `test-postgres` no `Makefile` (PostgreSQL 17 descartável, `TEST_DATABASE_URL`, container apagado mesmo com falha) e rodá-lo: nenhum teste pulado
 
 **Checkpoint (commit 4)**: `feat(estoque): expoe entradas, ajustes, historico e resumo na API` — `make test`, `make test-postgres` e `make lint` verdes; `make format` sem mudanças.
 

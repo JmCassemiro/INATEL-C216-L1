@@ -63,26 +63,16 @@ class StockChange:
     @classmethod
     def entry(cls, quantity: int, note: str | None = None) -> Self:
         """Entrada de mercadoria: 1 a 99.999 unidades, observação opcional (FR-003)."""
-        if not _is_integer(quantity) or not 1 <= quantity <= MAX_MOVEMENT_QUANTITY:
-            raise InvalidDataError(
-                "quantity", "Quantidade deve ser um número inteiro de 1 a 99.999"
-            )
-        return cls(MovementKind.ENTRY, quantity, _normalize_note(note))
+        return cls(MovementKind.ENTRY, entry_quantity(quantity), normalize_note(note))
 
     @classmethod
     def adjustment(cls, quantity: int, reason: str) -> Self:
         """Ajuste com sinal (positivo adiciona, negativo retira) e motivo (FR-005)."""
-        if (
-            not _is_integer(quantity)
-            or quantity == 0
-            or abs(quantity) > MAX_MOVEMENT_QUANTITY
-        ):
-            raise InvalidDataError(
-                "quantity",
-                "Quantidade do ajuste deve ser um número inteiro de 1 a 99.999, "
-                "para mais ou para menos",
-            )
-        return cls(MovementKind.ADJUSTMENT, quantity, _normalize_reason(reason))
+        return cls(
+            MovementKind.ADJUSTMENT,
+            adjustment_quantity(quantity),
+            normalize_reason(reason),
+        )
 
     def apply(
         self, product_id: UUID, *, balance: int, sequence: int, at: datetime
@@ -142,12 +132,28 @@ def stock_status(quantity: int, minimum: int) -> StockStatus:
     return StockStatus.OK
 
 
-def _is_integer(value: object) -> bool:
-    """`bool` é subclasse de `int` em Python, mas não é uma quantidade."""
-    return isinstance(value, int) and not isinstance(value, bool)
+def entry_quantity(value: int) -> int:
+    """Quantidade de uma entrada: inteiro de 1 a 99.999 (FR-003)."""
+    if not _is_integer(value) or not 1 <= value <= MAX_MOVEMENT_QUANTITY:
+        raise InvalidDataError(
+            "quantity", "Quantidade deve ser um número inteiro de 1 a 99.999"
+        )
+    return value
 
 
-def _normalize_note(text: str | None) -> str | None:
+def adjustment_quantity(value: int) -> int:
+    """Quantidade de um ajuste: inteiro com sinal, de 1 a 99.999 unidades (FR-005)."""
+    if not _is_integer(value) or value == 0 or abs(value) > MAX_MOVEMENT_QUANTITY:
+        raise InvalidDataError(
+            "quantity",
+            "Quantidade do ajuste deve ser um número inteiro de 1 a 99.999, "
+            "para mais ou para menos",
+        )
+    return value
+
+
+def normalize_note(text: str | None) -> str | None:
+    """Observação da entrada: opcional, aparada, até 200 caracteres (FR-003)."""
     note = (text or "").strip()
     if len(note) > NOTE_MAX_LENGTH:
         raise InvalidDataError(
@@ -156,7 +162,8 @@ def _normalize_note(text: str | None) -> str | None:
     return note or None
 
 
-def _normalize_reason(text: str) -> str:
+def normalize_reason(text: str) -> str:
+    """Motivo do ajuste: obrigatório, de 3 a 200 caracteres aparados (FR-005)."""
     reason = text.strip()
     if not reason:
         raise InvalidDataError("reason", "Informe o motivo do ajuste")
@@ -169,3 +176,8 @@ def _normalize_reason(text: str) -> str:
             "reason", f"Motivo deve ter no máximo {NOTE_MAX_LENGTH} caracteres"
         )
     return reason
+
+
+def _is_integer(value: object) -> bool:
+    """`bool` é subclasse de `int` em Python, mas não é uma quantidade."""
+    return isinstance(value, int) and not isinstance(value, bool)

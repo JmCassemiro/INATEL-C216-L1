@@ -1,4 +1,4 @@
-.PHONY: help install test test-verbose lint format run clean setup-hooks \
+.PHONY: help install test test-verbose test-postgres lint format run clean setup-hooks \
         up down build rebuild logs ps shell db-shell docker-clean \
         frontend-install frontend-dev frontend-lint frontend-format frontend-check \
         frontend-test frontend-test-e2e frontend-build e2e check-all
@@ -39,6 +39,7 @@ help:
 	@echo "  install - Instalar dependencias"
 	@echo "  test - Executar testes"
 	@echo "  test-verbose - Executar testes com saida detalhada"
+	@echo "  test-postgres - Executar os testes num PostgreSQL descartavel (como no CI)"
 	@echo "  lint - Executar linter"
 	@echo "  format - Formatar codigo"
 	@echo "  run - Executar servidor (usa o banco do Compose: rode make up antes)"
@@ -86,6 +87,23 @@ test:
 
 test-verbose:
 	cd $(BACKEND) && $(PYTEST) -v
+
+# Os mesmos testes num PostgreSQL 17 descartavel, como no CI: inclui o teste de
+# concorrencia do estoque, que o SQLite pula. O container nao tem volume e e apagado no
+# final, mesmo se os testes falharem. O pg_isready usa TCP (-h 127.0.0.1) porque o
+# servidor temporario da inicializacao da imagem so escuta no socket local.
+TEST_DB_CONTAINER := nexopdv-test-db
+TEST_DB_PORT ?= 5435
+TEST_DB_URL := postgresql+psycopg://test:test@localhost:$(TEST_DB_PORT)/test
+test-postgres:
+	docker run --rm -d --name $(TEST_DB_CONTAINER) -e POSTGRES_USER=test \
+		-e POSTGRES_PASSWORD=test -e POSTGRES_DB=test -p $(TEST_DB_PORT):5432 postgres:17-alpine
+	for i in $$(seq 1 60); do \
+		docker exec $(TEST_DB_CONTAINER) pg_isready -h 127.0.0.1 -U test -d test >/dev/null 2>&1 && break; \
+		sleep 1; \
+	done
+	cd $(BACKEND) && TEST_DATABASE_URL=$(TEST_DB_URL) $(PYTEST) -rs || (docker stop $(TEST_DB_CONTAINER) && exit 1)
+	docker stop $(TEST_DB_CONTAINER)
 
 lint:
 	cd $(BACKEND) && $(RUFF) check .

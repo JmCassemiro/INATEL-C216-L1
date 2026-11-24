@@ -35,6 +35,7 @@ class ProductData:
     description: str | None
     barcode: str
     price: Decimal
+    min_stock: int = 0
 
 
 @dataclass(frozen=True, slots=True)
@@ -45,6 +46,7 @@ class ProductChanges:
     description: str | None | Unset = UNSET
     barcode: str | Unset = UNSET
     price: Decimal | Unset = UNSET
+    min_stock: int | Unset = UNSET
 
     def is_empty(self) -> bool:
         return all(getattr(self, field.name) is UNSET for field in fields(self))

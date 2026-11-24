@@ -228,6 +228,7 @@ def test_movements_come_newest_first_with_total(factory, history):
     assert total == 4
     assert [movement.sequence for movement in items] == [4, 3, 2, 1]
     assert [movement.quantity for movement in items] == [-4, 2, 3, 5]
+    assert all(movement.occurred_at == AT for movement in items), "com fuso (UTC)"
 
 
 def test_movements_are_paginated(factory, history):
