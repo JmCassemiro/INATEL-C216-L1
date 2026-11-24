@@ -16,6 +16,17 @@ UNSET = _Unset.UNSET
 type Unset = Literal[_Unset.UNSET]
 
 
+class ProductOrder(Enum):
+    """Ordem da listagem de produtos (spec 011, research D7)."""
+
+    NEWEST = "newest"
+    """Do mais recente para o mais antigo (spec 007): o padrão."""
+    NAME = "name"
+    """Alfabética, sem diferenciar maiúsculas e acentos; empate pelo id."""
+    SHORTFALL = "shortfall"
+    """Maior falta para o mínimo primeiro; empate pelo nome."""
+
+
 @dataclass(frozen=True, slots=True)
 class ProductData:
     """Cadastro completo de um produto: usado para cadastrar e substituir."""

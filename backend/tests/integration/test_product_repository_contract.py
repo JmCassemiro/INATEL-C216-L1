@@ -9,6 +9,7 @@ from decimal import Decimal
 import pytest
 from sqlalchemy.orm import Session
 
+from app.application.commands import ProductOrder
 from app.application.ports.product_repository import ProductRepository
 from app.domain.barcode import Barcode
 from app.domain.errors import DuplicateBarcodeError, ProductNotFoundError
@@ -266,3 +267,68 @@ def test_update_unknown_product_is_rejected(repository):
     """FR-008: atualizar um produto que não está guardado é "não encontrado"."""
     with pytest.raises(ProductNotFoundError):
         repository.update(make_product())
+
+
+# --- estoque (spec 011) -------------------------------------------------------
+
+
+@pytest.fixture
+def shelf(repository) -> dict[str, Product]:
+    """Produtos com mínimos diferentes e saldo 0: a falta é o próprio mínimo."""
+    products = {
+        "banana": Product.create("Banana", None, gtin13(11), Decimal("5.00"), 4),
+        "agua": Product.create("Água Mineral", None, gtin13(12), Decimal("2.50"), 9),
+        "abacate": Product.create("abacate", None, gtin13(13), Decimal("8.00"), 0),
+        "cafe": Product.create("Café", None, gtin13(14), Decimal("19.90"), 9),
+    }
+    for product in products.values():
+        repository.add(product)
+    return products
+
+
+def names(products: list[Product]) -> list[str]:
+    return [product.name for product in products]
+
+
+def test_min_stock_is_stored(repository, shelf):
+    """FR-012 (011): o mínimo do cadastro é gravado e lido."""
+    found = repository.get_by_id(shelf["agua"].id)
+
+    assert found is not None
+    assert found.min_stock == 9
+    assert found.stock_quantity == 0
+
+
+def test_list_by_name_ignores_case_and_accents(repository, shelf):
+    """FR-016 (011): ordem alfabética, sem diferenciar maiúsculas e acentos."""
+    items, total = repository.list(0, 10, None, order=ProductOrder.NAME)
+
+    assert total == 4
+    assert names(items) == ["abacate", "Água Mineral", "Banana", "Café"]
+
+
+def test_list_restock_only_keeps_products_below_the_minimum(repository, shelf):
+    """FR-013, FR-014 (011): só saldo < mínimo; maior falta primeiro; empate: nome."""
+    items, total = repository.list(
+        0, 10, None, restock_only=True, order=ProductOrder.SHORTFALL
+    )
+
+    assert total == 3
+    assert names(items) == ["Água Mineral", "Café", "Banana"]
+
+
+def test_list_restock_filter_combines_with_name_and_pages(repository, shelf):
+    """FR-017 (011): filtro, busca e paginação juntos."""
+    items, total = repository.list(
+        1, 1, "a", restock_only=True, order=ProductOrder.SHORTFALL
+    )
+
+    assert total == 3
+    assert names(items) == ["Café"]
+
+
+def test_list_default_order_is_still_newest_first(repository, shelf):
+    """FR-005 (007): sem ordem pedida, do mais recente para o mais antigo."""
+    items, _ = repository.list(0, 10, None)
+
+    assert names(items) == ["Café", "abacate", "Água Mineral", "Banana"]

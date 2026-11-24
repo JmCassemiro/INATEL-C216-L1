@@ -8,7 +8,9 @@ from sqlalchemy import inspect
 from app.infrastructure.database.base import Base
 from tests.helpers import alembic_config
 
-APP_TABLES = {"products", "alembic_version"}
+APP_TABLES = {"products", "stock_movements", "alembic_version"}
+DROP_ITEMS_PARENT = "4f1e2a7c9b3d"
+"""Revisão anterior à que apaga `items` (spec 007)."""
 
 
 def table_names(engine) -> set[str]:
@@ -25,8 +27,8 @@ def test_migrations_match_the_orm_models(engine):
     assert differences == []
 
 
-def test_upgrade_head_leaves_only_the_products_table(engine):
-    """FR-024 (spec 007): a tabela `items` do laboratório não existe mais no head."""
+def test_upgrade_head_creates_only_the_app_tables(engine):
+    """FR-024 (spec 007), RP-003 (spec 011): produtos e movimentações; sem `items`."""
     assert table_names(engine) == APP_TABLES
 
 
@@ -34,8 +36,31 @@ def test_dropping_items_can_be_reverted(engine):
     """FR-024 (spec 007): voltar uma migração recria a tabela `items` como era."""
     try:
         with engine.begin() as connection:
-            command.downgrade(alembic_config(connection), "-1")
+            command.downgrade(alembic_config(connection), DROP_ITEMS_PARENT)
         assert "items" in table_names(engine)
+    finally:
+        with engine.begin() as connection:
+            command.upgrade(alembic_config(connection), "head")
+
+    assert table_names(engine) == APP_TABLES
+
+
+def column_names(engine, table: str) -> set[str]:
+    return {column["name"] for column in inspect(engine).get_columns(table)}
+
+
+def test_upgrade_head_adds_stock_columns_to_products(engine):
+    """RP-003 (spec 011): saldo e mínimo viram colunas de `products`."""
+    assert {"stock_quantity", "min_stock"} <= column_names(engine, "products")
+
+
+def test_stock_migration_can_be_reverted(engine):
+    """RP-003 (spec 011): voltar uma migração apaga a tabela e as colunas novas."""
+    try:
+        with engine.begin() as connection:
+            command.downgrade(alembic_config(connection), "-1")
+        assert "stock_movements" not in table_names(engine)
+        assert not {"stock_quantity", "min_stock"} & column_names(engine, "products")
     finally:
         with engine.begin() as connection:
             command.upgrade(alembic_config(connection), "head")
@@ -48,7 +73,7 @@ def test_migrations_can_be_reverted_and_reapplied(engine):
     try:
         with engine.begin() as connection:
             command.downgrade(alembic_config(connection), "base")
-        assert not {"products", "items"} & table_names(engine)
+        assert not {"products", "items", "stock_movements"} & table_names(engine)
     finally:
         with engine.begin() as connection:
             command.upgrade(alembic_config(connection), "head")

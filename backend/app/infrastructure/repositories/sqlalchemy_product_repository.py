@@ -1,11 +1,12 @@
 import builtins
-from typing import NoReturn
+from typing import Any, NoReturn
 from uuid import UUID
 
-from sqlalchemy import ColumnElement, func, select, update
+from sqlalchemy import ColumnElement, case, func, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.application.commands import ProductOrder
 from app.domain.barcode import Barcode
 from app.domain.errors import DuplicateBarcodeError, ProductNotFoundError
 from app.domain.product import Product
@@ -13,6 +14,21 @@ from app.infrastructure.models.product import ProductModel
 from app.infrastructure.repositories.search import searchable
 
 _ACTIVE = ProductModel.removed_at.is_(None)
+
+_SHORTFALL = ProductModel.min_stock - ProductModel.stock_quantity
+
+_ORDERING: dict[ProductOrder, tuple[ColumnElement[Any], ...]] = {
+    # O id é UUID v7, que cresce com o tempo: em ordem decrescente, o produto
+    # cadastrado por último vem primeiro (spec 007, FR-005).
+    ProductOrder.NEWEST: (ProductModel.id.desc(),),
+    ProductOrder.NAME: (ProductModel.name_search, ProductModel.id),
+    # A falta do domínio nunca é negativa: `max(min - saldo, 0)` (spec 011, FR-014).
+    ProductOrder.SHORTFALL: (
+        case((_SHORTFALL > 0, _SHORTFALL), else_=0).desc(),
+        ProductModel.name_search,
+        ProductModel.id,
+    ),
+}
 
 
 class SqlAlchemyProductRepository:
@@ -54,30 +70,41 @@ class SqlAlchemyProductRepository:
         return self._find_active(ProductModel.gtin14 == barcode.gtin14)
 
     def list(
-        self, offset: int, limit: int, name: str | None
+        self,
+        offset: int,
+        limit: int,
+        name: str | None,
+        *,
+        restock_only: bool = False,
+        order: ProductOrder = ProductOrder.NEWEST,
     ) -> tuple[builtins.list[Product], int]:
         conditions: builtins.list[ColumnElement[bool]] = [_ACTIVE]
         if name:
             conditions.append(
                 ProductModel.name_search.contains(searchable(name), autoescape=True)
             )
+        if restock_only:
+            # O mesmo predicado de `needs_restock` do domínio (spec 011, D7).
+            conditions.append(ProductModel.stock_quantity < ProductModel.min_stock)
         total = self._session.scalar(
             select(func.count()).select_from(ProductModel).where(*conditions)
         )
-        # O id é UUID v7, que cresce com o tempo: em ordem decrescente, o produto
-        # cadastrado por último vem primeiro (spec 007, FR-005).
         models = self._session.scalars(
             select(ProductModel)
             .where(*conditions)
-            .order_by(ProductModel.id.desc())
+            .order_by(*_ORDERING[order])
             .offset(offset)
             .limit(limit)
+            .execution_options(populate_existing=True)
         )
         return [model.to_entity() for model in models], total or 0
 
     def _find_active(self, condition: ColumnElement[bool]) -> Product | None:
+        # `populate_existing`: o saldo pode ter mudado por outra sessão (estoque).
         model = self._session.scalars(
-            select(ProductModel).where(condition, _ACTIVE)
+            select(ProductModel)
+            .where(condition, _ACTIVE)
+            .execution_options(populate_existing=True)
         ).one_or_none()
         return model.to_entity() if model is not None else None
 
