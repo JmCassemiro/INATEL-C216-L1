@@ -16,6 +16,7 @@ import type { Product } from "@/features/products/types";
 import { formatUnits } from "@/lib/quantity";
 import { useSearchTerm } from "@/lib/use-search-term";
 import { PAGE_SIZE, type StockView, useStockPage } from "./queries";
+import { StockAdjustmentDialog } from "./stock-adjustment-dialog";
 import { StockEntryDialog } from "./stock-entry-dialog";
 import {
   StockEmpty,
@@ -131,6 +132,23 @@ export function StockPage() {
     setEntryOpen(true);
   }
 
+  const [adjusting, setAdjusting] = useState<Product | null>(null);
+  const [adjustOpen, setAdjustOpen] = useState(false);
+
+  function openAdjust(product: Product) {
+    setAdjusting(product);
+    setAdjustOpen(true);
+  }
+
+  function handleAdjusted(product: Product, movement: StockMovement) {
+    setAdjustOpen(false);
+    setHighlightedId(product.id);
+    toast.success(
+      `Ajuste salvo: ${product.name} agora tem ${formatUnits(movement.balance_after)}`,
+      { id: "stock-adjustment" },
+    );
+  }
+
   function handleRegistered(product: Product, movement: StockMovement) {
     setEntryOpen(false);
     setHighlightedId(product.id);
@@ -143,6 +161,7 @@ export function StockPage() {
   /** O produto sumiu (removido em outra aba): avisa; a lista já foi recarregada. */
   function handleNotFound() {
     setEntryOpen(false);
+    setAdjustOpen(false);
     toast.warning("Este produto não existe mais. A lista foi atualizada.", {
       id: "stock-not-found",
     });
@@ -168,6 +187,7 @@ export function StockPage() {
           products={data.items}
           highlightedId={highlightedId}
           onEnter={openEntry}
+          onAdjust={openAdjust}
         />
         <ListPagination
           page={page}
@@ -219,6 +239,13 @@ export function StockPage() {
         open={entryOpen}
         onOpenChange={setEntryOpen}
         onRegistered={handleRegistered}
+        onNotFound={handleNotFound}
+      />
+      <StockAdjustmentDialog
+        product={adjusting}
+        open={adjustOpen}
+        onOpenChange={setAdjustOpen}
+        onAdjusted={handleAdjusted}
         onNotFound={handleNotFound}
       />
     </div>

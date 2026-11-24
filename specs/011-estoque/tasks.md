@@ -142,9 +142,9 @@ commit seguem a tabela "Ordem de implementação e commits" do plano.
 
 **Independent Test**: retirar 2 com "Avaria no transporte" baixa o saldo em 2; ajuste sem motivo é recusado.
 
-- [ ] T050 [P] [US3] Acrescentar a `frontend/tests/unit/stock-validation.test.ts`: ajuste exige direção, quantidade de 1 a 99.999 e motivo de 3 a 200 caracteres aparados; "Retirar" acima do saldo exibido recusado com "Saldo insuficiente: há {n} unidade(s) em estoque"; quantidade enviada com sinal
-- [ ] T051 [P] [US3] Escrever `frontend/tests/integration/stock-adjustment.test.tsx`: diálogo "Ajustar estoque" com "Retirar" marcado; prévia "Saldo: 36 → 34" (e → 37 com "Adicionar"); erros de motivo e quantidade sem envio; envio `{"quantity": -2, "reason": …}`; aviso "Ajuste salvo: {nome} agora tem {n} un."; 409 do servidor no campo "Quantidade"; envio único
-- [ ] T052 [US3] Implementar a validação do ajuste em `frontend/src/features/stock/validation.ts` e `frontend/src/features/stock/stock-adjustment-dialog.tsx`; ligar a ação "Ajustar estoque de {nome}" em `stock-list.tsx` e `stock-page.tsx`
+- [X] T050 [P] [US3] Acrescentar a `frontend/tests/unit/stock-validation.test.ts`: ajuste exige direção, quantidade de 1 a 99.999 e motivo de 3 a 200 caracteres aparados; "Retirar" acima do saldo exibido recusado com "Saldo insuficiente: há {n} unidade(s) em estoque"; quantidade enviada com sinal
+- [X] T051 [P] [US3] Escrever `frontend/tests/integration/stock-adjustment.test.tsx`: diálogo "Ajustar estoque" com "Retirar" marcado; prévia "Saldo: 36 → 34" (e → 37 com "Adicionar"); erros de motivo e quantidade sem envio; envio `{"quantity": -2, "reason": …}`; aviso "Ajuste salvo: {nome} agora tem {n} un."; 409 do servidor no campo "Quantidade"; envio único
+- [X] T052 [US3] Implementar a validação do ajuste em `frontend/src/features/stock/validation.ts` e `frontend/src/features/stock/stock-adjustment-dialog.tsx`; ligar a ação "Ajustar estoque de {nome}" em `stock-list.tsx` e `stock-page.tsx`
 
 **Checkpoint (commit 8)**: `feat(estoque): ajusta o saldo com motivo e previa`.
 
