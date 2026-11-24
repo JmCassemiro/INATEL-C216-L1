@@ -277,6 +277,12 @@ Decisões técnicas da spec 011. Cada uma traz o que foi escolhido, por quê e o
     repor", registra uma entrada e um ajuste pelo painel, recarrega e confere saldo e histórico.
 - **Por quê:** Princípio I e RP-006; os nomes acessíveis usados pelos testes estão em
   [contracts/ui.md](contracts/ui.md).
+- **Na implementação (2026-11-24):** o E2E cadastra o produto **pela interface** (com o campo de
+  estoque mínimo), e não pela API: assim ele cobre também o formulário, sem depender do endereço
+  da API dentro do teste. Com dois arquivos de E2E, o Playwright passou a rodá-los em paralelo
+  no mesmo banco e o de produtos falhou (os dois geraram o mesmo código de barras no mesmo
+  milissegundo, e o "produto mais novo" da lista podia ser o do outro teste); o
+  `playwright.config.ts` agora usa `workers: 1`.
 
 ## Ferramentas
 

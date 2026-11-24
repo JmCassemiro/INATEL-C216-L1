@@ -166,8 +166,8 @@ commit seguem a tabela "Ordem de implementação e commits" do plano.
 
 ## Phase 7: Polish & Cross-Cutting
 
-- [ ] T056 Escrever `frontend/tests/e2e/stock.spec.ts`: produto criado pela API com `min_stock` 30; em `/stock`, "Para repor" mostra o produto; entrada de 24 com "NF 1234"; ajuste "Retirar" 2 com "Avaria no transporte"; recarregar mostra 22 e "Repor · faltam 8"; histórico com as duas movimentações; rodar `make e2e`
-- [ ] T057 Capturas de tela finais (Estoque, visão "Para repor", diálogos, histórico, Produtos com a coluna; claro, escuro e 360 px) revisadas
+- [X] T056 Escrever `frontend/tests/e2e/stock.spec.ts`: produto criado pela API com `min_stock` 30; em `/stock`, "Para repor" mostra o produto; entrada de 24 com "NF 1234"; ajuste "Retirar" 2 com "Avaria no transporte"; recarregar mostra 22 e "Repor · faltam 8"; histórico com as duas movimentações; rodar `make e2e`
+- [X] T057 Capturas de tela finais (Estoque, visão "Para repor", diálogos, histórico, Produtos com a coluna; claro, escuro e 360 px) revisadas
 
 **Checkpoint (commit 10)**: `test(e2e): cobre reposicao, entrada e ajuste com persistencia`.
 
