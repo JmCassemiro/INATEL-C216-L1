@@ -1,10 +1,18 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version change: 1.5.0 → 1.6.0
-Bump rationale: MINOR — 004 (recorte de venda mínima) implementada.
+Version change: 1.6.0 → 1.7.0
+Bump rationale: MINOR — andamento do C-12: as três etapas de código concluídas; começa o
+  fechamento.
 
-Changes this revision (1.6.0, 2026-11-24):
+Changes this revision (1.7.0, 2026-11-25):
+  - 004: PR #14 mergeado em projeto-final (2026-11-24)
+  - C-12, andamento: fechamento iniciado em 2026-11-25 (README com as seções do PDF; vídeo e PR
+    projeto-final → main em seguida)
+
+Specs affected: 004
+
+Changes in 1.6.0 (2026-11-24):
   - Status: 004 specced → implemented (branch 004-vendas, PR → projeto-final, em revisão)
   - Notes on 004: o que ficou provado nos testes (concorrência sem impasse, idempotência)
 
@@ -149,6 +157,9 @@ O NexoPDV é um sistema híbrido de automação comercial (frente de caixa) e ge
   o link do vídeo, o vídeo gravado pelo usuário e o PR `projeto-final` → `main` com os checks
   verdes, que nunca é mergeado.
 
+  **Andamento (2026-11-25):** etapa 3 entregue (004, PR #14, merge em 2026-11-24). As três
+  etapas de código estão em `projeto-final`; o fechamento começou um dia antes do previsto.
+
 ## Planned Specs
 
 ### Back-end (API na nuvem)
@@ -276,7 +287,8 @@ O NexoPDV é um sistema híbrido de automação comercial (frente de caixa) e ge
   (UUID) da venda é criado no painel e torna o envio idempotente, base da sincronização da 009; o
   número legível é atribuído pelo banco. Continuam fora: operador e turno, desconto (Q4) e
   cancelamento.
-  **Implementada em 2026-11-24** (branch `004-vendas`, 11 commits, PR para `projeto-final`): a
+  **Implementada em 2026-11-24** (branch `004-vendas`, 11 commits, PR #14, merge em
+  `projeto-final` no mesmo dia): a
   venda trava os produtos em ordem de id; no PostgreSQL, 25 vendas disputando 20 unidades
   registram exatamente 20, e vendas com os mesmos produtos em ordens opostas terminam sem
   impasse. Falta o `/speckit-roadmap-debrief` para passar a `verified`. O restante da 004
@@ -413,4 +425,4 @@ O NexoPDV é um sistema híbrido de automação comercial (frente de caixa) e ge
 
 ---
 
-**Version**: 1.6.0 | **Ratified**: 2026-10-02 | **Last Amended**: 2026-11-24
+**Version**: 1.7.0 | **Ratified**: 2026-10-02 | **Last Amended**: 2026-11-25
