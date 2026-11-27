@@ -1,7 +1,7 @@
-.PHONY: help install test test-verbose test-postgres lint format run clean setup-hooks \
+.PHONY: help install test test-verbose coverage test-postgres lint format run clean setup-hooks \
         up down build rebuild logs ps shell db-shell docker-clean \
         frontend-install frontend-dev frontend-lint frontend-format frontend-check \
-        frontend-test frontend-test-e2e frontend-build e2e check-all
+        frontend-test frontend-coverage frontend-test-e2e frontend-build e2e check-all
 
 BACKEND := backend
 FRONTEND := frontend
@@ -39,6 +39,7 @@ help:
 	@echo "  install - Instalar dependencias"
 	@echo "  test - Executar testes"
 	@echo "  test-verbose - Executar testes com saida detalhada"
+	@echo "  coverage - Executar testes com cobertura (terminal + backend/htmlcov/index.html)"
 	@echo "  test-postgres - Executar os testes num PostgreSQL descartavel (como no CI)"
 	@echo "  lint - Executar linter"
 	@echo "  format - Formatar codigo"
@@ -72,6 +73,7 @@ help:
 	@echo "  frontend-format - Formatar codigo (Biome)"
 	@echo "  frontend-check - Lint + formatacao sem alterar arquivos"
 	@echo "  frontend-test - Testes unitarios e de integracao (Vitest)"
+	@echo "  frontend-coverage - Testes com cobertura (terminal + frontend/coverage/index.html)"
 	@echo "  frontend-test-e2e - Testes E2E (Playwright) contra uma stack ja no ar (E2E_BASE_URL)"
 	@echo "  frontend-build - Build de producao"
 	@echo ""
@@ -87,6 +89,10 @@ test:
 
 test-verbose:
 	cd $(BACKEND) && $(PYTEST) -v
+
+# Cobertura dos testes: resumo no terminal e relatorio navegavel em backend/htmlcov/
+coverage:
+	cd $(BACKEND) && $(PYTEST) --cov --cov-report=term --cov-report=html
 
 # Os mesmos testes num PostgreSQL 17 descartavel, como no CI: inclui o teste de
 # concorrencia do estoque, que o SQLite pula. O container nao tem volume e e apagado no
@@ -115,7 +121,7 @@ run:
 	cd $(BACKEND) && $(UVICORN) app.main:create_app --factory --reload
 
 clean:
-	rm -rf $(BACKEND)/__pycache__ $(BACKEND)/.pytest_cache $(BACKEND)/.ruff_cache
+	rm -rf $(BACKEND)/__pycache__ $(BACKEND)/.pytest_cache $(BACKEND)/.ruff_cache \n		$(BACKEND)/htmlcov $(BACKEND)/.coverage $(FRONTEND)/coverage
 
 setup-hooks:
 	git config core.hooksPath .githooks
@@ -184,6 +190,10 @@ frontend-check:
 
 frontend-test:
 	$(NPM) run test
+
+# Cobertura dos testes: resumo no terminal e relatorio navegavel em frontend/coverage/
+frontend-coverage:
+	$(NPM) run coverage
 
 frontend-test-e2e:
 	$(NPM) run test:e2e

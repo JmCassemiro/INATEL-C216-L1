@@ -7,8 +7,9 @@ import { server } from "./msw/server";
 
 installBrowserPolyfills();
 
-// Espera de até 3 s nos `findBy`: a tela depende de respostas assíncronas da API simulada.
-configure({ asyncUtilTimeout: 3000 });
+// Espera de até 5 s nos `findBy`: a tela depende de respostas assíncronas da API simulada,
+// e com a cobertura ligada (código instrumentado) e a suíte em paralelo a resposta demora mais.
+configure({ asyncUtilTimeout: 5000 });
 
 // Requisição sem rota simulada é erro: o teste não pode depender de rede de verdade.
 beforeAll(() => server.listen({ onUnhandledFrame: "error" }));

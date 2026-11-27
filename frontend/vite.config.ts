@@ -18,5 +18,13 @@ export default defineConfig({
       "tests/unit/**/*.test.{ts,tsx}",
       "tests/integration/**/*.test.{ts,tsx}",
     ],
+    // "npm run coverage": relatório no terminal e em HTML (coverage/index.html)
+    coverage: {
+      provider: "v8",
+      include: ["src/**/*.{ts,tsx}"],
+      // Componentes gerados pelo shadcn e declarações de tipo ficam de fora
+      exclude: ["src/components/ui/**", "src/**/*.d.ts"],
+      reporter: ["text", "html"],
+    },
   },
 });

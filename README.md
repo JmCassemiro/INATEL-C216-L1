@@ -359,6 +359,17 @@ make e2e              # Playwright: navegador real → React → FastAPI → Pos
 make check-all        # tudo acima (exige Docker)
 ```
 
+### Cobertura
+
+```bash
+make coverage           # back-end: resumo no terminal + backend/htmlcov/index.html
+make frontend-coverage  # front-end: resumo no terminal + frontend/coverage/index.html
+```
+
+O relatório em HTML mostra o total do projeto e, ao clicar num arquivo, as linhas que os testes
+não executam. No back-end mede o pacote `app/` (linhas e desvios); no front-end, `src/`, sem os
+componentes gerados pelo shadcn (`src/components/ui/`). Os relatórios ficam fora do git.
+
 ### Back-end
 
 Os testes ficam em `backend/tests/` e rodam com Pytest (configuração em
@@ -430,6 +441,7 @@ Rode `make help` para ver a lista no terminal.
 | `make run` | Sobe a API fora do Docker, usando o banco do Compose |
 | `make test` | Executa os testes |
 | `make test-verbose` | Executa os testes com saída detalhada |
+| `make coverage` | Executa os testes com cobertura (terminal e `backend/htmlcov/index.html`) |
 | `make test-postgres` | Executa os testes num PostgreSQL descartável (Docker), como no CI |
 | `make lint` | Executa o linter (Ruff) |
 | `make format` | Formata o código (Ruff); o CI falha se o código não estiver formatado |
@@ -446,6 +458,7 @@ Rode `make help` para ver a lista no terminal.
 | `make frontend-format` | Formata o código (Biome) |
 | `make frontend-check` | Lint + verificação da formatação, sem alterar arquivos |
 | `make frontend-test` | Testes unitários e de integração (Vitest + Testing Library) |
+| `make frontend-coverage` | Os mesmos testes com cobertura (terminal e `frontend/coverage/index.html`) |
 | `make frontend-test-e2e` | Playwright contra uma stack já no ar (`E2E_BASE_URL`) |
 | `make frontend-build` | Verificação de tipos (TypeScript) e build de produção |
 
