@@ -19,7 +19,8 @@ dependencies = [
 dev = [
     "pytest (>=9.1.1,<10.0.0)",
     "ruff (>=0.16.3,<0.17.0)",
-    "httpx2 (>=2.12.0,<3.0.0)"
+    "httpx2 (>=2.12.0,<3.0.0)",
+    "pytest-cov (>=7.1.0,<8.0.0)"
 ]
 
 [tool.poetry]
@@ -39,6 +40,18 @@ pythonpath = ["."]
 testpaths = ["tests"]
 # import-mode=importlib: importa os testes sem exigir __init__.py em tests/
 addopts = "--import-mode=importlib"
+
+[tool.coverage.run]
+# Mede só o código da aplicação (não os testes nem as migrations)
+source = ["app"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+
+[tool.coverage.html]
+directory = "htmlcov"
+title = "NexoPDV — cobertura do back-end"
 
 [tool.ruff]
 line-length = 88

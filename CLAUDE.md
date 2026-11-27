@@ -24,6 +24,8 @@ Rodar a partir da raiz do repositório:
 - `make frontend-install` / `make frontend-dev` — instala / sobe o painel fora do Docker (Vite)
 - `make frontend-check` — Biome (lint e formatação, sem alterar arquivos); `make frontend-format` formata
 - `make frontend-test` — Vitest + Testing Library (API simulada com MSW)
+- `make coverage` / `make frontend-coverage` — testes com cobertura: resumo no terminal e HTML
+  em `backend/htmlcov/` / `frontend/coverage/`
 - `make frontend-build` — verificação de tipos (`tsc -b`) e build
 - `make e2e` — Playwright contra uma stack isolada do Compose (`nexopdv-e2e`); exige Docker
 - `make check-all` — tudo acima, back-end e front-end
