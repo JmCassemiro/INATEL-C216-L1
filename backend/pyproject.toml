@@ -1,0 +1,74 @@
+[project]
+name = "backend"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "JmCassemiro",email = "jmcassemiro@outlook.com"}
+]
+license = "MIT"
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi (>=0.141.1,<0.142.0)",
+    "uvicorn (>=0.52.3,<0.53.0)",
+    "sqlalchemy (>=2.1.5,<3.0.0)",
+    "psycopg[binary] (>=3.3.6,<4.0.0)",
+    "alembic (>=1.20.0,<2.0.0)"
+]
+
+[dependency-groups]
+dev = [
+    "pytest (>=9.1.1,<10.0.0)",
+    "ruff (>=0.16.3,<0.17.0)",
+    "httpx2 (>=2.12.0,<3.0.0)",
+    "pytest-cov (>=7.1.0,<8.0.0)"
+]
+
+[tool.poetry]
+# O backend e uma aplicacao, nao uma biblioteca publicavel: o Poetry so gerencia
+# as dependencias e nao tenta instalar o proprio projeto como pacote.
+package-mode = false
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+# pythonpath: permite "from app.main import app" com o pytest rodando a partir de backend/
+pythonpath = ["."]
+# testpaths: o pytest so procura testes em backend/tests
+testpaths = ["tests"]
+# import-mode=importlib: importa os testes sem exigir __init__.py em tests/
+addopts = "--import-mode=importlib"
+
+[tool.coverage.run]
+# Mede só o código da aplicação (não os testes nem as migrations)
+source = ["app"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+
+[tool.coverage.html]
+directory = "htmlcov"
+title = "NexoPDV — cobertura do back-end"
+
+[tool.ruff]
+line-length = 88
+target-version = "py314"
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes (erros de sintaxe e imports não usados)
+    "I",    # isort (ordenação automática e padronizada de imports)
+    "UP",   # pyupgrade (garante sintaxe moderna de Python 3.14+)
+    "B",    # flake8-bugbear (pega bugs comuns)
+]
+ignore = []
+
+[tool.ruff.lint.isort]
+# A pasta backend/alembic/ (migrations) tem o mesmo nome do pacote: sem isto, o isort
+# trata o Alembic como código do projeto.
+known-third-party = ["alembic"]

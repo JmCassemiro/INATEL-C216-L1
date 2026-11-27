@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="description" content="NexoPDV: frente de caixa e retaguarda offline-first para o varejo físico." />
+    <meta name="theme-color" content="#0E1330" />
+    <title>NexoPDV</title>
+    <script>
+      // Aplica o tema antes do React carregar, para a tela não piscar no tema errado.
+      // A chave e os valores são os do ThemeProvider (src/components/theme).
+      (() => {
+        try {
+          const stored = localStorage.getItem("nexopdv-theme");
+          const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+          if (stored === "dark" || ((!stored || stored === "system") && prefersDark)) {
+            document.documentElement.classList.add("dark");
+          }
+        } catch {
+          // Sem localStorage (modo privado restrito): fica o tema claro.
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

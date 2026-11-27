@@ -1,0 +1,27 @@
+#!/bin/sh
+# Valida se a mensagem de commit segue o padrão Conventional Commits.
+# https://www.conventionalcommits.org/pt-br/v1.0.0/
+
+commit_msg_file="$1"
+first_line=$(head -n 1 "$commit_msg_file")
+
+pattern='^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-z0-9.-]+\))?!?: .{1,100}$'
+
+if echo "$first_line" | grep -qE "^(Merge |Revert )"; then
+  exit 0
+fi
+
+if ! echo "$first_line" | grep -qE "$pattern"; then
+  echo "Commit rejeitado: a mensagem nao segue o padrao Conventional Commits." >&2
+  echo "" >&2
+  echo "Formato esperado: <tipo>(<escopo opcional>): <descricao>" >&2
+  echo "Tipos aceitos: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert" >&2
+  echo "" >&2
+  echo "Exemplo: feat(api): adiciona endpoint de login" >&2
+  echo "" >&2
+  echo "Mensagem recebida:" >&2
+  echo "  $first_line" >&2
+  exit 1
+fi
+
+exit 0

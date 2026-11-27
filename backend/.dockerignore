@@ -1,0 +1,20 @@
+# Controle de versao
+.git
+.gitignore
+
+# Artefatos do Python
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+.ruff_cache
+
+# Ambiente virtual local (as dependencias sao instaladas dentro da imagem)
+.venv
+
+# Segredos nunca devem entrar no contexto de build
+.env
+.env.*
+
+# Nao e necessario para executar a aplicacao
+tests

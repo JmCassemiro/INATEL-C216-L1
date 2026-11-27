@@ -1,0 +1,351 @@
+/*
+ * Tema do NexoPDV (painel e site). Os valores vêm do DESIGN.md (cores, fontes, raios,
+ * sombras e brilhos) e entram nos componentes só por tokens: nada de cor solta nas telas.
+ */
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+/* Fontes auto-hospedadas, sem CDN: Plus Jakarta Sans na interface, Archivo no preço. */
+@import "@fontsource-variable/plus-jakarta-sans/wght.css";
+@import "@fontsource-variable/archivo/standard.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans:
+    "Plus Jakarta Sans Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-sans);
+  --font-price: "Archivo Variable", ui-sans-serif, system-ui, sans-serif;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Menu lateral e superfícies noturnas (faixa de título, hero do site). */
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-muted: var(--sidebar-muted);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-night: var(--night);
+  --color-night-foreground: var(--night-foreground);
+  --color-night-muted: var(--night-muted);
+
+  /* Tokens próprios do NexoPDV, sem equivalente no shadcn. */
+  --color-brand: var(--brand);
+  --color-brand-2: var(--brand-2);
+  --color-price-tag: var(--price-tag);
+  --color-price-tag-border: var(--price-tag-border);
+  --color-price-tag-foreground: var(--price-tag-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+
+  /* Raios grandes (DESIGN.md): campos 12 px, cartões 20 px, faixas 28 px. */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-3xl: 28px;
+  --radius-4xl: 36px;
+}
+
+@theme {
+  --shadow-xs: 0 1px 2px rgb(20 25 56 / 0.05);
+  --shadow-sm:
+    0 1px 2px rgb(20 25 56 / 0.04), 0 8px 24px -12px rgb(20 25 56 / 0.12);
+  --shadow-md:
+    0 1px 2px rgb(20 25 56 / 0.05), 0 16px 40px -16px rgb(20 25 56 / 0.22);
+  --shadow-lg: 0 24px 60px -20px rgb(14 19 48 / 0.45);
+  --shadow-xl: 0 40px 120px -24px rgb(0 0 0 / 0.55);
+  --shadow-glow-brand: 0 10px 30px -8px rgb(79 70 229 / 0.55);
+  --shadow-glow-tag: 0 10px 30px -10px rgb(255 212 59 / 0.6);
+
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-float-late: float 6s ease-in-out 1.5s infinite;
+  --animate-rise: rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+:root {
+  --radius: 12px;
+
+  --background: #f3f5fb; /* Névoa */
+  --foreground: #141938; /* Tinta */
+  --card: #ffffff; /* Papel */
+  --card-foreground: #141938;
+  --popover: #ffffff;
+  --popover-foreground: #141938;
+  --primary: #4f46e5; /* Índigo */
+  --primary-foreground: #ffffff;
+  --secondary: #eef1f8;
+  --secondary-foreground: #141938;
+  --muted: #eef1f8;
+  --muted-foreground: #5b6180; /* Tinta suave */
+  --accent: #eef0ff;
+  --accent-foreground: #3730a3;
+  --destructive: #e11d48; /* Remarcação */
+  --border: #e3e7f0; /* Linha */
+  --input: #8a90a5; /* Linha de campo (≥ 3:1 sobre o papel) */
+  --ring: #4f46e5;
+
+  --brand: #4f46e5;
+  --brand-2: #7c3aed;
+
+  --sidebar: #0e1330; /* Noite */
+  --sidebar-foreground: #c3c8e6;
+  --sidebar-muted: #8e95bd;
+  --sidebar-accent: rgb(255 255 255 / 0.08);
+  --sidebar-border: rgb(255 255 255 / 0.08);
+  --night: #0e1330;
+  --night-2: #161c44;
+  --night-foreground: #ffffff;
+  --night-muted: #c7cbf0;
+
+  /* Etiqueta de preço: igual nos dois temas, como um adesivo físico. */
+  --price-tag: #ffd43b;
+  --price-tag-border: #e5b800;
+  --price-tag-foreground: #0e1330;
+  --success: #047857; /* Caixa livre */
+  --warning: #b45309; /* Alerta */
+}
+
+.dark {
+  --background: #0b0f26;
+  --foreground: #e8eaf6;
+  --card: #131938;
+  --card-foreground: #e8eaf6;
+  --popover: #131938;
+  --popover-foreground: #e8eaf6;
+  --primary: #8b87ff;
+  --primary-foreground: #0b0f26;
+  --secondary: #1c2348;
+  --secondary-foreground: #e8eaf6;
+  --muted: #1c2348;
+  --muted-foreground: #a3a9c9;
+  --accent: #222a55;
+  --accent-foreground: #e8eaf6;
+  --destructive: #fb7185;
+  --border: #262e5a;
+  --input: #6e77a6;
+  --ring: #8b87ff;
+
+  --sidebar: #080b1f;
+  --sidebar-border: rgb(255 255 255 / 0.06);
+  --night: #0a0e27;
+  --night-2: #141a45;
+
+  --success: #34d399;
+  --warning: #fbbf24;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans antialiased;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+/* Superfície noturna com brilhos índigo e violeta (faixa de título do painel). */
+@utility bg-night-glow {
+  background:
+    radial-gradient(
+      600px 220px at 85% -20%,
+      rgb(124 58 237 / 0.55),
+      transparent 60%
+    ),
+    radial-gradient(500px 240px at 8% 0%, rgb(79 70 229 / 0.6), transparent 65%),
+    linear-gradient(135deg, var(--night-2), var(--night));
+}
+
+/* Hero do site: mais brilho, com um toque de amarelo no canto. */
+@utility bg-hero-glow {
+  background:
+    radial-gradient(
+      700px 420px at 78% 35%,
+      rgb(124 58 237 / 0.55),
+      transparent 60%
+    ),
+    radial-gradient(
+      520px 380px at 15% 85%,
+      rgb(79 70 229 / 0.45),
+      transparent 65%
+    ),
+    radial-gradient(
+      300px 200px at 92% 90%,
+      rgb(255 212 59 / 0.16),
+      transparent 70%
+    ),
+    var(--night);
+}
+
+/* Grade sutil sobre as superfícies noturnas. */
+@utility bg-grid-faint {
+  background-image:
+    linear-gradient(rgb(255 255 255 / 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* Gradiente da marca (logotipo, cartão de conexão, destaques). */
+@utility bg-brand-gradient {
+  background-image: linear-gradient(135deg, var(--brand), var(--brand-2));
+}
+
+/* Palavra de destaque do site: texto em gradiente amarelo. */
+@utility text-tag-gradient {
+  background-image: linear-gradient(90deg, var(--price-tag), #fcd34d);
+  background-clip: text;
+  color: transparent;
+}
+
+/* Tipografia. */
+@utility type-display {
+  font-size: clamp(40px, 5vw + 12px, 64px);
+  font-weight: 800;
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+}
+
+@utility type-page-title {
+  font-size: clamp(28px, 2vw + 18px, 40px);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+}
+
+@utility type-kpi {
+  font-size: clamp(22px, 1.4vw + 16px, 30px);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+@utility type-brand {
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+@utility type-meta {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+@utility type-eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+@utility type-price-list {
+  font-family: var(--font-price);
+  font-size: 20px;
+  font-weight: 850;
+  font-stretch: 72%;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+@utility type-price-label {
+  font-family: var(--font-price);
+  font-size: 48px;
+  font-weight: 850;
+  font-stretch: 68%;
+  line-height: 0.95;
+  font-variant-numeric: tabular-nums;
+}
+
+/* "R$" da etiqueta: pequeno, na largura normal, alinhado ao topo do numeral. */
+@utility type-price-currency {
+  font-size: 0.45em;
+  font-weight: 700;
+  font-stretch: 100%;
+  line-height: 1;
+  margin-top: 0.22em;
+  margin-right: 0.15em;
+}
+
+/* Centavos da etiqueta: menores e elevados, como na etiqueta de gôndola. */
+@utility type-price-cents {
+  font-size: 0.6em;
+  line-height: 1;
+  margin-top: 0.05em;
+}
+
+/* Linha que acabou de mudar: lavagem amarela que some. */
+@keyframes row-highlight {
+  from {
+    background-color: color-mix(in srgb, var(--price-tag) 45%, transparent);
+  }
+  to {
+    background-color: transparent;
+  }
+}
+
+[data-highlighted="true"] {
+  animation: row-highlight 1.2s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-highlighted="true"] {
+    animation: none;
+    background-color: color-mix(in srgb, var(--price-tag) 45%, transparent);
+  }
+  .animate-float,
+  .animate-float-late,
+  .animate-rise {
+    animation: none;
+  }
+}
